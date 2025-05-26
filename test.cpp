@@ -4,6 +4,7 @@
 void matmul(float* xout, float* x, float* w, int n, int d);
 void rmsnorm(float* o, float* x, float* g, int n, float eps);
 void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps);
+void softmax(float* o, float* x, int n);
 
 int success = 1;
 const float tolerance = 1e-6f;
@@ -85,10 +86,30 @@ void test_layernorm() {
     }
 }
 
+void test_softmax() {
+    int n = 5;
+    float x[5] = {2, 3, 1, 8, 4};
+
+    float o[5];
+    float res[5] = {0.0024102, 0.00655159, 0.00088666, 0.97234248, 0.01780907};
+
+    softmax(o, x, n);
+
+    for (int i = 0; i < n; i++) {
+        if (std::fabs(res[i] - o[i]) > tolerance) {
+            //std::cout << o[i] << " " << res[i] << std::endl;
+            std::cout << "softmax test failed" << std::endl;
+            success = 0;
+            return;
+        }
+    }
+}
+
 int main() {
     test_matmul();
     test_rmsnorm();
     test_layernorm();
+    test_softmax();
 
     if (success) {
         std::cout << "all tests passed" << std::endl;

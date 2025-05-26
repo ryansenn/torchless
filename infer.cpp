@@ -13,7 +13,6 @@ void matmul(float* xout, float* x, float* w, int n, int d){
     }
 }
 
-
 void rmsnorm(float* o, // output
              float* x, // input
              float* g, // scale per element
@@ -53,6 +52,19 @@ void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps)
 
     for (int i=0;i<n;i++){
         o[i] = (x[i] - u) * s2 * scale[i] + shift[i];
+    }
+}
+
+// If there is numerical instability, try to substract max value from each xi before exp
+void softmax(float* o, float* x, int n){
+    float total = 0;
+    for (int i=0;i<n;i++){
+        o[i] = std::expf(x[i]);
+        total += o[i];
+    }
+
+    for (int i=0;i<n;i++){
+        o[i] /= total;
     }
 }
 
