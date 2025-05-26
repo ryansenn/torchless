@@ -68,4 +68,16 @@ void softmax(float* o, float* x, int n){
     }
 }
 
-// softmax, gelu, silu, clip, rope, attn, block, forward
+inline float gelu(float x) {
+	return 0.5f * x * (1.0f + tanhf(0.797885f * (x + 0.044715f * x * x * x)));
+}
+
+inline float silu(float x) {
+	return x / (1.0f + expf(-x));
+}
+
+inline float clip(float x, float v) {
+	return x < -v ? -v : (x > v ? v : x);
+}
+
+// gelu, silu, clip, rope, attn, block, forward
