@@ -25,12 +25,35 @@ void rmsnorm(float* o, // output
         mean_squared += x[i]*x[i];
     }
     mean_squared = mean_squared/n;
-    float m = sqrt(mean_squared + eps);
+    float m = 1/sqrtf(mean_squared + eps);
 
     for (int i=0; i<n; i++){
-        o[i] = x[i] * g[i] / m;
+        o[i] = x[i] * g[i] * m;
     }
 
 }
 
-// layernorm, softmax, gelu, silu, clip, rope, attn, block, forward
+void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps){
+
+    float u = 0;
+    for (int i=0;i<n;i++){
+        u += x[i];
+    }
+    u /= n;
+
+    float s = 0;
+    float d;
+    for (int i=0;i<n;i++){
+        d = x[i]-u;
+        s += d*d;
+    }
+    s /= n;
+    s = sqrtf(s);
+    float s2 = 1/(s+eps);
+
+    for (int i=0;i<n;i++){
+        o[i] = (x[i] - u) * s2 * scale[i] + shift[i];
+    }
+}
+
+// softmax, gelu, silu, clip, rope, attn, block, forward

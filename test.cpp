@@ -3,6 +3,7 @@
 
 void matmul(float* xout, float* x, float* w, int n, int d);
 void rmsnorm(float* o, float* x, float* g, int n, float eps);
+void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps);
 
 int success = 1;
 const float tolerance = 1e-6f;
@@ -63,9 +64,31 @@ void test_rmsnorm(){
     }
 }
 
+void test_layernorm() {
+    int n = 5;
+    float x[5] = {1, 2, 3, 4, 5};
+    float scale[5] = {1, 1, 1, 1, 1};
+    float shift[5] = {0, 0, 0, 0, 0};
+    float eps = 0;
+
+    float o[5];
+    float res[5] = {-1.4142135, -0.7071068, 0, 0.7071068, 1.4142135};
+
+    layernorm(o, x, scale, shift, n, eps);
+
+    for (int i = 0; i < n; i++) {
+        if (std::fabs(res[i] - o[i]) > tolerance) {
+            std::cout << "layernorm test failed" << std::endl;
+            success = 0;
+            return;
+        }
+    }
+}
+
 int main() {
     test_matmul();
     test_rmsnorm();
+    test_layernorm();
 
     if (success) {
         std::cout << "all tests passed" << std::endl;
