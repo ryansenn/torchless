@@ -80,4 +80,22 @@ inline float clip(float x, float v) {
 	return x < -v ? -v : (x > v ? v : x);
 }
 
-// gelu, silu, clip, rope, attn, block, forward
+static void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim) {
+    for (int i = 0; i < d; i += 2) {
+        int j_head = i % head_dim;
+        float freq = 0.f;
+        if (j_head < rotary_dim) {
+            freq = 1.0f / powf(theta, static_cast<float>(j_head) / static_cast<float>(rotary_dim));
+        }
+        float val = pos * freq;
+        float fcr = cosf(val);
+        float fci = sinf(val);
+
+        float v0 = vec[i];
+        float v1 = vec[i + 1];
+        vec[i] = v0 * fcr - v1 * fci;
+        vec[i + 1] = v0 * fci + v1 * fcr;
+    }
+}
+
+// attn, block, forward
