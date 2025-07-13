@@ -1,4 +1,5 @@
 #include <math.h>
+#include <model.h>
 #include <iostream>
 
 // W (d,n) @ x (n,) = xout (d,)
@@ -80,7 +81,7 @@ inline float clip(float x, float v) {
 	return x < -v ? -v : (x > v ? v : x);
 }
 
-static void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim) {
+void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim) {
     for (int i = 0; i < d; i += 2) {
         int j_head = i % head_dim;
         float freq = 0.f;
@@ -98,4 +99,6 @@ static void rope(float* vec, int d, int head_dim, int pos, float theta, int rota
     }
 }
 
-// attn, block, forward
+void forward(InferenceState& s, Model& m, int token, int pos){
+    
+}
