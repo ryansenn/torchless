@@ -1,4 +1,6 @@
 #include <cassert>
+#include <string>
+#include <iostream>
 
 struct Tensor {
     std::string name;
@@ -26,8 +28,16 @@ struct Tensor {
     }
 };
 
+struct Config {
+    int vocab_size;
+    int hidden_size;
+};
+
 struct Model {
-    float* token_embedding_table;
+    Config config;
+    Tensor* token_embedding_table;
+
+    void load(std::string path);
 };
 
 struct InferenceState {
