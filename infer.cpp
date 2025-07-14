@@ -1,5 +1,5 @@
 #include <math.h>
-#include <model.h>
+#include "model/model.h"
 #include <iostream>
 
 // W (d,n) @ x (n,) = xout (d,)

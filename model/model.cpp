@@ -6,16 +6,17 @@ void Model::load(std::string path){
     f.seekg(0);
     
     char buffer[1024];
-    int32_t entry_type;
+    uint8_t entry_type;
     int32_t key_len;
     std::string key;
 
-    int32_t value_type;
+    uint8_t value_type;
 
 
     while (f.peek() != EOF){
-        f.read(buffer, 4);
-        std::memcpy(&entry_type, buffer, sizeof(int32_t));
+        f.read(buffer, 1);
+        std::memcpy(&entry_type, buffer, sizeof(uint8_t));
+        std::cout << entry_type << std::endl;
 
         // Metadata entry
         if (entry_type == 0) {
@@ -25,8 +26,8 @@ void Model::load(std::string path){
             f.read(buffer, key_len);
             key.assign(buffer, key_len);
 
-            f.read(buffer, 4);
-            std::memcpy(&value_type, buffer, sizeof(int32_t));
+            f.read(buffer, 1);
+            std::memcpy(&value_type, buffer, sizeof(uint8_t));
 
             switch(value_type){
                 // int
@@ -53,6 +54,10 @@ void Model::load(std::string path){
         // Tensor entry
         else if (entry_type == 1) {
 
+        }
+        else {
+            std::cerr << "FATAL: Unknown entry_type " << entry_type << " in model file\n";
+            std::exit(EXIT_FAILURE);
         }
     }
 }

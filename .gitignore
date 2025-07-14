@@ -3,3 +3,5 @@ a.out
 Mistral-7B-v0.1/
 changes.txt
 model.bin
+main_exec
+test_exec
