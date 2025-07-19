@@ -7,7 +7,6 @@ void Model::load(std::string path){
     
     char buffer[1024];
     uint8_t entry_type;
-    int32_t key_len;
     std::string key;
 
     uint8_t value_type;
@@ -20,11 +19,9 @@ void Model::load(std::string path){
 
         // Metadata entry
         if (entry_type == 0) {
-            f.read(buffer, 4);
-            std::memcpy(&key_len, buffer, sizeof(int32_t));
-
-            f.read(buffer, key_len);
-            key.assign(buffer, key_len);
+            f.read(buffer, 50);
+            key.assign(buffer, 50);
+            key.erase(key.find('\0'));
 
             f.read(buffer, 1);
             std::memcpy(&value_type, buffer, sizeof(uint8_t));
@@ -53,6 +50,11 @@ void Model::load(std::string path){
 
         // Tensor entry
         else if (entry_type == 1) {
+            f.read(buffer, 50);
+            key.assign(buffer, 50);
+            key.erase(key.find('\0'));
+
+            
 
         }
         else {
