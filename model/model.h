@@ -2,9 +2,14 @@
 #include <string>
 #include <iostream>
 
+enum class DType {
+    F32
+};
+
 struct Tensor {
     std::string name;
-    float* data;
+    DType dtype; 
+    void* data;
     std::array<int, 4> shape = {0,0,0,0};
 
     void check_shape(std::array<int, 4> expected_shape){
@@ -22,7 +27,8 @@ struct Tensor {
         }
     }
 
-    Tensor(std::string name, float* data){
+    Tensor(std::string name, void* data){
+        dtype = DType::F32;
         this->name = name;
         this->data = data;
     }

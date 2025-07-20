@@ -42,6 +42,7 @@ def add_metadata_entry(model, key, value):
 def add_tensor_entry(model, key, tensor):
     model.append(struct.pack("B", 1))
     model.append(key.encode("utf-8").ljust(50, b'\0')[:50]) # key size is always 50
+    tensor = tensor.to(torch.float32) # always use f32 for now 
 
     if tensor.dtype == torch.bfloat16:
         model.append(struct.pack("B", 0))
@@ -52,7 +53,6 @@ def add_tensor_entry(model, key, tensor):
 
     size = tensor.element_size() * tensor.numel()
     model.append(struct.pack("q", size))
-
     model.append(tensor.numpy().tobytes())
     
         
