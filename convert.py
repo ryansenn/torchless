@@ -2,6 +2,7 @@ import json
 import sys
 import os
 import struct
+import safetensors
 from safetensors.torch import safe_open
 import torch
 
