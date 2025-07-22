@@ -17,6 +17,7 @@ Tokenizer::Tokenizer(Tensor* raw_vocab){
             n = n->children[*p];
         }
         n->token_id = vocab.size();
+        n = trie;
         vocab.push_back(std::string(start, p-start));
     }
 }

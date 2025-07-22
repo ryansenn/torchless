@@ -11,13 +11,16 @@ if len(sys.argv) != 2:
     print("Wrong usage")
     sys.exit(1)
 
+model = []
+
 config_path = os.path.join(sys.argv[1], "config.json")
-tensor_index = os.path.join(sys.argv[1], "model.safetensors.index.json")
+tensor_index_path = os.path.join(sys.argv[1], "model.safetensors.index.json")
+tokenizer_path = os.path.join(sys.argv[1], "tokenizer.json")
 
 with open(config_path, "r") as f:
     config = json.load(f)
 
-with open(tensor_index, "r") as f:
+with open(tensor_index_path, "r") as f:
     tensor_index = json.load(f)
 
 
@@ -43,7 +46,6 @@ def add_metadata_entry(model, key, value):
 def add_tensor_entry(model, key, tensor):
     model.append(struct.pack("B", 1))
     model.append(key.encode("utf-8").ljust(50, b'\0')[:50]) # key size is always 50
-    tensor = tensor.to(torch.float32) # always use f32 for now 
 
     if tensor.dtype == torch.bfloat16:
         model.append(struct.pack("B", 0))
@@ -51,6 +53,8 @@ def add_tensor_entry(model, key, tensor):
         model.append(struct.pack("B", 1))
     elif tensor.dtype == torch.float32:
         model.append(struct.pack("B", 2))
+    elif tensor.dtype == torch.uint8:
+        model.append(struct.pack("B", 3))
 
     size = tensor.element_size() * tensor.numel()
     model.append(struct.pack("q", size))
@@ -62,14 +66,30 @@ def get_tensor(key):
                                
     with safetensors.safe_open(tensor_path, framework="pt") as f:
         return f.get_tensor(key)
-    
 
-model = []
+def load_vocab():
+    words = ["" for i in range(config["vocab_size"])]
+    with open(tokenizer_path, "r") as f:
+        vocab = json.load(f)["model"]["vocab"]
+
+        for k in vocab:
+            word = k
+            word = word.replace('\u2581', ' ') # check if this is really needed with mistral
+            word = word.replace("\0", "\7") # check if this is really needed with mistral
+            word = word+'\0'
+            words[vocab[k]] = word.encode("utf-8")
+
+    tensor = torch.cat([torch.tensor(w) for w in words])
+
+    add_tensor_entry(model, "vocab", tensor)
+    
 
 add_metadata_entry(model, "vocab_size", config["vocab_size"])
 add_metadata_entry(model, "hidden_size", config["hidden_size"])
 
-add_tensor_entry(model, "model.embed_tokens.weight", get_tensor("model.embed_tokens.weight"))
+load_vocab()
+
+add_tensor_entry(model, "model.embed_tokens.weight", get_tensor("model.embed_tokens.weight").to(torch.float32))
 
 with open("model.bin", "wb") as f:
     for entry in model:
