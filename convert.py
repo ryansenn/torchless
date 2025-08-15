@@ -7,9 +7,18 @@ from safetensors.torch import safe_open
 import torch
 
 """
-Metadata entry (0), key, value type (int=0, float=1, string=2), and value
+Builds a binary model file "model.bin" from the Mistral-7B-v0.1 directory.
 
-Tensor entry (1), key, dtype code (bfloat16=0, float16=1, float32=2, uint8=3), byte size, and raw tensor data
+Reads:
+    - config.json (model config)
+    - tokenizer.json (vocabulary)
+    - model.safetensors.index.json and referenced .safetensors files (tensor weights)
+
+Binary format:
+    Keys are fixed-width (50 bytes, zero-padded).
+    Entry types:
+        Metadata entry (0): key, value type (int=0, float=1, string=2), value
+        Tensor entry (1): key, dtype code (bfloat16=0, float16=1, float32=2, uint8=3), byte size, raw tensor data
 """
 
 MODEL_PATH = "Mistral-7B-v0.1/"
