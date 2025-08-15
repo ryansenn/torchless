@@ -6,16 +6,22 @@ import safetensors
 from safetensors.torch import safe_open
 import torch
 
+"""
+Metadata entry (0), key, value type (int=0, float=1, string=2), and value
 
-if len(sys.argv) != 2:
-    print("Wrong usage")
-    sys.exit(1)
+Tensor entry (1), key, dtype code (bfloat16=0, float16=1, float32=2, uint8=3), byte size, and raw tensor data
+"""
+
+MODEL_PATH = "Mistral-7B-v0.1/"
+
+if len(sys.argv) > 2:
+    MODEL_PATH = sys.argv[1]
 
 model = []
 
-config_path = os.path.join(sys.argv[1], "config.json")
-tensor_index_path = os.path.join(sys.argv[1], "model.safetensors.index.json")
-tokenizer_path = os.path.join(sys.argv[1], "tokenizer.json")
+config_path = os.path.join(MODEL_PATH, "config.json")
+tensor_index_path = os.path.join(MODEL_PATH, "model.safetensors.index.json")
+tokenizer_path = os.path.join(MODEL_PATH, "tokenizer.json")
 
 with open(config_path, "r") as f:
     config = json.load(f)
@@ -42,7 +48,7 @@ def add_metadata_entry(model, key, value):
         model.append(val_bytes)
     
 
-# key length, key, value type, value lenght, tensor
+# key, value type, value length, tensor
 def add_tensor_entry(model, key, tensor):
     model.append(struct.pack("B", 1))
     model.append(key.encode("utf-8").ljust(50, b'\0')[:50]) # key size is always 50
@@ -62,13 +68,13 @@ def add_tensor_entry(model, key, tensor):
     
         
 def get_tensor(key):
-    tensor_path = os.path.join(sys.argv[1], tensor_index["weight_map"][key])
+    tensor_path = os.path.join(MODEL_PATH, tensor_index["weight_map"][key])
                                
     with safetensors.safe_open(tensor_path, framework="pt") as f:
         return f.get_tensor(key)
 
 def load_vocab():
-    words = ["" for i in range(config["vocab_size"])]
+    words = [b"" for i in range(config["vocab_size"])]
     with open(tokenizer_path, "r") as f:
         vocab = json.load(f)["model"]["vocab"]
 
@@ -79,7 +85,9 @@ def load_vocab():
             word = word+'\0'
             words[vocab[k]] = word.encode("utf-8")
 
-    tensor = torch.cat([torch.tensor(w) for w in words])
+
+    buf = bytearray(b"".join(words))
+    tensor = torch.frombuffer(buf, dtype=torch.uint8)
 
     add_tensor_entry(model, "vocab", tensor)
     
@@ -91,6 +99,10 @@ load_vocab()
 
 add_tensor_entry(model, "model.embed_tokens.weight", get_tensor("model.embed_tokens.weight").to(torch.float32))
 
-with open("model.bin", "wb") as f:
+out_path = "model.bin"
+with open(out_path, "wb") as f:
     for entry in model:
         f.write(entry)
+
+size = os.path.getsize(out_path)
+print(f"OK: wrote {out_path} ({size} bytes)")
