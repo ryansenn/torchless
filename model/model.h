@@ -10,13 +10,13 @@ struct Config {
 };
 
 struct Model {
-    Config config;
-    Tensor* token_embedding_table;
-
-    // To Refactor: Tokenizer should probably not be a member of Model
-    Tokenizer* tok;
+    std::shared_ptr<Config> config;
+    std::shared_ptr<Tensor> token_embedding_table;
+    std::shared_ptr<Tokenizer> tokenizer; // To Refactor: Tokenizer should probably not be a member of Model
 
     void load(std::string path);
+    void load_metadata_entry(std::ifstream& f);
+    void load_tensor_entry(std::ifstream& f);
 };
 
 struct InferenceState {
