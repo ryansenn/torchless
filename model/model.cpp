@@ -2,7 +2,14 @@
 #include <fstream>
 
 void Model::load(std::string path){
+    config = std::make_shared<Config>();
+
     std::ifstream f(path, std::ios::binary);
+    if (!f) {
+        std::cerr << "Failed to open file" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
     f.seekg(0);
     uint8_t entry_type;
 
