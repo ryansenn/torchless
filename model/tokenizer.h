@@ -1,3 +1,4 @@
+#pragma once
 #include "tensor.h"
 
 struct TrieNode {
@@ -9,6 +10,6 @@ struct Tokenizer {
     std::vector<std::string> vocab;
     std::shared_ptr<TrieNode> trie;
 
-    Tokenizer(Tensor* raw_vocab);
+    Tokenizer(std::shared_ptr<Tensor> raw_vocab);
     std::vector<int> encode(std::string text);
 };

@@ -42,7 +42,6 @@ void Model::load_metadata_entry(std::ifstream& f){
         // int
         case 0:
             int32_t value;
-
             f.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
 
             if (key == "vocab_size") {

@@ -1,7 +1,7 @@
 #include "tokenizer.h"
 
 
-Tokenizer::Tokenizer(Tensor* raw_vocab){
+Tokenizer::Tokenizer(std::shared_ptr<Tensor> raw_vocab){
     char* p = reinterpret_cast<char*>(raw_vocab->data);
     int size = raw_vocab->shape[0];
     char* end = p+size;
