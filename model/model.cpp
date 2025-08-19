@@ -16,8 +16,6 @@ void Model::load(std::string path){
     while (f.peek() != EOF){
         f.read(reinterpret_cast<char*>(&entry_type), sizeof(entry_type));
 
-        std::cout << entry_type << std::endl;
-
         // Metadata entry
         if (entry_type == 0) {
             load_metadata_entry(f);
