@@ -6,5 +6,6 @@ int main(){
     model.load("../model.bin");
 
     std::cout << model.tokenizer->vocab[433] << std::endl;
+    std::cout << model.tokenizer->vocab.size() << std::endl;
 
 }

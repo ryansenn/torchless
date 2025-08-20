@@ -12,7 +12,7 @@ Model& get_model() {
 }
 
 int test_model_load_metadata(){
-    Model m = get_model();
+    Model& m = get_model();
 
     if (!m.config) {
         std::cout << "config is null" << std::endl;
@@ -50,6 +50,38 @@ int test_model_load_embedding() {
     if (std::fabs(got - expected) > 1e-40f) {
         std::cout << "embedding[0] mismatch: got " << got
                   << ", want " << expected << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+int test_tokenizer_vocab(){
+    Model& m = get_model();
+
+    std::vector<std::string>& vocab = m.tokenizer->vocab;
+
+    if (vocab.size() != 32000) {
+        std::cout << "vocab size mismatch: got " << vocab.size()
+                  << ", want 32000" << std::endl;
+        return 1;
+    }
+
+    if (vocab[31855] != "拥") {
+        std::cout << "vocab[31855] mismatch: got " << vocab[31855]
+                  << ", want 拥" << std::endl;
+        return 1;
+    }
+
+    if (vocab[1098] != "ular") {
+        std::cout << "vocab[1098] mismatch: got " << vocab[1098]
+                  << ", want ular" << std::endl;
+        return 1;
+    }
+
+    if (vocab[0] != "<unk>") {
+        std::cout << "vocab[0] mismatch: got " << vocab[0]
+                  << ", want <unk>" << std::endl;
         return 1;
     }
 
