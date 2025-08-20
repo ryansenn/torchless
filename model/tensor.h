@@ -11,9 +11,9 @@ struct Tensor {
     std::string name;
     DType dtype; 
     void* data;
-    std::array<int, 4> shape = {0,0,0,0};
+    std::array<int64_t, 4> shape = {0,0,0,0};
 
-    void check_shape(std::array<int, 4> expected_shape){
+    void check_shape(std::array<int64_t, 4> expected_shape){
         if (this->shape != expected_shape){
             std::cerr << "FATAL: shape mismatch for tensor: " << name << std::endl;
             std::cerr << "Expected: [" << expected_shape[0] << ", "

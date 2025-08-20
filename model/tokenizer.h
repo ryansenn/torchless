@@ -4,6 +4,8 @@
 struct TrieNode {
     std::unordered_map<char, std::shared_ptr<TrieNode>> children;
     int token_id = -1;
+
+    std::shared_ptr<TrieNode> next_char(char c);
 };
 
 struct Tokenizer {

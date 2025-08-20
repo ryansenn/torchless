@@ -82,6 +82,7 @@ void Model::load_tensor_entry(std::ifstream& f){
     void* data = std::malloc(size);
     f.read(reinterpret_cast<char*>(data), size);
     tensor = std::make_shared<Tensor>(key, data);
+    tensor->shape[0] = size;
 
     if (key == "model.embed_tokens.weight"){
         token_embedding_table = tensor;
