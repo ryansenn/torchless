@@ -56,6 +56,8 @@ int test_model_load_embedding() {
     return 0;
 }
 
+static RegisterTest load_embedding("load embedding", &test_model_load_embedding);
+
 int test_tokenizer_vocab(){
     Model& m = get_model();
 
@@ -88,4 +90,33 @@ int test_tokenizer_vocab(){
     return 0;
 }
 
-static RegisterTest load_embedding("load embedding", &test_model_load_embedding);
+static RegisterTest tokenizer_vocab("tokenizer vocab", &test_tokenizer_vocab);
+
+int test_tokenizer_encode_basic(){
+    Model& m = get_model();
+    if (!m.tokenizer) {
+        std::cout << "tokenizer is null" << std::endl;
+        return 1;
+    }
+
+    std::string text = "hello how are you";
+    std::vector<int> want = {21558, 910, 460, 368};
+
+    std::vector<int> got = m.tokenizer->encode(text);
+
+    if (got.size() != want.size()) {
+        std::cout << "encode size mismatch: got " << got.size()
+                  << ", want " << want.size() << std::endl;
+        return 1;
+    }
+    for (size_t i = 0; i < want.size(); ++i) {
+        if (got[i] != want[i]) {
+            std::cout << "encode mismatch at " << i << ": got " << got[i]
+                      << ", want " << want[i] << std::endl;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static RegisterTest tokenizer_encode_basic("tokenizer encode basic", &test_tokenizer_encode_basic);
