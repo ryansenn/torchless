@@ -6,6 +6,7 @@ struct TrieNode {
     int token_id = -1;
 
     std::shared_ptr<TrieNode> next_char(char c);
+    bool contains(char c);
 };
 
 struct Tokenizer {
@@ -13,5 +14,5 @@ struct Tokenizer {
     std::shared_ptr<TrieNode> trie;
 
     Tokenizer(std::shared_ptr<Tensor> raw_vocab);
-    std::vector<int> encode(std::string text);
+    std::vector<int> encode(std::string& text);
 };

@@ -5,7 +5,11 @@ int main(){
     Model model;
     model.load("../model.bin");
 
-    std::cout << model.tokenizer->vocab[433] << std::endl;
-    std::cout << model.tokenizer->vocab.size() << std::endl;
+    std::string text = "hello how are you";
+    std::vector<int> r = model.tokenizer->encode(text);
 
+    for (auto i : r){
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
 }
