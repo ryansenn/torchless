@@ -15,4 +15,5 @@ struct Tokenizer {
 
     Tokenizer(std::shared_ptr<Tensor> raw_vocab);
     std::vector<int> encode(std::string& text);
+    std::string decode(std::vector<int>& tokens);
 };

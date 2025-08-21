@@ -65,3 +65,23 @@ std::vector<int> Tokenizer::encode(std::string& text){
 
     return result;
 }
+
+// i think need to figure out how to strip extra space and deal with special characters
+std::string Tokenizer::decode(std::vector<int>& tokens) {
+    std::string result;
+    int byte_fallback_start = -1;
+    for (int t : tokens) {
+        if (t < 0 || static_cast<size_t>(t) >= vocab.size())
+            continue;
+
+        if (byte_fallback_start >= 0 &&
+            t >= byte_fallback_start &&
+            t < byte_fallback_start + 256)
+        {
+            result.push_back(static_cast<char>(t - byte_fallback_start));
+        } else {
+            result += vocab[t];
+        }
+    }
+    return result;
+}
