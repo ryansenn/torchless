@@ -33,9 +33,22 @@ struct Tensor {
         return static_cast<T*>(data);
     }
 
-    Tensor(std::string name, void* data){
-        dtype = DType::F32;
-        this->name = name;
-        this->data = data;
+    // type is hardcoded to float, should be changed if needed
+    Tensor(std::string name, void* data): name(std::move(name)), data(data), dtype(DType::F32){}
+
+    // Allocate empty tensor given shape
+    template <typename T>
+    Tensor(std::string name, std::array<int64_t, 4> shape) : name(std::move(name)), shape(shape), dtype(DType::F32){
+        uint64_t size = 1;
+        for (auto i : shape){
+            if (i > 0){
+                size *= i;
+            }
+        }
+
+        data = new T[size];
     }
 };
+
+
+

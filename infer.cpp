@@ -105,4 +105,5 @@ void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim)
 }
 
 void forward(InferenceState& s, Model& m, int token, int pos){
+
 }
