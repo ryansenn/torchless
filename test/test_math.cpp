@@ -2,7 +2,7 @@
 #include <iostream>
 #include "registry.h"
 
-void matmul(float* xout, float* x, float* w, int n, int d);
+void matmul_impl(float* xout, float* w, float* x, int d, int n);
 void rmsnorm(float* o, float* x, float* g, int n, float eps);
 void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps);
 void softmax(float* o, float* x, int n);
@@ -32,7 +32,7 @@ int test_matmul(){
     expected[1] = 26;
     expected[2] = 42;
 
-    matmul(xout, x, w, n, d);
+    matmul_impl(xout, w, x, d, n);
 
     for (int i=0; i<d; i++){
         if (xout[i] != expected[i]){
