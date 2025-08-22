@@ -10,7 +10,7 @@ enum class DType {
 struct Tensor {
     std::string name;
     DType dtype; 
-    void* data;
+    void* data; // need to free this at some point
     std::array<int64_t, 4> shape = {0,0,0,0};
 
     void check_shape(std::array<int64_t, 4> expected_shape){
@@ -26,6 +26,11 @@ struct Tensor {
                       << shape[3] << "]" << std::endl;
             assert(false);
         }
+    }
+
+    template <typename T>
+    T* get_data(){
+        return static_cast<T*>(data);
     }
 
     Tensor(std::string name, void* data){

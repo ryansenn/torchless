@@ -21,5 +21,7 @@ struct Model {
 };
 
 struct InferenceState {
+    Tensor x; // [hidden_size]
 
+    InferenceState(Config& config) : x("x", new float[config.hidden_size]){}
 };

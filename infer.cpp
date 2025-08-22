@@ -3,7 +3,7 @@
 #include <iostream>
 
 // W (d,n) @ x (n,) = xout (d,)
-void matmul(float* xout, float* x, float* w, int n, int d){
+void matmul_impl(float* xout, float* w, float* x, int d, int n){
     for (int i=0; i<d; i++){
         float res = 0;
 
@@ -13,6 +13,11 @@ void matmul(float* xout, float* x, float* w, int n, int d){
         xout[i] = res;
     }
 }
+
+void matmul(Tensor& xout, Tensor& w, Tensor& x){
+    matmul_impl(xout.get_data<float>(), w.get_data<float>(), x.get_data<float>(), w.shape[0], w.shape[1]);
+}
+
 
 void rmsnorm(float* o, // output
              float* x, // input
@@ -100,5 +105,4 @@ void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim)
 }
 
 void forward(InferenceState& s, Model& m, int token, int pos){
-    
 }
