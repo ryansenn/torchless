@@ -1,5 +1,6 @@
 #include <iostream>
 #include "model/model.h"
+#include "math_ops.h"
 
 int main(){
     Model model;
@@ -11,3 +12,7 @@ int main(){
     InferenceState inferenceState(*model.config);
 }
 
+// Trying first minimal implementation of the inference flow
+void forward(InferenceState& inferenceState, Model& model, int token){
+
+}

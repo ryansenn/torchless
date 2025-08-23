@@ -43,7 +43,7 @@ int test_model_load_embedding() {
         return 1;
     }
 
-    float* data = static_cast<float*>(m.token_embedding_table->data);
+    float* data = m.token_embedding_table->data;
     float got = data[0];
     float expected = -2.18642e-36f;
 

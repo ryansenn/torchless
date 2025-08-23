@@ -81,12 +81,15 @@ void Model::load_tensor_entry(std::ifstream& f){
 
     void* data = std::malloc(size);
     f.read(reinterpret_cast<char*>(data), size);
-    tensor = std::make_shared<Tensor>(key, data);
+
+    if (key == "vocab"){
+        tokenizer = std::make_shared<Tokenizer>(reinterpret_cast<char*>(data), size);
+    }
+
+    tensor = std::make_shared<Tensor>(key, reinterpret_cast<float*>(data));
     tensor->shape[0] = size;
 
     if (key == "model.embed_tokens.weight"){
         token_embedding_table = tensor;
-    } else if (key == "vocab"){
-        tokenizer = std::make_shared<Tokenizer>(tensor);
     }
 }

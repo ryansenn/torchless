@@ -13,7 +13,7 @@ struct Tokenizer {
     std::vector<std::string> vocab;
     std::shared_ptr<TrieNode> trie;
 
-    Tokenizer(std::shared_ptr<Tensor> raw_vocab);
+    Tokenizer(char* raw_vocab, int size);
     std::vector<int> encode(std::string& text);
     std::string decode(std::vector<int>& tokens);
 };

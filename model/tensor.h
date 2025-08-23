@@ -3,15 +3,32 @@
 #include <iostream>
 
 
-enum class DType {
-    F32
-};
 
 struct Tensor {
     std::string name;
-    DType dtype; 
-    void* data; // need to free this at some point
+    float* data; // need to free this at some point
     std::array<int64_t, 4> shape = {0,0,0,0};
+
+    uint64_t get_size(){
+        uint64_t size = 1;
+        for (auto i : shape){
+            if (i > 0){
+                size *= i;
+            }
+        }
+        return size;
+    }
+
+    Tensor(std::string name, float* data): name(std::move(name)), data(data){}
+
+    Tensor(std::string name, std::array<int64_t, 4> shape) : name(std::move(name)), shape(shape){
+        data = new float[get_size()];
+    }
+
+    // should probably do shape check, type check, etc
+    void copy_from(std::shared_ptr<Tensor> tensor){
+        memcpy(data, tensor->data, get_size() * sizeof(float));
+    }
 
     void check_shape(std::array<int64_t, 4> expected_shape){
         if (this->shape != expected_shape){
@@ -26,26 +43,6 @@ struct Tensor {
                       << shape[3] << "]" << std::endl;
             assert(false);
         }
-    }
-
-    template <typename T>
-    T* get_data(){
-        return static_cast<T*>(data);
-    }
-
-    // type is hardcoded to float, should be changed if needed
-    Tensor(std::string name, void* data): name(std::move(name)), data(data), dtype(DType::F32){}
-
-    // Allocate empty tensor given shape
-    Tensor(std::string name, std::array<int64_t, 4> shape) : name(std::move(name)), shape(shape), dtype(DType::F32){
-        uint64_t size = 1;
-        for (auto i : shape){
-            if (i > 0){
-                size *= i;
-            }
-        }
-
-        data = new float[size];
     }
 };
 

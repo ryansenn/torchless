@@ -15,7 +15,7 @@ void matmul_impl(float* xout, float* w, float* x, int d, int n){
 }
 
 void matmul(Tensor& xout, Tensor& w, Tensor& x){
-    matmul_impl(xout.get_data<float>(), w.get_data<float>(), x.get_data<float>(), w.shape[0], w.shape[1]);
+    matmul_impl(xout.data, w.data, x.data, w.shape[0], w.shape[1]);
 }
 
 void rmsnorm(float* o, // output

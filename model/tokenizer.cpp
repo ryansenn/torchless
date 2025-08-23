@@ -9,11 +9,10 @@ bool TrieNode::contains(char c){
     return children.find(c) != children.end();
 }
 
-Tokenizer::Tokenizer(std::shared_ptr<Tensor> raw_vocab){
+Tokenizer::Tokenizer(char* raw_vocab, int size){
     trie = std::make_shared<TrieNode>();
 
-    char* p = reinterpret_cast<char*>(raw_vocab->data);
-    int size = raw_vocab->shape[0];
+    char* p = raw_vocab;
     char* end = p+size;
 
     std::shared_ptr<TrieNode> n = trie;
