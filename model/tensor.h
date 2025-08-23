@@ -37,7 +37,6 @@ struct Tensor {
     Tensor(std::string name, void* data): name(std::move(name)), data(data), dtype(DType::F32){}
 
     // Allocate empty tensor given shape
-    template <typename T>
     Tensor(std::string name, std::array<int64_t, 4> shape) : name(std::move(name)), shape(shape), dtype(DType::F32){
         uint64_t size = 1;
         for (auto i : shape){
@@ -46,7 +45,7 @@ struct Tensor {
             }
         }
 
-        data = new T[size];
+        data = new float[size];
     }
 };
 

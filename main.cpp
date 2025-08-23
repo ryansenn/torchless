@@ -6,10 +6,8 @@ int main(){
     model.load("../model.bin");
 
     std::string text = "hello how are you";
-    std::vector<int> r = model.tokenizer->encode(text);
+    std::vector<int> tokens = model.tokenizer->encode(text);
 
-    for (auto i : r){
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
+    InferenceState inferenceState(*model.config);
 }
+
