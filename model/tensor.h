@@ -2,8 +2,6 @@
 #include <string>
 #include <iostream>
 
-
-
 struct Tensor {
     std::string name;
     float* data; // need to free this at some point
@@ -26,8 +24,12 @@ struct Tensor {
     }
 
     // should probably do shape check, type check, etc
-    void copy_from(std::shared_ptr<Tensor> tensor){
-        memcpy(data, tensor->data, get_size() * sizeof(float));
+    void copy_from(Tensor& tensor){
+        memcpy(data, tensor.data, get_size() * sizeof(float));
+    }
+
+    void copy_from(float* new_data, int size){
+        memcpy(static_cast<void*>(data), new_data, size);
     }
 
     void check_shape(std::array<int64_t, 4> expected_shape){
@@ -44,6 +46,9 @@ struct Tensor {
             assert(false);
         }
     }
+
+    // Make sure im not copying the tensors
+    Tensor(const Tensor&) = delete;
 };
 
 
