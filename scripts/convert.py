@@ -21,7 +21,7 @@ Binary format:
         Tensor entry (1): key, dtype code (bfloat16=0, float16=1, float32=2, uint8=3), byte size, raw tensor data
 """
 
-MODEL_PATH = "Mistral-7B-v0.1/"
+MODEL_PATH = "../Mistral-7B-v0.1/"
 
 if len(sys.argv) > 2:
     MODEL_PATH = sys.argv[1]
@@ -40,10 +40,8 @@ with open(tensor_index_path, "r") as f:
 
 
 def add_metadata_entry(model, key, value):
-
     model.append(struct.pack("B", 0)) # entry type
     model.append(key.encode("utf-8").ljust(50, b'\0')[:50]) # key size is always 50
-
     if isinstance(value, int):
         model.append(struct.pack("B", 0))  # Value type: int
         model.append(struct.pack("i", value))
@@ -103,12 +101,13 @@ def load_vocab():
 
 add_metadata_entry(model, "vocab_size", config["vocab_size"])
 add_metadata_entry(model, "hidden_size", config["hidden_size"])
+add_metadata_entry(model, "num_hidden_layers", config["num_hidden_layers"])
 
 load_vocab()
 
 add_tensor_entry(model, "model.embed_tokens.weight", get_tensor("model.embed_tokens.weight").to(torch.float32))
 
-out_path = "model.bin"
+out_path = "../model.bin"
 with open(out_path, "wb") as f:
     for entry in model:
         f.write(entry)

@@ -14,18 +14,20 @@ Model& get_model() {
 int test_model_load_metadata(){
     Model& m = get_model();
 
-    if (!m.config) {
-        std::cout << "config is null" << std::endl;
-        return 1;
-    }
-    if (m.config->hidden_size != 4096) {
-        std::cout << "hidden_size mismatch: got " << m.config->hidden_size
+    if (m.config.hidden_size != 4096) {
+        std::cout << "hidden_size mismatch: got " << m.config.hidden_size
                   << ", want 4096" << std::endl;
         return 1;
     }
-    if (m.config->vocab_size != 32000) {
-        std::cout << "vocab_size mismatch: got " << m.config->vocab_size
+    if (m.config.vocab_size != 32000) {
+        std::cout << "vocab_size mismatch: got " << m.config.vocab_size
                   << ", want 32000" << std::endl;
+        return 1;
+    }
+
+    if (m.config.num_hidden_layers != 32) {
+        std::cout << "hidden layers size mismatch: got " << m.config.num_hidden_layers
+                  << ", want 32" << std::endl;
         return 1;
     }
 

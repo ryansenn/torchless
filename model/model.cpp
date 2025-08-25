@@ -53,6 +53,8 @@ void Model::load_metadata_entry(std::ifstream& f){
                 config.vocab_size = value;
             } else if (key == "hidden_size") {
                 config.hidden_size = value;
+            } else if (key == "num_hidden_layers"){
+                config.num_hidden_layers = value;
             }
             break;
         // float
