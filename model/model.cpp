@@ -1,5 +1,7 @@
 #include "model.h"
 #include <fstream>
+#include <unordered_map>
+#include <functional>
 
 void Model::load(std::string path){
     config = Config();
@@ -10,22 +12,16 @@ void Model::load(std::string path){
         std::exit(EXIT_FAILURE);
     }
 
-    f.seekg(0);
     uint8_t entry_type;
-
     while (f.peek() != EOF){
         f.read(reinterpret_cast<char*>(&entry_type), sizeof(entry_type));
+        if (!f) break;
 
-        // Metadata entry
         if (entry_type == 0) {
             load_metadata_entry(f);
-        }
-
-        // Tensor entry
-        else if (entry_type == 1) {
+        } else if (entry_type == 1) {
             load_tensor_entry(f);
-        }
-        else {
+        } else {
             std::cerr << "FATAL: Unknown entry_type " << entry_type << " in model file\n";
             std::exit(EXIT_FAILURE);
         }
@@ -39,42 +35,51 @@ void Model::load_metadata_entry(std::ifstream& f){
 
     f.read(buffer, 50);
     key.assign(buffer, 50);
-    key.erase(key.find('\0'));
+    size_t pos = key.find('\0');
+    if (pos != std::string::npos) key.erase(pos);
 
     f.read(reinterpret_cast<char*>(&value_type), sizeof(uint8_t));
 
-    switch(value_type){
-        // int
-        case 0:
-            int32_t value;
-            f.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
+    static const std::unordered_map<std::string, std::function<void(Config&, int32_t)>> int_setters = {
+            {"vocab_size",        [](Config& c, int32_t v){ c.vocab_size = v; }},
+            {"hidden_size",       [](Config& c, int32_t v){ c.hidden_size = v; }},
+            {"num_hidden_layers", [](Config& c, int32_t v){ c.num_hidden_layers = v; }}
+    };
 
-            if (key == "vocab_size") {
-                config.vocab_size = value;
-            } else if (key == "hidden_size") {
-                config.hidden_size = value;
-            } else if (key == "num_hidden_layers"){
-                config.num_hidden_layers = value;
-            }
+    switch(value_type){
+        case 0: {
+            int32_t value;
+            f.read(reinterpret_cast<char*>(&value), sizeof(value));
+            auto it = int_setters.find(key);
+            if (it != int_setters.end()) it->second(config, value);
             break;
-        // float
-        case 1:
+        }
+        case 1: {
+            float value;
+            f.read(reinterpret_cast<char*>(&value), sizeof(value));
             break;
-        //string
-        case 2:
+        }
+        case 2: {
+            int32_t len;
+            f.read(reinterpret_cast<char*>(&len), sizeof(len));
+            f.ignore(len);
+            break;
+        }
+        default:
+            std::cerr << "Unknown metadata value_type " << (int)value_type << "\n";
             break;
     }
 }
 
 void Model::load_tensor_entry(std::ifstream& f){
-    std::unique_ptr<Tensor> tensor;
     char buffer[1024];
     uint8_t value_type;
     std::string key;
 
     f.read(buffer, 50);
     key.assign(buffer, 50);
-    key.erase(key.find('\0'));
+    size_t pos = key.find('\0');
+    if (pos != std::string::npos) key.erase(pos);
 
     f.read(reinterpret_cast<char*>(&value_type), sizeof(value_type));
 
@@ -86,12 +91,18 @@ void Model::load_tensor_entry(std::ifstream& f){
 
     if (key == "vocab"){
         tokenizer = std::make_unique<Tokenizer>(reinterpret_cast<char*>(data), size);
+        return;
     }
 
-    tensor = std::make_unique<Tensor>(key, reinterpret_cast<float*>(data));
-    tensor->shape[0] = size;
+    auto tensor = std::make_unique<Tensor>(key, reinterpret_cast<float*>(data));
+    tensor->shape[0] = size / sizeof(float);
 
-    if (key == "model.embed_tokens.weight"){
-        token_embedding_table = std::move(tensor);
+    static const std::unordered_map<std::string, std::function<void(Model&, std::unique_ptr<Tensor>)>> tensor_setters = {
+            {"model.embed_tokens.weight", [](Model& m, std::unique_ptr<Tensor> t){ m.token_embedding_table = std::move(t); }}
+    };
+
+    auto it = tensor_setters.find(key);
+    if (it != tensor_setters.end()) {
+        it->second(*this, std::move(tensor));
     }
 }
