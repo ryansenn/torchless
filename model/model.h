@@ -4,6 +4,7 @@
 #include <iostream>
 #include "tensor.h"
 #include "tokenizer.h"
+#include "json.hpp"
 
 struct Config {
     int vocab_size;
@@ -29,9 +30,7 @@ struct Model {
     std::unique_ptr<Tokenizer> tokenizer; // tokenizer should probably not be a member of Model
     std::vector<Block> blocks;
 
-    void load(std::string path);
-    void load_metadata_entry(std::ifstream& f);
-    void load_tensor_entry(std::ifstream& f);
+    Model(std::string path);
 };
 
 struct InferenceState {

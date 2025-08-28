@@ -2,12 +2,7 @@
 #include "registry.h"
 
 Model& get_model() {
-    static Model model;
-    static bool loaded = false;
-    if (!loaded) {
-        model.load("../model.bin");
-        loaded = true;
-    }
+    static Model model("../model.bin");
     return model;
 }
 

@@ -11,13 +11,14 @@ void forward(InferenceState& inferenceState, Model& model, int token){
 }
 
 int main(){
-    Model model;
-    model.load("../model.bin");
+    Model model("../model.bin");
 
+    /*
     std::string text = "hello how are you";
     std::vector<int> tokens = model.tokenizer->encode(text);
 
     InferenceState inferenceState(model.config);
 
     forward(inferenceState, model, tokens[0]);
+    */
 }

@@ -6,3 +6,4 @@ model.bin
 build/
 .idea/
 cmake-build-debug/
+model/json.hpp
