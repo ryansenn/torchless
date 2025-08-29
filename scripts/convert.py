@@ -30,8 +30,10 @@ with open(idx_path, "r", encoding="utf-8") as f:
 
 header = {
     "__metadata__": {
-        "hidden_dim": str(cfg["intermediate_size"]),
+        "hidden_size": str(cfg["hidden_size"]),
+        "intermediate_size": str(cfg["intermediate_size"]),
         "n_layers": str(cfg["num_hidden_layers"]),
+        "n_heads": str(cfg["num_attention_heads"]),
         "n_kv_heads": str(cfg["num_key_value_heads"]),
         "vocab_size": str(cfg["vocab_size"]),
         "max_seq_len": str(cfg["max_position_embeddings"]),

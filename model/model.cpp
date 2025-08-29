@@ -21,12 +21,16 @@
     nlohmann::json header = nlohmann::json::parse(json_str);
 
     // fill Config from "__metadata__"
-    if (header.contains("__metadata__")) {
-        const auto& m = header["__metadata__"];
-        auto get_i = [&](const char* k){ return m.contains(k) ? std::stoi(m[k].get<std::string>()) : 0; };
-        config.hidden_size       = get_i("hidden_dim");
-        config.num_hidden_layers = get_i("n_layers");
-        config.vocab_size        = get_i("vocab_size");
-    }
+     auto& m = header["__metadata__"];
+
+     config.hidden_size       = std::stoi(m["hidden_size"].get<std::string>());
+     config.intermediate_size = std::stoi(m["intermediate_size"].get<std::string>());
+     config.n_layers          = std::stoi(m["n_layers"].get<std::string>());
+     config.n_heads           = std::stoi(m["n_heads"].get<std::string>());
+     config.n_kv_heads        = std::stoi(m["n_kv_heads"].get<std::string>());
+     config.vocab_size        = std::stoi(m["vocab_size"].get<std::string>());
+     config.max_seq_len       = std::stoi(m["max_seq_len"].get<std::string>());
+     config.rope_theta        = std::stof(m["rope_theta"].get<std::string>());
+     config.norm_eps          = std::stof(m["norm_eps"].get<std::string>());
 }
 

@@ -7,9 +7,15 @@
 #include "json.hpp"
 
 struct Config {
-    int vocab_size;
     int hidden_size;
-    int num_hidden_layers;
+    int intermediate_size;
+    int n_layers;
+    int n_heads;
+    int n_kv_heads;
+    int vocab_size;
+    int max_seq_len;
+    float rope_theta;
+    float norm_eps;
 };
 
 struct Block {

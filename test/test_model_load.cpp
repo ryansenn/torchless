@@ -6,12 +6,32 @@ Model& get_model() {
     return model;
 }
 
-int test_model_load_metadata(){
-    Model& m = get_model();
+int test_model_load_metadata() {
+    Model m("../model.bin");
 
     if (m.config.hidden_size != 4096) {
         std::cout << "hidden_size mismatch: got " << m.config.hidden_size
                   << ", want 4096" << std::endl;
+        return 1;
+    }
+    if (m.config.intermediate_size != 14336) {
+        std::cout << "intermediate_size mismatch: got " << m.config.intermediate_size
+                  << ", want 14336" << std::endl;
+        return 1;
+    }
+    if (m.config.n_layers != 32) {
+        std::cout << "n_layers mismatch: got " << m.config.n_layers
+                  << ", want 32" << std::endl;
+        return 1;
+    }
+    if (m.config.n_heads != 32) {
+        std::cout << "n_heads mismatch: got " << m.config.n_heads
+                  << ", want 32" << std::endl;
+        return 1;
+    }
+    if (m.config.n_kv_heads != 8) {
+        std::cout << "n_kv_heads mismatch: got " << m.config.n_kv_heads
+                  << ", want 8" << std::endl;
         return 1;
     }
     if (m.config.vocab_size != 32000) {
@@ -19,13 +39,23 @@ int test_model_load_metadata(){
                   << ", want 32000" << std::endl;
         return 1;
     }
-
-    if (m.config.num_hidden_layers != 32) {
-        std::cout << "hidden layers size mismatch: got " << m.config.num_hidden_layers
-                  << ", want 32" << std::endl;
+    if (m.config.max_seq_len != 32768) {
+        std::cout << "max_seq_len mismatch: got " << m.config.max_seq_len
+                  << ", want 32768" << std::endl;
+        return 1;
+    }
+    if (std::abs(m.config.rope_theta - 10000.0f) > 1e-3f) {
+        std::cout << "rope_theta mismatch: got " << m.config.rope_theta
+                  << ", want 10000.0" << std::endl;
+        return 1;
+    }
+    if (std::abs(m.config.norm_eps - 1e-5f) > 1e-8f) {
+        std::cout << "norm_eps mismatch: got " << m.config.norm_eps
+                  << ", want 1e-5" << std::endl;
         return 1;
     }
 
+    std::cout << "Config metadata test passed." << std::endl;
     return 0;
 }
 
