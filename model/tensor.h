@@ -5,7 +5,7 @@
 struct Tensor {
     std::string name;
     float* data; // need to free this at some point
-    std::array<int64_t, 4> shape = {0,0,0,0};
+    std::vector<int64_t> shape;
 
     uint64_t get_size(){
         uint64_t size = 1;
@@ -19,7 +19,9 @@ struct Tensor {
 
     Tensor(std::string name, float* data): name(std::move(name)), data(data){}
 
-    Tensor(std::string name, std::array<int64_t, 4> shape) : name(std::move(name)), shape(shape){
+    Tensor(std::string name, float* data, std::vector<int64_t> shape): name(std::move(name)), data(data), shape(shape){}
+
+    Tensor(std::string name, std::vector<int64_t> shape) : name(std::move(name)), shape(shape){
         data = new float[get_size()];
     }
 
@@ -32,7 +34,7 @@ struct Tensor {
         memcpy(static_cast<void*>(data), new_data, size);
     }
 
-    void check_shape(std::array<int64_t, 4> expected_shape){
+    void check_shape(std::vector<int64_t> expected_shape){
         if (this->shape != expected_shape){
             std::cerr << "FATAL: shape mismatch for tensor: " << name << std::endl;
             std::cerr << "Expected: [" << expected_shape[0] << ", "

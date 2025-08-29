@@ -36,7 +36,10 @@ struct Model {
     std::unique_ptr<Tokenizer> tokenizer; // tokenizer should probably not be a member of Model
     std::vector<Block> blocks;
 
+    uint8_t* base_offset;
+
     Model(std::string path);
+    std::unique_ptr<Tensor> load_tensor_by_key(const nlohmann::json& header, const std::string& key);
 };
 
 struct InferenceState {
