@@ -45,8 +45,14 @@
 
      // Load pointers to tensors
      token_embedding_table = load_tensor_by_key(header, "model.embed_tokens.weight");
-     tokenizer = std::make_unique<Tokenizer>(reinterpret_cast<char*>(load_tensor_by_key(header, "vocab")->data), config.vocab_size);
 
+     // Load vocab
+     int64_t begin = header["vocab"]["data_offsets"][0].get<uint64_t>();
+     uint64_t end = header["vocab"]["data_offsets"][1].get<uint64_t>();
+     char* raw_vocab = reinterpret_cast<char *>(base_offset + begin);
+     tokenizer = std::make_unique<Tokenizer>(raw_vocab, end-begin);
+
+     /*
      // attention proj weights
      for (int i=0; i<config.n_layers; i++){
          Block block;
@@ -57,5 +63,6 @@
          block.wo = load_tensor_by_key(header, base + "o_proj.weight");
          blocks.push_back(std::move(block));
      }
+     */
 }
 

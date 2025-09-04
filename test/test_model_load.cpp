@@ -7,7 +7,7 @@ Model& get_model() {
 }
 
 int test_model_load_metadata() {
-    Model m("../model.bin");
+    Model& m = get_model();
 
     if (m.config.hidden_size != 4096) {
         std::cout << "hidden_size mismatch: got " << m.config.hidden_size
@@ -55,7 +55,6 @@ int test_model_load_metadata() {
         return 1;
     }
 
-    std::cout << "Config metadata test passed." << std::endl;
     return 0;
 }
 
