@@ -52,17 +52,22 @@
      char* raw_vocab = reinterpret_cast<char *>(base_offset + begin);
      tokenizer = std::make_unique<Tokenizer>(raw_vocab, end-begin);
 
-     /*
-     // attention proj weights
+
+     // block weights
      for (int i=0; i<config.n_layers; i++){
          Block block;
-         const std::string base = "model.layers." + std::to_string(i) + ".self_attn.";
-         block.wq = load_tensor_by_key(header, base + "q_proj.weight");
-         block.wk = load_tensor_by_key(header, base + "k_proj.weight");
-         block.wv = load_tensor_by_key(header, base + "v_proj.weight");
-         block.wo = load_tensor_by_key(header, base + "o_proj.weight");
+
+         block.lm1 = load_tensor_by_key(header, "model.layers." + std::to_string(i) + ".input_layernorm.weight");
+         
+         std::string base_attn = "model.layers." + std::to_string(i) + ".self_attn.";
+
+         // attention proj
+         block.wq = load_tensor_by_key(header, base_attn + "q_proj.weight");
+         block.wk = load_tensor_by_key(header, base_attn + "k_proj.weight");
+         block.wv = load_tensor_by_key(header, base_attn + "v_proj.weight");
+         block.wo = load_tensor_by_key(header, base_attn + "o_proj.weight");
          blocks.push_back(std::move(block));
      }
-     */
+
 }
 

@@ -33,7 +33,6 @@ Tokenizer::Tokenizer(char* raw_vocab, int size){
         vocab.push_back(word);
         p++;
     }
-    return;
 }
 
 std::vector<int> Tokenizer::encode(std::string& text){

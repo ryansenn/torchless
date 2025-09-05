@@ -146,3 +146,22 @@ int test_tokenizer_encode_basic(){
 }
 
 static RegisterTest tokenizer_encode_basic("tokenizer encode basic", &test_tokenizer_encode_basic);
+
+int test_layer_norm_load(){
+    Model& m = get_model();
+    int layers[]    = {0, 14, 31};
+    float expected[] = {-7.48038e-06f, 1.9765625f, 2.53125f};
+    float atol = 1e-8f;
+
+    for (int i = 0; i < 3; i++) {
+        float got = m.blocks[layers[i]].lm1->data[0];
+        if (std::fabs(got - expected[i]) > atol) {
+            std::cout << "lm1[" << layers[i] << "][0] mismatch: got "
+                      << got << ", want " << expected[i] << std::endl;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static RegisterTest layer_norm_load("layer_norm_load", &test_layer_norm_load);

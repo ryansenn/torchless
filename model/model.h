@@ -19,6 +19,9 @@ struct Config {
 };
 
 struct Block {
+    // Input layer norm
+    std::unique_ptr<Tensor> lm1;
+
     // Attention weights
     std::unique_ptr<Tensor> wq;
     std::unique_ptr<Tensor> wk;
