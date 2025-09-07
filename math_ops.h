@@ -13,6 +13,10 @@ void matmul(Tensor& xout, Tensor& w, Tensor& x);
 
 // Normalization
 void rmsnorm(float* o, float* x, float* g, int n, float eps);
+inline void rmsnorm(Tensor& o, Tensor& x, Tensor& g, int n){
+    rmsnorm(o.data, x.data, g.data, n , 0); // supposed to use eps > 0 ? change if failure
+}
+
 void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps);
 
 // Activation and transformation functions
