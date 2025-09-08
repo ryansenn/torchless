@@ -9,10 +9,10 @@ void forward(InferenceState& inferenceState, Model& model, int token){
 
     rmsnorm(inferenceState.x, inferenceState.x, *model.blocks[0].lm1, model.config.hidden_size);
 
-    for (int i = 0; i < 8; i++) {
-        std::cout << inferenceState.x.data[i] << " ";
-    }
-    std::cout << "\n";
+    // Now starting multi-head attention
+
+    // Get Q, K, V
+
 
 }
 

@@ -13,8 +13,17 @@ def print_first(tensor):
     print(tensor + " shape:", w.shape)
     print("first weight:", w.flatten()[0].item())
 
-#print_first("model.embed_tokens.weight")
-
+'''
+print_first("model.embed_tokens.weight")
 print_first("model.layers.0.input_layernorm.weight")
 print_first("model.layers.14.input_layernorm.weight")
 print_first("model.layers.31.input_layernorm.weight")
+'''
+
+print_first("model.layers.0.self_attn.q_proj.weight")
+print_first("model.layers.0.self_attn.k_proj.weight")
+print_first("model.layers.0.self_attn.v_proj.weight")
+
+print_first("model.layers.31.self_attn.q_proj.weight")
+print_first("model.layers.31.self_attn.k_proj.weight")
+print_first("model.layers.31.self_attn.v_proj.weight")

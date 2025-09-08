@@ -8,7 +8,7 @@
     uint64_t end = header[key]["data_offsets"][1].get<uint64_t>();
     std::vector<int64_t> shape = header[key]["shape"].get<std::vector<int64_t>>();
 
-    return std::make_unique<Tensor>(key, reinterpret_cast<float *>(base_offset + start));
+    return std::make_unique<Tensor>(key, reinterpret_cast<float *>(base_offset + start), shape);
 }
 
  Model::Model(std::string path){
@@ -58,7 +58,7 @@
          Block block;
 
          block.lm1 = load_tensor_by_key(header, "model.layers." + std::to_string(i) + ".input_layernorm.weight");
-         
+
          std::string base_attn = "model.layers." + std::to_string(i) + ".self_attn.";
 
          // attention proj

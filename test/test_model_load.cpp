@@ -147,21 +147,58 @@ int test_tokenizer_encode_basic(){
 
 static RegisterTest tokenizer_encode_basic("tokenizer encode basic", &test_tokenizer_encode_basic);
 
-int test_layer_norm_load(){
+int test_block_load(){
     Model& m = get_model();
+
     int layers[]    = {0, 14, 31};
-    float expected[] = {-7.48038e-06f, 1.9765625f, 2.53125f};
     float atol = 1e-8f;
 
+    // Check layer norm weights
+    float expected_lm[] = {-7.48038e-06f, 1.9765625f, 2.53125f};
     for (int i = 0; i < 3; i++) {
         float got = m.blocks[layers[i]].lm1->data[0];
-        if (std::fabs(got - expected[i]) > atol) {
+        if (std::fabs(got - expected_lm[i]) > atol) {
             std::cout << "lm1[" << layers[i] << "][0] mismatch: got "
-                      << got << ", want " << expected[i] << std::endl;
+                      << got << ", want " << expected_lm[i] << std::endl;
             return 1;
         }
     }
+
+    // Check attention weights
+    float expected_att[] = {-7.48038e-06f, 1.9765625f, 2.53125f};
+
+    // Check attention weights
+    int att_layers[] = {0, 31};
+    float expected_q[] = {5.3882599e-05f, 4.8446655e-04f};
+    float expected_k[] = {-1.5646219e-06f, 1.73950195e-03f};
+    float expected_v[] = {-4.1961670e-04f, 1.77001953e-03f};
+
+    for (int i = 0; i < 2; i++) {
+        int l = att_layers[i];
+
+        float got_q = m.blocks[l].wq->data[0];
+        float got_k = m.blocks[l].wk->data[0];
+        float got_v = m.blocks[l].wv->data[0];
+
+        if (std::fabs(got_q - expected_q[i]) > atol) {
+            std::cout << "q_proj[" << l << "][0] mismatch: got "
+                      << got_q << ", want " << expected_q[i] << std::endl;
+            return 1;
+        }
+        if (std::fabs(got_k - expected_k[i]) > atol) {
+            std::cout << "k_proj[" << l << "][0] mismatch: got "
+                      << got_k << ", want " << expected_k[i] << std::endl;
+            return 1;
+        }
+        if (std::fabs(got_v - expected_v[i]) > atol) {
+            std::cout << "v_proj[" << l << "][0] mismatch: got "
+                      << got_v << ", want " << expected_v[i] << std::endl;
+            return 1;
+        }
+    }
+
+
     return 0;
 }
 
-static RegisterTest layer_norm_load("layer_norm_load", &test_layer_norm_load);
+static RegisterTest layer_norm_load("layer_norm_load", &test_block_load);
