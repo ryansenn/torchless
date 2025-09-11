@@ -1,6 +1,7 @@
 #include <math.h>
 #include <iostream>
 #include "registry.h"
+#include "../model/tensor.h"
 
 void matmul_impl(float* xout, float* w, float* x, int d, int n);
 void rmsnorm(float* o, float* x, float* g, int n, float eps);
@@ -112,3 +113,53 @@ static RegisterTest reg_matmul("matmul", &test_matmul);
 static RegisterTest reg_rmsnorm("rmsnorm", &test_rmsnorm);
 static RegisterTest reg_layernorm("layernorm", &test_layernorm);
 static RegisterTest reg_softmax("softmax", &test_softmax);
+
+int test_tensor_index(){
+    float data[4][4][2] = {
+            { {0,1}, {2,3}, {4,5}, {6,7} },
+            { {8,9}, {10,11}, {12,13}, {14,15} },
+            { {16,17}, {18,19}, {20,21}, {22,23} },
+            { {24,25}, {26,27}, {28,29}, {30,31} }
+    };
+    std::vector<int64_t> shape = {4, 4, 2};
+    Tensor t("test", reinterpret_cast<float*>(data), shape);
+
+    // Scalar access: t[1,2,0] == 12
+    {
+        Tensor v = t.at({1,2,0});
+        if (!v.shape.empty() || *(v.data) != 12.f) {
+            std::cout << "tensor_index scalar failed\n";
+            return 1;
+        }
+    }
+
+    // 1D slice: t[3,0] -> shape {2}, values {24,25}
+    {
+        Tensor v = t.at({3,0});
+        if (v.shape.size() != 1 || v.shape[0] != 2) {
+            std::cout << "tensor_index 1D shape failed\n";
+            return 1;
+        }
+        if (v.data[0] != 24.f || v.data[1] != 25.f) {
+            std::cout << "tensor_index 1D values failed\n";
+            return 1;
+        }
+    }
+
+    // 2D slice: t[2] -> shape {4,2}; check first and last elements (16, 23)
+    {
+        Tensor v = t.at({2});
+        if (v.shape.size() != 2 || v.shape[0] != 4 || v.shape[1] != 2) {
+            std::cout << "tensor_index 2D shape failed\n";
+            return 1;
+        }
+        if (*(v.at({0,0}).data) != 16.f || *(v.at({3,1}).data) != 23.f) {
+            std::cout << "tensor_index 2D values failed\n";
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static RegisterTest reg_tensor_index("tensor_index", &test_tensor_index);

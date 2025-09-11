@@ -20,7 +20,7 @@ struct Tensor {
     }
 
     void init_strides(){
-        strides.assign(size, 1);
+        strides.assign(shape.size(), 1);
         int64_t stride = 1;
 
         for (int i = strides.size() - 2; i >= 0; i--){
@@ -51,7 +51,7 @@ struct Tensor {
 
     Tensor at(std::initializer_list<int64_t> idx){
         assert(idx.size() <= shape.size() && "Too many indices for tensor");
-        float* new_data;
+        float* new_data = data;
 
         int i = 0;
         for (auto v : idx){
