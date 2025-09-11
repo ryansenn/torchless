@@ -165,9 +165,6 @@ int test_block_load(){
     }
 
     // Check attention weights
-    float expected_att[] = {-7.48038e-06f, 1.9765625f, 2.53125f};
-
-    // Check attention weights
     int att_layers[] = {0, 31};
     float expected_q[] = {5.3882599e-05f, 4.8446655e-04f};
     float expected_k[] = {-1.5646219e-06f, 1.73950195e-03f};

@@ -11,9 +11,8 @@ void forward(InferenceState& inferenceState, Model& model, int token){
 
     // Now starting multi-head attention
 
-    // Get Q, K, V
-
-
+    // Get Q for the current token
+    matmul(inferenceState.q, *model.blocks[0].wq, inferenceState.x);
 }
 
 int main(){

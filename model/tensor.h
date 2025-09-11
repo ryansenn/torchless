@@ -6,6 +6,8 @@ struct Tensor {
     std::string name;
     float* data; // need to free this at some point
     std::vector<int64_t> shape;
+    int size;
+    std::vector<int64_t> strides;
 
     uint64_t get_size(){
         uint64_t size = 1;
@@ -17,12 +19,25 @@ struct Tensor {
         return size;
     }
 
-    Tensor(std::string name, float* data): name(std::move(name)), data(data){}
+    void init_strides(){
+        strides.assign(size, 1);
+        int64_t stride = 1;
 
-    Tensor(std::string name, float* data, std::vector<int64_t> shape): name(std::move(name)), data(data), shape(shape){}
+        for (int i = strides.size() - 2; i >= 0; i--){
+            stride *= shape[i+1];
+            strides[i] = stride;
+        }
+    }
+
+    Tensor(std::string name, float* data, std::vector<int64_t> shape): name(std::move(name)), data(data), shape(shape){
+        size = get_size();
+        init_strides();
+    }
 
     Tensor(std::string name, std::vector<int64_t> shape) : name(std::move(name)), shape(shape){
-        data = new float[get_size()];
+        size = get_size();
+        data = new float[size];
+        init_strides();
     }
 
     // should probably do shape check, type check, etc
@@ -33,6 +48,25 @@ struct Tensor {
     void copy_from(float* new_data, int size){
         memcpy(static_cast<void*>(data), new_data, size);
     }
+
+    Tensor at(std::initializer_list<int64_t> idx){
+        assert(idx.size() <= shape.size() && "Too many indices for tensor");
+        float* new_data;
+
+        int i = 0;
+        for (auto v : idx){
+            assert(v < shape[i] && "Index out of range");
+            new_data += strides[i] * v;
+            i++;
+        }
+
+        std::vector<int64_t> new_shape(shape.begin() + i, shape.end());
+
+        return Tensor("", new_data, new_shape);
+    }
+
+    // Make sure im not copying the tensors
+    Tensor(const Tensor&) = delete;
 
     void check_shape(std::vector<int64_t> expected_shape){
         if (this->shape != expected_shape){
@@ -48,9 +82,6 @@ struct Tensor {
             assert(false);
         }
     }
-
-    // Make sure im not copying the tensors
-    Tensor(const Tensor&) = delete;
 };
 
 
