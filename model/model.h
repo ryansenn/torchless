@@ -50,11 +50,24 @@ struct InferenceState {
 
     Tensor q;
 
-    std::vector<std::vector<Tensor>> k_cache;
-    std::vector<std::vector<Tensor>> v_cache;
+    // KV cache
+    // Each block stores Tensor of size [n_kv_heads, max_seq_len, head_dim]
+    std::vector<std::unique_ptr<Tensor>> k_cache;
+    std::vector<std::unique_ptr<Tensor>> v_cache;
 
     InferenceState(Config& config) :
-        x("x", {config.hidden_size, 0, 0, 0}),
-        q("q", {config.hidden_size, 0, 0, 0})
-        {}
+        x("x", {config.hidden_size, 0, 0, 0}), q("q", {config.hidden_size, 0, 0, 0}){
+
+        // Initialize empty KV cache
+        int64_t head_dim = config.hidden_size / config.n_heads;
+        std::vector<int64_t> shape = {config.n_kv_heads, config.max_seq_len, head_dim};
+
+        for (int i=0; i<config.n_layers; i++){
+            std::unique_ptr<Tensor> k = std::make_unique<Tensor>("k_cache_" + std::to_string(i), shape);
+            std::unique_ptr<Tensor> v = std::make_unique<Tensor>("v_cache_" + std::to_string(i), shape);
+
+            k_cache.push_back(std::move(k));
+            v_cache.push_back(std::move(v));
+        }
+    }
 };
