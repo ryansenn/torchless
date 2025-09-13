@@ -1,6 +1,7 @@
 #include <iostream>
 #include "model/model.h"
-#include "math_ops.h"
+#include "inference/math_ops.h"
+#include "inference/inference.h"
 
 void block_forward(InferenceState& inferenceState, Model& model, int b){
     // Get Q for the current token

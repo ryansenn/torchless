@@ -5,7 +5,7 @@
 #ifndef MATH_OPS_H
 #define MATH_OPS_H
 
-#include "model/model.h"
+#include "../model/model.h"
 
 // Matrix multiplication
 void matmul_impl(float* xout, float* w, float* x, int d, int n);
