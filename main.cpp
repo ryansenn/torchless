@@ -3,13 +3,12 @@
 #include "inference/math_ops.h"
 #include "inference/inference.h"
 
-void block_forward(InferenceState& inferenceState, Model& model, int b){
+void block_forward(InferenceState& inferenceState, int b){
+    Model& model = inferenceState.model;
+
     // Get Q for the current token
     matmul(inferenceState.q, *model.blocks[b].wq, inferenceState.x);
 
-    // Get K,V
-    matmul(inferenceState.k, *model.blocks[b].wk, inferenceState.x);
-    matmul(inferenceState.v, *model.blocks[b].wv, inferenceState.x);
 
     // Compute attention for each head individually
     for (int i=0; i<model.config.n_heads; i++){
@@ -17,13 +16,11 @@ void block_forward(InferenceState& inferenceState, Model& model, int b){
     }
 
     // Write current K,V to cache
-    inferenceState.k_cache[b]->at({inferenceState.pos}).copy_from(inferenceState.k);
-    inferenceState.v_cache[b]->at({inferenceState.pos}).copy_from(inferenceState.v);
-    inferenceState.pos++;
+    inferenceState.push_kv(b);
 }
 
 // Trying first minimal implementation of the inference flow
-void forward(InferenceState& inferenceState, Model& model, int token){
+void forward(InferenceState& inferenceState, int token){
     float* embedding = &model.token_embedding_table->data[token * model.config.hidden_size];
     inferenceState.x.copy_from(embedding, model.config.hidden_size);
 
