@@ -1,10 +1,5 @@
 #include "../model/model.h"
-#include "registry.h"
-
-Model& get_model() {
-    static Model model("../model.bin");
-    return model;
-}
+#include "context.h"
 
 int test_model_load_metadata() {
     Model& m = get_model();

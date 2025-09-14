@@ -1,6 +1,6 @@
 #include <math.h>
 #include <iostream>
-#include "registry.h"
+#include "context.h"
 #include "../model/tensor.h"
 
 void matmul_impl(float* xout, float* w, float* x, int d, int n);

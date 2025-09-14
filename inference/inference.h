@@ -17,5 +17,7 @@ struct InferenceState {
     int pos;
 
     InferenceState(Model& model);
+    void block_forward(int b);
+    void forward(int token);
     void push_kv(int b);
 };

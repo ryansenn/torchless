@@ -1,14 +1,18 @@
 #include <string>
+#include "../model/model.h"
+#include "../inference/inference.h"
 
 struct TestCase {
     std::string name;
     int (*func)();
 };
 
-inline std::vector<TestCase> tests;
+extern std::vector<TestCase> tests;
 
 struct RegisterTest {
     RegisterTest(std::string name, int (*func)()){
         tests.push_back({name, func});
     }
 };
+
+Model& get_model();
