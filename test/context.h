@@ -16,3 +16,5 @@ struct RegisterTest {
 };
 
 Model& get_model();
+
+bool equals(float x, float y);

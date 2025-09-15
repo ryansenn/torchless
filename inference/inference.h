@@ -3,7 +3,7 @@
 struct InferenceState {
     Model& model;
 
-    Tensor x; // [hidden_size]
+    Tensor x; // hidden state [hidden_size]
 
     Tensor q;
     Tensor k;
@@ -19,5 +19,5 @@ struct InferenceState {
     InferenceState(Model& model);
     void block_forward(int b);
     void forward(int token);
-    void push_kv(int b);
+    void push_kv();
 };

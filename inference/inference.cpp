@@ -31,9 +31,6 @@ void InferenceState::block_forward(int b){
     for (int i=0; i<model.config.n_heads; i++){
 
     }
-
-    // Write current K,V to cache
-    push_kv(b);
 }
 
 // Trying first minimal implementation of the inference flow
@@ -47,16 +44,21 @@ void InferenceState::forward(int token){
     for (int i=0; i<model.config.n_layers; i++){
         block_forward(i);
     }
+
+    // Push KV to cache for all blocks
+    push_kv();
 }
 
 // We could probably optimize this by directly matmuling kv directly in cache
-void InferenceState::push_kv(int b) {
-    // Get K,V
-    matmul(k, *model.blocks[b].wk, x);
-    matmul(v, *model.blocks[b].wv, x);
+void InferenceState::push_kv() {
+    for (int b=0; b<model.config.n_layers; b++){
+        // Get K,V
+        matmul(k, *model.blocks[b].wk, x);
+        matmul(v, *model.blocks[b].wv, x);
 
-    // Append in tensor
-    k_cache[b]->at({pos}).copy_from(k);
-    v_cache[b]->at({pos}).copy_from(v);
+        // Append in tensor
+        k_cache[b]->at({pos}).copy_from(k);
+        v_cache[b]->at({pos}).copy_from(v);
+    }
     pos++;
 }
