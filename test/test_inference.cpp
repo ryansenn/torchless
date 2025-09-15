@@ -9,14 +9,20 @@ int test_kv_cache() {
     for (int i = 0; i < hidden_size; i++) ones[i] = 1.0f;
     inferenceState.x.copy_from(ones, hidden_size * sizeof(float));
 
-    // push at all layers
-    inferenceState.push_kv();
+    // push all layers
+    for (int i=0;i<inferenceState.model.config.n_layers; i++){
+        inferenceState.push_kv(i);
+    }
+    inferenceState.pos++;
 
     if (inferenceState.pos != 1) {
-        std::cout << "pos mismatch after push on layer 0: got " << inferenceState.pos
+        std::cout << "pos mismatch after push: got " << inferenceState.pos
                   << ", want 1" << std::endl;
         return 1;
     }
+
+    // check layer 0
+    inferenceState.push_kv(0);
     if (!equals(inferenceState.k_cache[0]->data[0], 0.00145736f)) {
         std::cout << "k_cache[0]->data[0] mismatch: got "
                   << inferenceState.k_cache[0]->data[0] << ", want 0.00145736" << std::endl;
@@ -29,7 +35,7 @@ int test_kv_cache() {
     }
 
     // check at layer 31
-
+    inferenceState.push_kv(31);
     if (!equals(inferenceState.k_cache[31]->data[0], 0.11939027f)) {
         std::cout << "k_cache[31]->data[0] mismatch: got "
                   << inferenceState.k_cache[31]->data[0] << ", want 0.11939027" << std::endl;
@@ -42,12 +48,10 @@ int test_kv_cache() {
     }
 
     // push again, should populate pos 1
-    inferenceState.push_kv();
-    if (inferenceState.pos != 2) {
-        std::cout << "pos mismatch after push: got " << inferenceState.pos
-                  << ", want 2" << std::endl;
-        return 1;
+    for (int i=0;i<inferenceState.model.config.n_layers; i++){
+        inferenceState.push_kv(i);
     }
+    inferenceState.pos++;
 
     if (!equals(inferenceState.k_cache[0]->at({1}).data[0], 0.00145736f)) {
         std::cout << "k_cache[0]->data[" << 1024 + 0

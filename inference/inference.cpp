@@ -26,6 +26,7 @@ void InferenceState::block_forward(int b){
     // Get Q for the current token
     matmul(q, *model.blocks[b].wq, x);
 
+    push_kv(b);
 
     // Compute attention for each head individually
     for (int i=0; i<model.config.n_heads; i++){
@@ -45,20 +46,16 @@ void InferenceState::forward(int token){
         block_forward(i);
     }
 
-    // Push KV to cache for all blocks
-    push_kv();
+    pos++;
 }
 
 // We could probably optimize this by directly matmuling kv directly in cache
-void InferenceState::push_kv() {
-    for (int b=0; b<model.config.n_layers; b++){
-        // Get K,V
-        matmul(k, *model.blocks[b].wk, x);
-        matmul(v, *model.blocks[b].wv, x);
+void InferenceState::push_kv(int b) {
+    // Get K,V
+    matmul(k, *model.blocks[b].wk, x);
+    matmul(v, *model.blocks[b].wv, x);
 
-        // Append in tensor
-        k_cache[b]->at({pos}).copy_from(k);
-        v_cache[b]->at({pos}).copy_from(v);
-    }
-    pos++;
+    // Append in tensor
+    k_cache[b]->at({pos}).copy_from(k);
+    v_cache[b]->at({pos}).copy_from(v);
 }
