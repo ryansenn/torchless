@@ -65,6 +65,14 @@ struct Tensor {
         return Tensor("", new_data, new_shape);
     }
 
+    // should probably do some checks before reshaping
+    Tensor reshape(std::vector<int64_t> new_shape){
+        uint64_t new_size = 1;
+        for (auto d : new_shape) new_size *= d;
+        assert(new_size == size && "Reshape size mismatch");
+        return Tensor("", data, new_shape);
+    }
+
     // Make sure im not copying the tensors
     Tensor(const Tensor&) = delete;
 

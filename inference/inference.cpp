@@ -30,7 +30,7 @@ void InferenceState::block_forward(int b){
 
     // Compute attention for each head individually
     for (int i=0; i<model.config.n_heads; i++){
-
+        // Match each q head to a corresponding k head (each k head is re-used 4 times because ofgrouped-query attention)
     }
 }
 
