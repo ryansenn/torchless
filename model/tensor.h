@@ -41,7 +41,7 @@ struct Tensor {
     }
 
     // should probably do shape check, type check, etc
-    void copy_from(Tensor& tensor){
+    void copy_from(Tensor tensor){
         memcpy(data, tensor.data, get_size() * sizeof(float));
     }
 

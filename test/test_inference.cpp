@@ -1,69 +1,72 @@
 #include "context.h"
 
 int test_kv_cache() {
-    InferenceState inferenceState(get_model());
-    int hidden_size = inferenceState.model.config.hidden_size;
+    InferenceState st(get_model());
+    const int H = st.model.config.n_kv_heads;
+    const int D = st.model.config.head_dim;
 
-    // hijack the hidden state with a bunch of ones
-    float ones[hidden_size];
-    for (int i = 0; i < hidden_size; i++) ones[i] = 1.0f;
-    inferenceState.x.copy_from(ones, hidden_size * sizeof(float));
+    // hijack the hidden state with ones
+    std::vector<float> ones(st.model.config.hidden_size, 1.f);
+    st.x.copy_from(ones.data(), ones.size() * sizeof(float));
 
-    // push all layers
-    for (int i=0;i<inferenceState.model.config.n_layers; i++){
-        inferenceState.push_kv(i);
-    }
-    inferenceState.pos++;
+    // push all layers at pos 0
+    for (int i = 0; i < st.model.config.n_layers; ++i) st.push_kv(i);
+    st.pos++;
 
-    if (inferenceState.pos != 1) {
-        std::cout << "pos mismatch after push: got " << inferenceState.pos
-                  << ", want 1" << std::endl;
+    if (st.pos != 1) {
+        std::cout << "pos mismatch after push: got " << st.pos << ", want 1\n";
         return 1;
     }
 
-    // check layer 0
-    inferenceState.push_kv(0);
-    if (!equals(inferenceState.k_cache[0]->data[0], 0.00145736f)) {
-        std::cout << "k_cache[0]->data[0] mismatch: got "
-                  << inferenceState.k_cache[0]->data[0] << ", want 0.00145736" << std::endl;
-        return 1;
-    }
-    if (!equals(inferenceState.k_cache[0]->data[1023], -0.04015780f)) {
-        std::cout << "k_cache[0]->data[1023] mismatch: got "
-                  << inferenceState.k_cache[0]->data[1023] << ", want -0.04015780" << std::endl;
-        return 1;
-    }
-
-    // check at layer 31
-    inferenceState.push_kv(31);
-    if (!equals(inferenceState.k_cache[31]->data[0], 0.11939027f)) {
-        std::cout << "k_cache[31]->data[0] mismatch: got "
-                  << inferenceState.k_cache[31]->data[0] << ", want 0.11939027" << std::endl;
-        return 1;
-    }
-    if (!equals(inferenceState.k_cache[31]->data[1023], -0.11372215f)) {
-        std::cout << "k_cache[31]->data[1023] mismatch: got "
-                  << inferenceState.k_cache[31]->data[1023] << ", want -0.11372215" << std::endl;
-        return 1;
+    // check layer 0 @ pos 0
+    st.push_kv(0);
+    {
+        float a = st.k_cache[0]->at({0, 0}).data[0];       // head 0, dim 0
+        float b = st.k_cache[0]->at({H-1, 0}).data[D-1];   // last head, last dim
+        if (!equals(a, 0.00145736f)) {
+            std::cout << "k_cache[0][h=0,pos=0,d=0] mismatch: got " << a << ", want 0.00145736\n";
+            return 1;
+        }
+        if (!equals(b, -0.04015780f)) {
+            std::cout << "k_cache[0][h=" << (H-1) << ",pos=0,d=" << (D-1)
+                      << "] mismatch: got " << b << ", want -0.04015780\n";
+            return 1;
+        }
     }
 
-    // push again, should populate pos 1
-    for (int i=0;i<inferenceState.model.config.n_layers; i++){
-        inferenceState.push_kv(i);
+    // check layer 31 @ pos 0
+    st.push_kv(31);
+    {
+        float a = st.k_cache[31]->at({0, 0}).data[0];
+        float b = st.k_cache[31]->at({H-1, 0}).data[D-1];
+        if (!equals(a, 0.11939027f)) {
+            std::cout << "k_cache[31][h=0,pos=0,d=0] mismatch: got " << a << ", want 0.11939027\n";
+            return 1;
+        }
+        if (!equals(b, -0.11372215f)) {
+            std::cout << "k_cache[31][h=" << (H-1) << ",pos=0,d=" << (D-1)
+                      << "] mismatch: got " << b << ", want -0.11372215\n";
+            return 1;
+        }
     }
-    inferenceState.pos++;
 
-    if (!equals(inferenceState.k_cache[0]->at({1}).data[0], 0.00145736f)) {
-        std::cout << "k_cache[0]->data[" << 1024 + 0
-                  << "] mismatch at pos1: got " << inferenceState.k_cache[0]->at({1}).data[0]
-                  << ", want 0.00145736" << std::endl;
-        return 1;
-    }
-    if (!equals(inferenceState.k_cache[0]->at({1}).data[1023], -0.04015780f)) {
-        std::cout << "k_cache[0]->data[" << 1024 + 1023
-                  << "] mismatch at pos1: got " << inferenceState.k_cache[0]->at({1}).data[1023]
-                  << ", want -0.04015780" << std::endl;
-        return 1;
+    // push again → pos 1
+    for (int i = 0; i < st.model.config.n_layers; ++i) st.push_kv(i);
+    st.pos++;
+
+    // check layer 0 @ pos 1 (same expected refs as before)
+    {
+        float a = st.k_cache[0]->at({0, 1}).data[0];
+        float b = st.k_cache[0]->at({H-1, 1}).data[D-1];
+        if (!equals(a, 0.00145736f)) {
+            std::cout << "k_cache[0][h=0,pos=1,d=0] mismatch: got " << a << ", want 0.00145736\n";
+            return 1;
+        }
+        if (!equals(b, -0.04015780f)) {
+            std::cout << "k_cache[0][h=" << (H-1) << ",pos=1,d=" << (D-1)
+                      << "] mismatch: got " << b << ", want -0.04015780\n";
+            return 1;
+        }
     }
 
     return 0;

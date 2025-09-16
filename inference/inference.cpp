@@ -28,9 +28,13 @@ void InferenceState::block_forward(int b){
 
     push_kv(b);
 
+    // Reshape by head
+    q = q.reshape({32, 128});
+
     // Compute attention for each head individually
     for (int i=0; i<model.config.n_heads; i++){
         // Match each q head to a corresponding k head (each k head is re-used 4 times because ofgrouped-query attention)
+
     }
 }
 
@@ -50,12 +54,18 @@ void InferenceState::forward(int token){
 }
 
 // We could probably optimize this by directly matmuling kv directly in cache
+// Because we switched layout of KV cache to [n_kv_heads, max_seq_len, head_dim], we are not writing a contiguous chunk anymore
 void InferenceState::push_kv(int b) {
     // Get K,V
     matmul(k, *model.blocks[b].wk, x);
     matmul(v, *model.blocks[b].wv, x);
 
-    // Append in tensor
-    k_cache[b]->at({pos}).copy_from(k);
-    v_cache[b]->at({pos}).copy_from(v);
+    Tensor kh = k.reshape({model.config.n_kv_heads, model.config.head_dim});
+    Tensor vh = v.reshape({model.config.n_kv_heads, model.config.head_dim});
+
+    for (int h=0;h<model.config.n_kv_heads; h++){
+        // Append in tensor
+        k_cache[b]->at({h, pos}).copy_from(kh.at({h}));
+        v_cache[b]->at({h, pos}).copy_from(vh.at({h}));
+    }
 }

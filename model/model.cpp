@@ -42,6 +42,8 @@
      config.max_seq_len       = std::stoi(m["max_seq_len"].get<std::string>());
      config.rope_theta        = std::stof(m["rope_theta"].get<std::string>());
      config.norm_eps          = std::stof(m["norm_eps"].get<std::string>());
+     config.head_dim          = config.hidden_size / config.n_heads;
+
 
      // Load pointers to tensors
      token_embedding_table = load_tensor_by_key(header, "model.embed_tokens.weight");

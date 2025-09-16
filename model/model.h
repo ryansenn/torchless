@@ -14,6 +14,7 @@ struct Config {
     int n_kv_heads;
     int vocab_size;
     int max_seq_len;
+    int head_dim;
     float rope_theta;
     float norm_eps;
 };
