@@ -20,7 +20,10 @@ inline void rmsnorm(Tensor& o, Tensor& x, Tensor& g, int n){
 void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps);
 
 // Activation and transformation functions
-void softmax(float* o, float* x, int n);
+void softmax(float* o, float* x, int n, float t);
+inline void softmax(Tensor& o, Tensor& x, int n, float t){
+    softmax(o.data, x.data, n, t);
+}
 
 inline float gelu(float x) {
     return 0.5f * x * (1.0f + tanhf(0.797885f * (x + 0.044715f * x * x * x)));

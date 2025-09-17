@@ -1,12 +1,7 @@
 #include <math.h>
 #include <iostream>
 #include "context.h"
-#include "../model/tensor.h"
-
-void matmul_impl(float* xout, float* w, float* x, int d, int n);
-void rmsnorm(float* o, float* x, float* g, int n, float eps);
-void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps);
-void softmax(float* o, float* x, int n);
+#include "../inference/math_ops.h"
 
 const float tolerance = 1e-6f;
 
@@ -96,7 +91,7 @@ int test_softmax() {
     float o[5];
     float res[5] = {0.0024102, 0.00655159, 0.00088666, 0.97234248, 0.01780907};
 
-    softmax(o, x, n);
+    softmax(o, x, n, 1);
 
     for (int i = 0; i < n; i++) {
         if (std::fabs(res[i] - o[i]) > tolerance) {

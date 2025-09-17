@@ -7,11 +7,13 @@ InferenceState::InferenceState(Model& model) :
     q("q", {model.config.hidden_size}),
     k("k", {model.config.n_kv_heads * model.config.hidden_size / model.config.n_heads}),
     v("v", {model.config.n_kv_heads * model.config.hidden_size / model.config.n_heads}),
-    pos(0) {
+    attn("attn", {model.config.max_seq_len}),
+    ctx("context", {model.config.hidden_size})
+    {
 
     // Initialize empty KV cache
     int64_t head_dim = model.config.hidden_size / model.config.n_heads;
-    std::vector<int64_t> shape = {model.config.max_seq_len, model.config.n_kv_heads, head_dim};
+    std::vector<int64_t> shape = {model.config.n_kv_heads, model.config.max_seq_len, head_dim};
 
     for (int i=0; i<model.config.n_layers; i++){
     std::unique_ptr<Tensor> k = std::make_unique<Tensor>("k_cache_" + std::to_string(i), shape);
@@ -29,12 +31,23 @@ void InferenceState::block_forward(int b){
     push_kv(b);
 
     // Reshape by head
-    q = q.reshape({32, 128});
+    q = q.reshape({model.config.n_heads, model.config.head_dim});
 
     // Compute attention for each head individually
-    for (int i=0; i<model.config.n_heads; i++){
-        // Match each q head to a corresponding k head (each k head is re-used 4 times because ofgrouped-query attention)
+    for (int h=0; h<model.config.n_heads; h++){
+        // Match each q head to a corresponding k head (each k head is re-used 4 times because of grouped-query attention)
+        Tensor q_h =  q.at({h}); // [head_dim]
+        Tensor k_h = k_cache[b]->at({h / (model.config.n_heads / model.config.n_kv_heads)}); // [seq_len x head_dim]
 
+        // Need to add causal masking ..
+
+        matmul(attn, k_h, q_h); // logits [seq_len]
+        softmax(attn, attn, std::min(pos+1, model.config.max_seq_len), sqrt(model.config.head_dim)); // this gives us the weights
+
+        Tensor v_h = v_cache[b]->at({h / (model.config.n_heads / model.config.n_kv_heads)}); // [seq_len x head_dim]
+
+        Tensor ctx_slice = ctx.at({h * model.config.head_dim}).reshape({model.config.head_dim});
+        matmul(ctx_slice, attn, v_h); // Write the attention output directly to corresponding context slice
     }
 }
 

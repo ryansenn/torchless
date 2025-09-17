@@ -61,10 +61,10 @@ void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps)
 }
 
 // If there is numerical instability, try to substract max value from each xi before exp
-void softmax(float* o, float* x, int n){
+void softmax(float* o, float* x, int n, float t){
     float total = 0;
     for (int i=0;i<n;i++){
-        o[i] = std::expf(x[i]);
+        o[i] = std::expf(x[i]/t);
         total += o[i];
     }
 
