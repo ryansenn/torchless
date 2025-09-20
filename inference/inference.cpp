@@ -42,6 +42,8 @@ void InferenceState::block_forward(int b){
         // Need to add causal masking ..
 
         matmul(attn, k_h, q_h); // logits [seq_len]
+
+        // [seq_len]
         softmax(attn, attn, std::min(pos+1, model.config.max_seq_len), sqrt(model.config.head_dim)); // this gives us the weights
 
         Tensor v_h = v_cache[b]->at({h / (model.config.n_heads / model.config.n_kv_heads)}); // [seq_len x head_dim]
