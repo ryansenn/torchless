@@ -24,6 +24,8 @@ struct Tensor {
 
     Tensor reshape(std::vector<int64_t> new_shape);
 
+    Tensor slice1d(int start, int len);
+
     // Make sure im not copying the tensors
     Tensor(const Tensor&) = delete;
 
