@@ -8,7 +8,7 @@ InferenceState::InferenceState(Model& model) :
     k("k", {model.config.n_kv_heads * model.config.hidden_size / model.config.n_heads}),
     v("v", {model.config.n_kv_heads * model.config.hidden_size / model.config.n_heads}),
     attn("attn", {model.config.max_seq_len}),
-    ctx("context", {model.config.hidden_size})
+    ctx("context", {model.config.n_heads,model.config.head_dim})
     {
 
     // Initialize empty KV cache
@@ -37,18 +37,23 @@ void InferenceState::block_forward(int b){
     for (int h=0; h<model.config.n_heads; h++){
         // Match each q head to a corresponding k head (each k head is re-used 4 times because of grouped-query attention)
         Tensor q_h =  q.at({h}); // [head_dim]
-        Tensor k_h = k_cache[b]->at({h / (model.config.n_heads / model.config.n_kv_heads)}); // [seq_len x head_dim]
 
-        // Need to add causal masking ..
+        Tensor k_h = k_cache[b]->at({h / (model.config.n_heads / model.config.n_kv_heads)}); // [max_seq_len x head_dim]
+        k_h = k_h.slice1d(pos, model.config.head_dim); // [seq_len x head_dim]
 
-        matmul(attn, k_h, q_h); // logits [seq_len]
+        // [seq_len x head_dim] @ [head_dim] = [seq_len]
+        matmul(attn, k_h, q_h); // logits
 
         // [seq_len]
         softmax(attn, attn, std::min(pos+1, model.config.max_seq_len), sqrt(model.config.head_dim)); // this gives us the weights
 
-        Tensor v_h = v_cache[b]->at({h / (model.config.n_heads / model.config.n_kv_heads)}); // [seq_len x head_dim]
+        // [seq_len x head_dim]
+        Tensor v_h = v_cache[b]->at({h / (model.config.n_heads / model.config.n_kv_heads)});
 
-        Tensor ctx_slice = ctx.at({h * model.config.head_dim}).reshape({model.config.head_dim});
+        // [head_dim]
+        Tensor ctx_slice = ctx.at({h});
+
+        // [seq_len] @ [seq_len x head_dim] = [head_dim]
         matmul(ctx_slice, attn, v_h); // Write the attention output directly to corresponding context slice
     }
 }
