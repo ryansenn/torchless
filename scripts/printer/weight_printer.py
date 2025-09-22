@@ -2,7 +2,7 @@ import json, os
 from safetensors import safe_open
 import torch
 
-repo_dir = ".././Mistral-7B-v0.1"
+repo_dir = "../.././Mistral-7B-v0.1"
 
 def get_tensor(tensor):
     index = json.load(open(os.path.join(repo_dir, "model.safetensors.index.json")))
@@ -35,6 +35,7 @@ print_first("model.layers.0.self_attn.v_proj.weight")
 #print_first("model.layers.31.self_attn.k_proj.weight")
 #print_first("model.layers.31.self_attn.v_proj.weight")
 
+'''
 torch.set_printoptions(precision=8, sci_mode=False)
 
 def f(i):
@@ -46,3 +47,8 @@ def f(i):
 
 f(0)
 f(31)
+'''
+
+print_first("model.layers.0.self_attn.o_proj.weight")
+print_first("model.layers.31.self_attn.o_proj.weight")
+

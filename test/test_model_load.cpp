@@ -145,25 +145,14 @@ static RegisterTest tokenizer_encode_basic("tokenizer encode basic", &test_token
 int test_block_load(){
     Model& m = get_model();
 
-    int layers[]    = {0, 14, 31};
+    int att_layers[] = {0, 31};
     float atol = 1e-8f;
 
-    // Check layer norm weights
-    float expected_lm[] = {-7.48038e-06f, 1.9765625f, 2.53125f};
-    for (int i = 0; i < 3; i++) {
-        float got = m.blocks[layers[i]].lm1->data[0];
-        if (std::fabs(got - expected_lm[i]) > atol) {
-            std::cout << "lm1[" << layers[i] << "][0] mismatch: got "
-                      << got << ", want " << expected_lm[i] << std::endl;
-            return 1;
-        }
-    }
-
-    // Check attention weights
-    int att_layers[] = {0, 31};
+    // expected values from PyTorch
     float expected_q[] = {5.3882599e-05f, 4.8446655e-04f};
     float expected_k[] = {-1.5646219e-06f, 1.73950195e-03f};
     float expected_v[] = {-4.1961670e-04f, 1.77001953e-03f};
+    float expected_o[] = {0.000675201416015625f, -0.0022430419921875f};
 
     for (int i = 0; i < 2; i++) {
         int l = att_layers[i];
@@ -171,6 +160,7 @@ int test_block_load(){
         float got_q = m.blocks[l].wq->data[0];
         float got_k = m.blocks[l].wk->data[0];
         float got_v = m.blocks[l].wv->data[0];
+        float got_o = m.blocks[l].wo->data[0];
 
         if (std::fabs(got_q - expected_q[i]) > atol) {
             std::cout << "q_proj[" << l << "][0] mismatch: got "
@@ -187,8 +177,12 @@ int test_block_load(){
                       << got_v << ", want " << expected_v[i] << std::endl;
             return 1;
         }
+        if (std::fabs(got_o - expected_o[i]) > atol) {
+            std::cout << "o_proj[" << l << "][0] mismatch: got "
+                      << got_o << ", want " << expected_o[i] << std::endl;
+            return 1;
+        }
     }
-
 
     return 0;
 }

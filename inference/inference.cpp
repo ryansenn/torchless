@@ -56,6 +56,8 @@ void InferenceState::block_forward(int b){
         // [seq_len] @ [seq_len x head_dim] = [head_dim]
         matmul(ctx_slice, attn, v_h); // Write the attention output directly to corresponding context slice
     }
+
+
 }
 
 // Trying first minimal implementation of the inference flow
