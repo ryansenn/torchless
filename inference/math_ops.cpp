@@ -18,6 +18,25 @@ void matmul(Tensor& xout, Tensor& w, Tensor& x){
     matmul_impl(xout.data, w.data, x.data, w.shape[0], w.shape[1]);
 }
 
+// out(d) = x(n) @ W(n,d)
+// row-vector times matrix, same as (W^T @ x_col)
+void rowvec_matmul_impl(float* xout, float* x, float* w, int n, int d){
+    // column by column
+    for(int i=0;i<d;i++){
+        float res = 0;
+
+        // row by row
+        for(int j=0;j<n;j++){
+            res += x[j] * w[j*d + i];
+        }
+        xout[i] = res;
+    }
+}
+
+void rowvec_matmul(Tensor& xout, Tensor& x, Tensor& w){
+    matmul_impl(xout.data, w.data, x.data, w.shape[0], w.shape[1]);
+}
+
 void rmsnorm(float* o, // output
              float* x, // input
              float* g, // scale per element

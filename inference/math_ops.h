@@ -11,6 +11,9 @@
 void matmul_impl(float* xout, float* w, float* x, int d, int n);
 void matmul(Tensor& xout, Tensor& w, Tensor& x);
 
+void rowvec_matmul_impl(float* xout, float* x, float* w, int n, int d);
+void rowvec_matmul(Tensor& xout, Tensor& x, Tensor& w);
+
 // Normalization
 void rmsnorm(float* o, float* x, float* g, int n, float eps);
 inline void rmsnorm(Tensor& o, Tensor& x, Tensor& g, int n){
