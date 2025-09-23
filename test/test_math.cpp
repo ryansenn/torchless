@@ -108,3 +108,41 @@ static RegisterTest reg_matmul("matmul", &test_matmul);
 static RegisterTest reg_rmsnorm("rmsnorm", &test_rmsnorm);
 static RegisterTest reg_layernorm("layernorm", &test_layernorm);
 static RegisterTest reg_softmax("softmax", &test_softmax);
+
+int test_rowvec_matmul(){
+    // x(d,) * W(d,n) = xout(d,)
+
+    int d = 3;
+    int n = 4;
+
+    float* w = new float[d*n];
+    float* x = new float[d];
+    float* xout = new float[n];
+    float* expected = new float[n];
+
+    for (int i=0; i<d*n; i++){
+        w[i] = i+1;
+    }
+
+    for (int i=0; i<n; i++){
+        x[i] = 1;
+    }
+
+    expected[0] = 15;
+    expected[1] = 18;
+    expected[2] = 21;
+
+    rowvec_matmul_impl(xout, x, w, d, n);
+
+    for (int i=0; i<d; i++){
+        std::cout << xout[i] << " " << expected[i] << std::endl;
+        if (xout[i] != expected[i]){
+            return 1;
+        }
+    }
+
+    delete[] w; delete[] x; delete[] xout; delete[] expected;
+    return 0;
+}
+
+static RegisterTest reg_rowvec_matmul("rowvec_matmul", &test_rowvec_matmul);

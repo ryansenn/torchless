@@ -18,16 +18,15 @@ void matmul(Tensor& xout, Tensor& w, Tensor& x){
     matmul_impl(xout.data, w.data, x.data, w.shape[0], w.shape[1]);
 }
 
-// out(d) = x(n) @ W(n,d)
-// row-vector times matrix, same as (W^T @ x_col)
-void rowvec_matmul_impl(float* xout, float* x, float* w, int n, int d){
+// out(d) = x(d) @ W(d,n)
+void rowvec_matmul_impl(float* xout, float* x, float* w, int d, int n){
     // column by column
-    for(int i=0;i<d;i++){
+    for(int i=0;i<n;i++){
         float res = 0;
 
         // row by row
-        for(int j=0;j<n;j++){
-            res += x[j] * w[j*d + i];
+        for(int j=0;j<d;j++){
+            res += x[j] * w[j*n + i];
         }
         xout[i] = res;
     }
