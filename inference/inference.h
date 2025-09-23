@@ -10,7 +10,7 @@ struct InferenceState {
     Tensor v;
 
     Tensor attn; // [max_seq_len]
-    Tensor ctx; // [hidden_size]
+    Tensor ctx; // [n_heads x head_dim]
 
     // KV cache
     // Each block stores Tensor of size [n_kv_heads, max_seq_len, head_dim]
