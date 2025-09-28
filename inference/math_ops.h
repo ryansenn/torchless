@@ -11,7 +11,7 @@
 void matmul_impl(float* xout, float* w, float* x, int d, int n);
 void matmul(Tensor& xout, Tensor& w, Tensor& x);
 
-void rowvec_matmul_impl(float* xout, float* x, float* w, int n, int d);
+void rowvec_matmul_impl(float* xout, float* x, float* w, int d, int n);
 void rowvec_matmul(Tensor& xout, Tensor& x, Tensor& w);
 
 // Normalization
@@ -42,5 +42,6 @@ inline float clip(float x, float v) {
 
 // Rotary positional encoding
 void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim);
+void rope(Tensor& v, int head_dim, int pos, float theta, int rotary_dim);
 
 #endif // MATH_OPS_H

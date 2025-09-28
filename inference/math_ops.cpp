@@ -103,7 +103,15 @@ inline float clip(float x, float v) {
 	return x < -v ? -v : (x > v ? v : x);
 }
 
-void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim) {
+
+// Try to get some deeper intuition behind the math her
+void rope(float* vec,
+          int d, // size of vec
+          int head_dim,
+          int pos,
+          float theta, // from the mistral config
+          int rotary_dim) // which first dims of each head are rotated
+{
     for (int i = 0; i < d; i += 2) {
         int j_head = i % head_dim;
         float freq = 0.f;
@@ -120,4 +128,10 @@ void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim)
         vec[i + 1] = v0 * fci + v1 * fcr;
     }
 }
+
+void rope(Tensor& v, int head_dim, int pos, float theta, int rotary_dim){
+    rope(v.data, v.size, head_dim, pos, theta, rotary_dim);
+}
+
+
 

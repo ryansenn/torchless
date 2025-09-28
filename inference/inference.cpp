@@ -27,6 +27,8 @@ InferenceState::InferenceState(Model& model) :
 void InferenceState::block_forward(int b){
     // Get Q for the current token
     matmul(q, *model.blocks[b].wq, x);
+    rope(q, model.config.head_dim, pos, model.config.rope_theta, model.config.head_dim / 2);
+
     std::cout << "q " << q.data[0] << " " << q.data[1] << " " << q.data[2] << std::endl;
 
     push_kv(b);
@@ -97,6 +99,8 @@ void InferenceState::forward(int token){
 void InferenceState::push_kv(int b) {
     // Get K,V
     matmul(k, *model.blocks[b].wk, x);
+    rope(k, model.config.head_dim, pos, model.config.rope_theta, model.config.head_dim / 2);
+
     matmul(v, *model.blocks[b].wv, x);
 
     Tensor kh = k.reshape({model.config.n_kv_heads, model.config.head_dim});

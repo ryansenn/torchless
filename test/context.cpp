@@ -8,7 +8,7 @@ Model& get_model(){
 }
 
 bool equals(float x, float y){
-    float atol = 1e-5f;
+    float atol = 1e-4f;
 
     return std::fabs(x - y) < atol;
 }

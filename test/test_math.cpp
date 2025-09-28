@@ -135,7 +135,6 @@ int test_rowvec_matmul(){
     rowvec_matmul_impl(xout, x, w, d, n);
 
     for (int i=0; i<d; i++){
-        std::cout << xout[i] << " " << expected[i] << std::endl;
         if (xout[i] != expected[i]){
             return 1;
         }
