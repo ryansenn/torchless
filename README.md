@@ -1,6 +1,8 @@
-# llm-engine
+# torchless
 
-A native C++ inference engine that runs LLMs directly from model weights
+A C++ inference engine that runs LLMs directly from model weights.
+
+I'm currently focusing on getting a first working CPU inference pass for the [Mistral-7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1)
 
 ## Todo
 - [x] model binary converter
@@ -19,3 +21,7 @@ A native C++ inference engine that runs LLMs directly from model weights
     - [ ] quantization
     - [ ] CUDA kernel?  
 
+Resources: 
+
+- [Attention is all you need](https://arxiv.org/pdf/1706.03762)
+- [Hugging face mistral implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
