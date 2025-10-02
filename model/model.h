@@ -1,7 +1,8 @@
 #include <unordered_map>
 #include <string>
 #include "tensor.h"
-
+#include "tokenizer.h"
+#include "json.hpp"
 
 struct Config {
     int hidden_size;
@@ -17,17 +18,15 @@ struct Config {
 };
 
 struct Parameters {
-    // Pointer to start of model binary file
-    void* start;
+    Config config;
+    std::vector<std::unordered_map<std::string, Tensor>> layers;
+    Tokenizer tokenizer;
 
-    const std::vector<std::unordered_map<std::string, Tensor>> layers;
-    const Config config;
+    static void* map_file(int fd);
 
-    Parameters(const std::string& path) : start(map_file(path)), layers(load_weights_from_path(path)), config(load_config_from_path(path)) {}
-
-    static void* map_file(const std::string& path);
-    static std::vector<std::unordered_map<std::string, Tensor>> load_weights_from_path(const std::string& path);
-    static Config load_config_from_path(const std::string& path);
+    void load_config(nlohmann::json& header);
+    void load_weights(void* p, nlohmann::json& header);
+    void load_parameters(const std::string& path);
 
     // Overload [] operator so we can access layer Tensors directly, params[i]
     const std::unordered_map<std::string, Tensor>& operator[](size_t i) const {
@@ -38,5 +37,5 @@ struct Parameters {
 struct Model {
     std::shared_ptr<const Parameters> params;
 
-    Model(const std::string& path) :
+    Model(std::shared_ptr<const Parameters> params) : params(params) {}
 };
