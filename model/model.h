@@ -19,19 +19,20 @@ struct Config {
 
 struct Parameters {
     Config config;
-    std::vector<std::unordered_map<std::string, Tensor>> layers;
     Tokenizer tokenizer;
 
+    // Global weights (For Mistral, this is embeddings, final layernorm, lm_head)
+    std::unordered_map<std::string, std::unique_ptr<Tensor>> global_weights;
+
+    // Layer specific weights
+    std::vector<std::unordered_map<std::string, std::unique_ptr<Tensor>>> layer_weights;
+
     static void* map_file(int fd);
+    void load_tensor(std::unordered_map<std::string, std::unique_ptr<Tensor>>& m, char* p, const std::string& key, nlohmann::json& value);
 
     void load_config(nlohmann::json& header);
-    void load_weights(void* p, nlohmann::json& header);
+    void load_weights(char* p, nlohmann::json& header);
     void load_parameters(const std::string& path);
-
-    // Overload [] operator so we can access layer Tensors directly, params[i]
-    const std::unordered_map<std::string, Tensor>& operator[](size_t i) const {
-        return layers[i];
-    }
 };
 
 struct Model {

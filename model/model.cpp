@@ -44,10 +44,37 @@ void Parameters::load_config(nlohmann::json& header){
     config.head_dim          = config.hidden_size / config.n_heads;
 }
 
+void Parameters::load_tensor(std::unordered_map<std::string, std::unique_ptr<Tensor>>& m, char* p, const std::string& key, nlohmann::json& value){
+    int offset = value["offset"];
+    std::vector<int64_t> shape = value["shape"];
+
+    std::unique_ptr<Tensor> t = std::make_unique<Tensor>(key, reinterpret_cast<float*>(p + offset), shape);
+    m.insert({key, std::move(t)});
+}
 
 // Load Tensor views for all weights using offsets from the JSON header.
-void Parameters::load_weights(void* p, nlohmann::json& header){
+void Parameters::load_weights(char* p, nlohmann::json& header){
+    // Init empty maps per layer
+    layer_weights.resize(config.n_layers);
 
+    nlohmann::json t = header["tensors"];
+    const std::string model_prefix = "model.layers.";
+
+    for (auto& [key, value] : t.items()){
+
+        // Layer-specific weight
+        if (key.compare(0, model_prefix.size(), model_prefix) == 0){
+            // Extract the layer number
+            std::string rest = key.substr(model_prefix.size());
+            int i = std::stoi(rest.substr(0, rest.find(".")));
+
+            load_tensor(layer_weights[i], p, key, value);
+            continue;
+        }
+
+        // Otherwise global weight
+        load_tensor(global_weights, p, key, value);
+    }
 }
 
 void Parameters::load_parameters(const std::string& path){
@@ -75,7 +102,7 @@ void Parameters::load_parameters(const std::string& path){
     void* p = map_file(fd);
 
     // Load tensor weights to pointers in mmap
-    //load_weights(p, header_json);
+    load_weights(static_cast<char*>(p) + header_size, header_json);
 
     close(fd);
 }
