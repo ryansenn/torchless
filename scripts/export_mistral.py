@@ -16,12 +16,12 @@ Inputs (from the downloaded model directory):
 Output:
   model.bin with layout:
     [8-byte uint64: size of JSON header]
-    [JSON header: config, vocab, tensor index]
+    [JSON header: config, vocab/merges, tensor index]
     [payload: All tensors as float32]
     
 How it works:
 - Read config.json (metadata), tokenizer.json (vocab), and safetensors index (tensors).
-- Build a JSON header with metadata, vocab, and tensor offsets.
+- Build a JSON header with metadata, vocab/merges, and tensor offsets.
 - Write to model.bin:
     1) 8-byte header size (uint64, little-endian)
     2) JSON header (UTF-8)
@@ -54,9 +54,12 @@ with open(config_path, 'r') as f:
 
 # Insert the vocab in header["vocab"]
 tokenizer_path = os.path.join(IN_PATH, "tokenizer.json")
+header["tokenizer"] = {}
 
 with open(tokenizer_path, 'r') as f:
-    header["vocab"] = json.load(f)["model"]["vocab"]
+    t = json.load(f)
+    header["tokenizer"]["vocab"] = t["model"]["vocab"]
+    header["tokenizer"]["merges"] = t["model"]["merges"]
 
 
 # Load weight map
