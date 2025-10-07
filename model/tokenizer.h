@@ -1,19 +1,26 @@
 #pragma once
 #include "tensor.h"
-
-struct TrieNode {
-    std::unordered_map<char, std::shared_ptr<TrieNode>> children;
-    int token_id = -1;
-
-    std::shared_ptr<TrieNode> next_char(char c);
-    bool contains(char c);
-};
+#include "json.hpp"
 
 struct Tokenizer {
-    std::vector<std::string> vocab;
-    std::shared_ptr<TrieNode> trie;
+    // Vocab lookup tables
+    // Store the vocab to go back and forth Token <-> ID
+    std::vector<std::string> id_to_token;
+    std::unordered_map<std::string, uint32_t> token_to_id;
 
-    Tokenizer(char* raw_vocab, int size);
-    std::vector<int> encode(std::string& text);
+    // BPE Merge table
+    // Maps a merged token pair to its merge rank (Vocab token ID)
+    // Each key packs two 32-bit token IDs (left and right) into one 64-bit integer
+    std::unordered_map<uint64_t, uint32_t> merge_to_rank;
+
+    // Maps a packed (left,right) token pair to its merged token ID to avoid recomputing merges during encoding
+    std::unordered_map<uint64_t, uint32_t> merge_to_id;
+
+    static uint64_t pack(uint32_t left, uint32_t right);
+    uint64_t get_lowest_pair(std::vector<uint32_t>& tokens);
+    std::vector<uint32_t> merge(std::vector<uint32_t>& tokens, uint32_t left, uint32_t right, uint32_t merged);
+
+    void load(nlohmann::json tokenizer);
+    std::vector<uint32_t> encode(std::string& text);
     std::string decode(std::vector<int>& tokens);
 };

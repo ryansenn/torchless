@@ -1,75 +1,111 @@
 #include "tokenizer.h"
 
-std::shared_ptr<TrieNode> TrieNode::next_char(char c){
-    children.emplace(c, std::make_shared<TrieNode>());
-    return children[c];
+
+uint64_t Tokenizer::pack(uint32_t left, uint32_t right){
+    // Pack left
+    uint64_t packed = left;
+    // Shift to left and zero out 32 right-most bits
+    packed = packed << 32;
+    // Insert right on the right with OR
+    packed = packed | right;
+
+    return packed;
 }
 
-bool TrieNode::contains(char c){
-    return children.find(c) != children.end();
-}
 
-Tokenizer::Tokenizer(char* raw_vocab, int size){
-    trie = std::make_shared<TrieNode>();
 
-    char* p = raw_vocab;
-    char* end = p+size;
+void Tokenizer::load(nlohmann::json tokenizer){
+    id_to_token.resize(tokenizer["vocab"].size());
 
-    std::shared_ptr<TrieNode> n = trie;
-
-    while (p < end){
-        char* start = p;
-
-        n = n->next_char(*p);
-        p++;
-
-        while (*p != '\0' && p < end){
-            n = n->next_char(*p);
-            p++;
-        }
-        n->token_id = vocab.size();
-        n = trie;
-        std::string word = std::string(start, p-start);
-        vocab.push_back(word);
-        p++;
+    // Load vocabulary tables
+    for (auto& [key, value] : tokenizer["vocab"].items()){
+        int id = value;
+        id_to_token[id] = key;
+        token_to_id[key] = id;
     }
-}
 
-std::vector<int> Tokenizer::encode(std::string& text){
-    std::vector<int> result;
-
-    std::shared_ptr<TrieNode> n = trie;
+    // Load BPE merge map
     int i = 0;
+    for (auto& item : tokenizer["merges"]){
+        std::string merge = item.get<std::string>();
 
-    int curr_id = -1;
+        size_t s = merge.find(" ");
+        std::string token1 = merge.substr(0, s);
+        std::string token2 = merge.substr(s+1);
 
-    while (i < text.size()){
-        if (n->contains(text[i])){
-            n = n->next_char(text[i]);
-            if (n->token_id > -1){
-                curr_id = n->token_id;
-            }
-            i++;
-        }
-        else {
-            result.push_back(curr_id);
-            n = trie;
-            curr_id = -1;
-        }
+        uint32_t id1 = token_to_id[token1];
+        uint32_t id2 = token_to_id[token2];
+
+        uint64_t packed = pack(id1, id2);
+
+        merge_to_rank[packed] = i;
+        merge_to_id[packed] = token_to_id[token1 + token2];
+        i++;
     }
+}
 
-    if (curr_id > -1){
-        result.push_back(curr_id);
+// Get the merge pair with lowest rank in a list of tokens
+// Returns UINT32_MAX when no merge is possible
+uint64_t Tokenizer::get_lowest_pair(std::vector<uint32_t>& tokens){
+    uint32_t lowest_rank = UINT64_MAX;
+    uint64_t result = UINT64_MAX;
+
+    for (int i=0;i<tokens.size()-1;i++){
+        uint64_t packed = pack(tokens[i], tokens[i+1]);
+
+        auto it = merge_to_rank.find(packed);
+        if (it != merge_to_rank.end() && it->second < lowest_rank){
+            lowest_rank = it->second;
+            result = packed;
+        }
     }
 
     return result;
 }
 
-// i think need to figure out how to strip extra space and deal with special characters
-std::string Tokenizer::decode(std::vector<int>& tokens) {
-    std::string result;
-    for (int t : tokens) {
-            result += vocab[t];
+// Merge all occurrences of the (left, right) token pair into merged token
+std::vector<uint32_t> Tokenizer::merge(std::vector<uint32_t>& tokens, uint32_t left, uint32_t right, uint32_t merged){
+    std::vector<uint32_t> merged_tokens;
+
+    int i = 0;
+    while (i < tokens.size()){
+        if (tokens[i] == left && i + 1 < tokens.size() && tokens[i+1] == right){
+            merged_tokens.push_back(merged);
+            i += 2;
+            continue;
+        }
+
+        merged_tokens.push_back(tokens[i]);
+        i++;
     }
-    return result;
+
+    return merged_tokens;
+}
+
+// Runs the BPE merge based tokenization
+std::vector<uint32_t> Tokenizer::encode(std::string& text){
+    // Transform into a list of token IDs
+    std::vector<uint32_t> tokens;
+
+    for (auto& c : text){
+        std::string s(1, c);
+        tokens.push_back(token_to_id[s]);
+    }
+
+    uint64_t packed = get_lowest_pair(tokens);
+
+    while (packed != UINT64_MAX){
+
+        uint32_t left  = static_cast<uint32_t>(packed >> 32);
+        uint32_t right = static_cast<uint32_t>(packed & 0xFFFFFFFFu);
+
+        tokens = merge(tokens, left, right, merge_to_id[packed]);
+        packed = get_lowest_pair(tokens);
+    }
+
+    return tokens;
+}
+
+std::string Tokenizer::decode(std::vector<int>& tokens) {
+
 }
