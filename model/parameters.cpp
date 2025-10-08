@@ -97,6 +97,7 @@ void Parameters::load_parameters(const std::string& path){
     nlohmann::json header_json = nlohmann::json::parse(std::string(header));
 
     load_config(header_json);
+    tokenizer.load(header_json["tokenizer"]);
 
     // Map file into virtual memory
     void* p = map_file(fd);

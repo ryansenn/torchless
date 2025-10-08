@@ -21,6 +21,8 @@ struct Tokenizer {
     std::vector<uint32_t> merge(std::vector<uint32_t>& tokens, uint32_t left, uint32_t right, uint32_t merged);
 
     void load(nlohmann::json tokenizer);
-    std::vector<uint32_t> encode(std::string& text);
+
+    std::string pre_tokenize_mistral(std::string& text);
+    std::vector<uint32_t> encode(std::string text);
     std::string decode(std::vector<int>& tokens);
 };

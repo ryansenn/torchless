@@ -1,10 +1,8 @@
-.vscode
-a.out
 Mistral-7B-v0.1/
 changes.txt
 model.bin
-build/
 .idea/
 cmake-build-debug/
 model/json.hpp
 __pycache__/
+venv
