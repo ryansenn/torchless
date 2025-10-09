@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 file(GLOB MODEL_SRC "model/*")
 file(GLOB INFERENCE_SRC "inference/*")
-file(GLOB TEST_SRC "test/*")
+file(GLOB TEST_SRC "test_mistral/*")
 
 add_executable(main_exec main.cpp ${MODEL_SRC} ${INFERENCE_SRC})
 add_executable(test_exec ${MODEL_SRC} ${INFERENCE_SRC} ${TEST_SRC})
