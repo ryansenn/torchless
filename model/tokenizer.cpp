@@ -1,4 +1,5 @@
 #include "tokenizer.h"
+#include <iostream>
 
 
 uint64_t Tokenizer::pack(uint32_t left, uint32_t right){
@@ -12,28 +13,30 @@ uint64_t Tokenizer::pack(uint32_t left, uint32_t right){
     return packed;
 }
 
+uint32_t Tokenizer::get_id(const std::string& token){
+    auto it = token_to_id.find(token);
+
+    // This is the byte fallback
+    if (it == token_to_id.end()){
+        unsigned char b = static_cast<unsigned char>(token[0]);
+        char buf[8];
+        snprintf(buf, sizeof(buf), "<0x%02X>", b);
+        auto bit = token_to_id.find(buf);
+        return bit->second;
+    }
+    return it->second;
+}
+
 
 
 void Tokenizer::load(nlohmann::json tokenizer){
     id_to_token.resize(tokenizer["vocab"].size());
 
+    int t = 0;
+
     // Load vocabulary tables
     for (auto& [key, value] : tokenizer["vocab"].items()){
-
-        // Bytes in the vocab JSON are written as strings representation "<0x01>"
-        // Im converting them to an actual byte so that I can look them up directly during encoding
-        if (key.substr(0, 3) == "<0x"){
-            std::string hexa = key.substr(3, 2);
-            unsigned char byte = std::stoi(hexa, nullptr, 16);
-            std::string byte_key = std::string(1, byte);
-
-            int id = value;
-            id_to_token[id] = byte_key;
-            token_to_id[byte_key] = id;
-
-            continue;
-        }
-
+        // Bytes in the vocab JSON are written as strings representation "<0x01>" not actual bytes
         int id = value;
         id_to_token[id] = key;
         token_to_id[key] = id;
@@ -140,7 +143,7 @@ std::vector<uint32_t> Tokenizer::encode(std::string text){
         else if ((b0 & 0xF8) == 0xF0) len = 4;          // 11110xxx
 
         std::string s = text.substr(i, len);
-        tokens.push_back(token_to_id[s]);
+        tokens.push_back(get_id(s));
         i += len;
     }
 
