@@ -45,7 +45,7 @@ void Parameters::load_config(nlohmann::json& header){
 }
 
 void Parameters::load_tensor(std::unordered_map<std::string, std::unique_ptr<Tensor>>& m, char* p, const std::string& key, nlohmann::json& value){
-    int offset = value["offset"];
+    uint64_t offset = value["offset"];
     std::vector<int64_t> shape = value["shape"];
 
     std::unique_ptr<Tensor> t = std::make_unique<Tensor>(key, reinterpret_cast<float*>(p + offset), shape);
@@ -96,14 +96,20 @@ void Parameters::load_parameters(const std::string& path){
     header[header_size] = '\0';
     nlohmann::json header_json = nlohmann::json::parse(std::string(header));
 
+    float x;
+    read(fd, &x, sizeof(x));
+
     load_config(header_json);
     tokenizer.load(header_json["tokenizer"]);
 
     // Map file into virtual memory
     void* p = map_file(fd);
 
+    // The blob of tensors starts after header_size uint64 and the header
+    char* start = static_cast<char*>(p) + header_size + sizeof(uint64_t);
+
     // Load tensor weights to pointers in mmap
-    load_weights(static_cast<char*>(p) + header_size, header_json);
+    load_weights(start, header_json);
 
     close(fd);
 }
