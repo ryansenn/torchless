@@ -16,15 +16,15 @@ struct Tokenizer {
     // Maps a packed (left,right) token pair to its merged token ID to avoid recomputing merges during encoding
     std::unordered_map<uint64_t, uint32_t> merge_to_id;
 
-    uint32_t get_id(const std::string& token);
+    uint32_t get_id(const std::string& token) const;
 
-    static uint64_t pack(uint32_t left, uint32_t right);
-    uint64_t get_lowest_pair(std::vector<uint32_t>& tokens);
-    std::vector<uint32_t> merge(std::vector<uint32_t>& tokens, uint32_t left, uint32_t right, uint32_t merged);
+    uint64_t pack(uint32_t left, uint32_t right) const;
+    uint64_t get_lowest_pair(std::vector<uint32_t>& tokens) const;
+    std::vector<uint32_t> merge(std::vector<uint32_t>& tokens, uint32_t left, uint32_t right, uint32_t merged) const;
 
     void load(nlohmann::json tokenizer);
 
-    std::string pre_tokenize_mistral(std::string& text);
-    std::vector<uint32_t> encode(std::string text);
-    std::string decode(std::vector<int>& tokens);
+    std::string pre_tokenize_mistral(std::string& text) const;
+    std::vector<uint32_t> encode(std::string text) const;
+    std::string decode(std::vector<int>& tokens) const;
 };

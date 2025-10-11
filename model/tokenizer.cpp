@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-uint64_t Tokenizer::pack(uint32_t left, uint32_t right){
+uint64_t Tokenizer::pack(uint32_t left, uint32_t right) const{
     // Pack left
     uint64_t packed = left;
     // Shift to left and zero out 32 right-most bits
@@ -13,7 +13,7 @@ uint64_t Tokenizer::pack(uint32_t left, uint32_t right){
     return packed;
 }
 
-uint32_t Tokenizer::get_id(const std::string& token){
+uint32_t Tokenizer::get_id(const std::string& token) const{
     auto it = token_to_id.find(token);
 
     // This is the byte fallback
@@ -64,7 +64,7 @@ void Tokenizer::load(nlohmann::json tokenizer){
 
 // Get the merge pair with lowest rank in a list of tokens
 // Returns UINT64_MAX when no merge is possible
-uint64_t Tokenizer::get_lowest_pair(std::vector<uint32_t>& tokens){
+uint64_t Tokenizer::get_lowest_pair(std::vector<uint32_t>& tokens) const{
     uint32_t lowest_rank = UINT32_MAX;
     uint64_t result = UINT64_MAX;
 
@@ -82,7 +82,7 @@ uint64_t Tokenizer::get_lowest_pair(std::vector<uint32_t>& tokens){
 }
 
 // Merge all occurrences of the (left, right) token pair into merged token
-std::vector<uint32_t> Tokenizer::merge(std::vector<uint32_t>& tokens, uint32_t left, uint32_t right, uint32_t merged){
+std::vector<uint32_t> Tokenizer::merge(std::vector<uint32_t>& tokens, uint32_t left, uint32_t right, uint32_t merged) const{
     std::vector<uint32_t> merged_tokens;
 
     int i = 0;
@@ -101,7 +101,7 @@ std::vector<uint32_t> Tokenizer::merge(std::vector<uint32_t>& tokens, uint32_t l
 }
 
 // For mistral, use Metaspace pre-tokenization, replace spaces with '▁' and prepend
-std::string Tokenizer::pre_tokenize_mistral(std::string& text){
+std::string Tokenizer::pre_tokenize_mistral(std::string& text) const{
     std::string out = "▁";
 
     for (auto c : text){
@@ -115,7 +115,7 @@ std::string Tokenizer::pre_tokenize_mistral(std::string& text){
 }
 
 // Runs the BPE merge based tokenization
-std::vector<uint32_t> Tokenizer::encode(std::string text){
+std::vector<uint32_t> Tokenizer::encode(std::string text) const {
     // If want to support other tokenizers config we would support other stages that are not needed in Mistral
 
     // Normalization (not implemented for Mistral)
@@ -155,7 +155,7 @@ std::vector<uint32_t> Tokenizer::encode(std::string text){
         uint32_t right = static_cast<uint32_t>(packed & 0xFFFFFFFFu);
 
         // Perform the merge on tokens
-        tokens = merge(tokens, left, right, merge_to_id[packed]);
+        tokens = merge(tokens, left, right, merge_to_id.at(packed));
         packed = get_lowest_pair(tokens);
     }
 
@@ -165,6 +165,6 @@ std::vector<uint32_t> Tokenizer::encode(std::string text){
     return tokens;
 }
 
-std::string Tokenizer::decode(std::vector<int>& tokens) {
+std::string Tokenizer::decode(std::vector<int>& tokens) const {
     return "hello!";
 }
