@@ -1,5 +1,5 @@
 #include <math.h>
-#include "../model/model.h"
+#include "../../common/math_ops.h"
 #include <iostream>
 
 // W (d,n) @ x (n,) = xout (d,)
@@ -16,43 +16,6 @@ void matmul_impl(float* xout, float* w, float* x, int d, int n){
 
 void matmul(Tensor& xout, Tensor& w, Tensor& x){
     matmul_impl(xout.data, w.data, x.data, w.shape[0], w.shape[1]);
-}
-
-// out(d) = x(d) @ W(d,n)
-void rowvec_matmul_impl(float* xout, float* x, float* w, int d, int n){
-    // column by column
-    for(int i=0;i<n;i++){
-        float res = 0;
-
-        // row by row
-        for(int j=0;j<d;j++){
-            res += x[j] * w[j*n + i];
-        }
-        xout[i] = res;
-    }
-}
-
-void rowvec_matmul(Tensor& xout, Tensor& x, Tensor& w){
-    matmul_impl(xout.data, w.data, x.data, w.shape[0], w.shape[1]);
-}
-
-void rmsnorm(float* o, // output
-             float* x, // input
-             float* g, // scale per element
-             int    n, // size
-             float eps) // epsilon 
-{
-    float mean_squared = 0;
-    for (int i=0;i<n;i++){
-        mean_squared += x[i]*x[i];
-    }
-    mean_squared = mean_squared/n;
-    float m = 1/sqrtf(mean_squared + eps);
-
-    for (int i=0; i<n; i++){
-        o[i] = x[i] * g[i] * m;
-    }
-
 }
 
 void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps){

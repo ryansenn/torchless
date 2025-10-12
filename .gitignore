@@ -3,6 +3,6 @@ changes.txt
 model.bin
 .idea/
 cmake-build-debug/
-model/json.hpp
+src/common/json.hpp
 __pycache__/
 venv

@@ -1,4 +1,4 @@
-#include "model.h"
+#include "parameters.h"
 #include <iostream>
 
 #include <fcntl.h>     // declares open()

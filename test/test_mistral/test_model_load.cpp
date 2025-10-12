@@ -146,7 +146,6 @@ int test_load_weights() {
             t = it->second.get();
         }
 
-
         const float* p = t->data;
         size_t n = t->get_size();
         if (!equals(p[0], e.first)) {

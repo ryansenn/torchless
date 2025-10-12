@@ -5,30 +5,39 @@ I'm building a C++ inference engine from scratch that runs large language models
 - [x] **Model binary converter** *(scripts/export_mistral.py)*  
   Converts a Hugging Face Mistral model (config, vocab/merges, and weights) into a single standardized binary file that can be fed into the engine. It uses a JSON header to store model metadata, vocabulary, merges,     and tensor index information, followed by all model weights packed sequentially as contiguous floating point data.
 
-- [x] **In-memory model loader**  *(model/parameters.cpp)*  
+- [x] **In-memory model loader**  *(src/loader/parameters.cpp)*  
   Memory-maps the binary and provides direct tensor views without copying.
 
-- [x] **Tokenizer**  *(model/tokenizer.cpp)*   
+- [x] **Tokenizer**  *(src/tokenizer/tokenizer.cpp)*   
   The tokenizer implements a full byte-pair encoding (BPE) system compatible with Mistral’s vocabulary format. It loads the tokenizer.json, builds vocabulary and merge maps, applies Metaspace pre-tokenization           (replacing spaces with ▁), and encodes UTF-8 text by iteratively merging token pairs according to their rank. It also supports byte-fallback for unseen characters using the <0xNN> convention from the original         Mistral tokenizer.
 
-- [x] **Tensor** *(model/tensor.cpp)*   
-  Minimal tensor struct over float* with shape, size, and strides; supports contiguous and strided views, at(), reshape(), and copy helpers for zero-copy access or in-place updates.
+- [x] **Tensor** *(src/common/tensor.cpp)*   
+  Minimal tensor struct over float* with shape, size, strides, at(), reshape(), and copy helpers.
 
-- [x] **Math Ops** *(inference/math_ops.cpp)*   
-  Baseline implementation for matmul, normalization, activations, softmax, rotary embeddings, that will be optimized later
+- [x] **Math Ops** *(src/backend/cpu/math_ops.cpp)*   
+  Baseline CPU implementation for matmul, activations, softmax, that will be optimized later
 
-- [ ] **Transformer forward pass**
-  - [ ] Attention *(being rewritten)*
-  - [ ] MLP
-  - [ ] Output layer
-- [ ] **Fix segfaults**
+- [ ] **Mistral architecture implementation** *(src/model/components.cpp)*
+  - [ ] Implement each module and validate against its PyTorch reference
+    - [ ] Embedding
+    - [ ] RMSNorm
+    - [ ] Rotary Embedding
+    - [ ] MLP
+    - [ ] Attention
+    - [ ] Decoder
+    - [ ] LM Head
+    - [ ] Model
+  - [ ] KV Cache
+
 - [ ] **CLI I/O**
+
 - [ ] **Performance**
-  - [ ] Parallelization
   - [ ] Quantization
+  - [ ] Parallelization
   - [ ] CUDA kernels
 
 ## Resources
-- [Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
+- [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
+- [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
 - [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
-- [Mistral implementation (Hugging Face)](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
+- [Hugging Face - Mistral Implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)

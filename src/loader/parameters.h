@@ -1,8 +1,8 @@
 #include <unordered_map>
 #include <string>
-#include "tensor.h"
-#include "tokenizer.h"
-#include "json.hpp"
+#include "../common/tensor.h"
+#include "../tokenizer/tokenizer.h"
+#include "../common/json.hpp"
 
 struct Config {
     int hidden_size;

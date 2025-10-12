@@ -1,6 +1,6 @@
 #pragma once
-#include "tensor.h"
-#include "json.hpp"
+#include "../common/tensor.h"
+#include "../common/json.hpp"
 
 struct Tokenizer {
     // Vocab lookup tables
