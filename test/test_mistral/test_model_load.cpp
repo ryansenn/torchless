@@ -1,4 +1,4 @@
-#include "context.h"
+#include "setup/context.h"
 
 int test_load_config(){
     Model m = get_model();

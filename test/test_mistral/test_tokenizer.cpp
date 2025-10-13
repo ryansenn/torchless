@@ -1,4 +1,4 @@
-#include "context.h"
+#include "setup/context.h"
 
 int test_tokenizer_encode(){
     Model m = get_model();
