@@ -7,9 +7,17 @@
 
 #include "tensor.h"
 
+
+float sum(Tensor& x);
+void mul(Tensor& xout, Tensor&x, float c);
+void pow(Tensor& xout, Tensor& x, int e);
+void sqrt(Tensor& xout, Tensor& x);
+
 // Matrix multiplication
-void matmul_impl(float* xout, float* w, float* x, int d, int n);
-void matmul(Tensor& xout, Tensor& w, Tensor& x);
+void matmul(float* xout, float* w, float* x, int d, int n);
+inline void matmul(Tensor& xout, Tensor& w, Tensor& x){
+    matmul(xout.data, w.data, x.data, w.shape[0], w.shape[1]);
+}
 
 void layernorm(float* o, float* x, float* scale, float* shift, int n, float eps);
 
@@ -18,15 +26,5 @@ void softmax(float* o, float* x, int n, float t);
 inline void softmax(Tensor& o, Tensor& x, int n, float t){
     softmax(o.data, x.data, n, t);
 }
-
-inline float gelu(float x);
-
-inline float silu(float x);
-
-inline float clip(float x, float v);
-
-// Rotary positional encoding
-void rope(float* vec, int d, int head_dim, int pos, float theta, int rotary_dim);
-void rope(Tensor& v, int head_dim, int pos, float theta, int rotary_dim);
 
 #endif // MATH_OPS_H

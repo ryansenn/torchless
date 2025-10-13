@@ -14,8 +14,8 @@ I'm building a C++ inference engine from scratch that runs large language models
 - [x] **Tensor** *(src/common/tensor.cpp)*   
   Minimal tensor struct over float* with shape, size, strides, at(), reshape(), and copy helpers.
 
-- [x] **Math Ops** *(src/backend/cpu/math_ops.cpp)*   
-  Baseline CPU implementation for matmul, activations, softmax, that will be optimized later
+- [x] **CPU Kernels** *(src/backend/cpu/kernels.cpp)*   
+  Baseline implementations of core ops (e.g. matmul, softmax, pow) to be optimized later
 
 - [ ] **Mistral architecture implementation** *(src/model/components.cpp)*
   - [ ] Implement each module and validate against its PyTorch reference
@@ -39,5 +39,6 @@ I'm building a C++ inference engine from scratch that runs large language models
 ## Resources
 - [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
 - [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
-- [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
 - [Hugging Face - Mistral Implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
+- [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
+- [PyTorch Documentation](https://docs.pytorch.org/docs/stable/index.html)
