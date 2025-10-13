@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include "../../../src/loader/parameters.h"
+#include "../../../src/common/kernels.h"
 
 struct TestCase {
     std::string name;

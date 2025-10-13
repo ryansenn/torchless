@@ -5,7 +5,6 @@
 #include <initializer_list>
 
 struct Tensor {
-    std::string name;
     float* data; // need to free this at some point
     std::vector<int64_t> shape;
     size_t size;
@@ -15,8 +14,9 @@ struct Tensor {
     void init_strides();
 
     Tensor(){}
-    Tensor(std::string name, float* data, std::vector<int64_t> shape);
-    Tensor(std::string name, std::vector<int64_t> shape);
+    Tensor(float* data, std::vector<int64_t> shape);
+    Tensor(std::vector<int64_t> shape);
+    Tensor(std::vector<float> arr, std::vector<int64_t> shape);
 
     void copy_from(const Tensor& tensor);
     void copy_from(const float* new_data, size_t size_in_bytes);

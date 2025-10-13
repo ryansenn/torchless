@@ -48,7 +48,7 @@ void Parameters::load_tensor(std::unordered_map<std::string, std::unique_ptr<Ten
     uint64_t offset = value["offset"];
     std::vector<int64_t> shape = value["shape"];
 
-    std::unique_ptr<Tensor> t = std::make_unique<Tensor>(key, reinterpret_cast<float*>(p + offset), shape);
+    std::unique_ptr<Tensor> t = std::make_unique<Tensor>(reinterpret_cast<float*>(p + offset), shape);
     m.insert({key, std::move(t)});
 }
 

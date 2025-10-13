@@ -22,17 +22,29 @@ void Tensor::init_strides() {
     }
 }
 
-Tensor::Tensor(std::string name, float* data, std::vector<int64_t> shape)
-        : name(std::move(name)), data(data), shape(std::move(shape)) {
+Tensor::Tensor(float* data, std::vector<int64_t> shape)
+        : data(data), shape(std::move(shape)) {
     size = get_size();
     init_strides();
 }
 
-Tensor::Tensor(std::string name, std::vector<int64_t> shape)
-        : name(std::move(name)), shape(std::move(shape)) {
+Tensor::Tensor(std::vector<int64_t> shape)
+        : shape(std::move(shape)) {
     size = get_size();
     data = new float[size]; // need to free this at some point
     init_strides();
+}
+
+Tensor::Tensor(std::vector<float> arr, std::vector<int64_t> shape) : shape(std::move(shape)) {
+    size = get_size();
+    data = new float[size]; // need to free this at some point
+    init_strides();
+
+    assert(arr.size() == size && "Tensor init mismatch between data and shape");
+
+    for(int i=0;i<arr.size();i++){
+        data[i] = arr[i];
+    }
 }
 
 void Tensor::copy_from(const Tensor& tensor) {
@@ -55,24 +67,24 @@ Tensor Tensor::at(std::initializer_list<int64_t> idx) {
     }
 
     std::vector<int64_t> new_shape(shape.begin() + i, shape.end());
-    return Tensor("", new_data, new_shape);
+    return Tensor(new_data, new_shape);
 }
 
 Tensor Tensor::reshape(std::vector<int64_t> new_shape) {
     size_t new_size = 1;
     for (auto d : new_shape) new_size *= d;
     assert(new_size == size && "Reshape size mismatch");
-    return Tensor("", data, new_shape);
+    return Tensor(data, new_shape);
 }
 
 Tensor Tensor::slice1d(int start, int len) {
     assert(start + len <= size && "Slice out of bounds");
-    return Tensor("", data+start, {len});
+    return Tensor(data+start, {len});
 }
 
 void Tensor::check_shape(const std::vector<int64_t>& expected_shape) const {
     if (shape != expected_shape) {
-        std::cerr << "FATAL: shape mismatch for tensor: " << name << std::endl;
+        std::cerr << "FATAL: shape mismatch" << std::endl;
 
         std::cerr << "Expected: [";
         for (size_t i = 0; i < expected_shape.size(); ++i) {
