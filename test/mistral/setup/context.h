@@ -19,3 +19,4 @@ struct RegisterTest {
 Model& get_model();
 
 bool equals(float x, float y);
+bool equals(Tensor& x, Tensor& y);

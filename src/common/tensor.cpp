@@ -77,11 +77,6 @@ Tensor Tensor::reshape(std::vector<int64_t> new_shape) {
     return Tensor(data, new_shape);
 }
 
-Tensor Tensor::slice1d(int start, int len) {
-    assert(start + len <= size && "Slice out of bounds");
-    return Tensor(data+start, {len});
-}
-
 void Tensor::check_shape(const std::vector<int64_t>& expected_shape) const {
     if (shape != expected_shape) {
         std::cerr << "FATAL: shape mismatch" << std::endl;

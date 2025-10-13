@@ -25,7 +25,5 @@ struct Tensor {
 
     Tensor reshape(std::vector<int64_t> new_shape);
 
-    Tensor slice1d(int start, int len);
-
     void check_shape(const std::vector<int64_t>& expected_shape) const;
 };

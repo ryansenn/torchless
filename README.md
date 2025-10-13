@@ -6,7 +6,7 @@ I'm building a C++ inference engine from scratch that runs large language models
   Converts a Hugging Face Mistral model (config, vocab/merges, and weights) into a single standardized binary file that can be fed into the engine. It uses a JSON header to store model metadata, vocabulary, merges,     and tensor index information, followed by all model weights packed sequentially as contiguous floating point data.
 
 - [x] **In-memory model loader**  *(src/loader/parameters.cpp)*  
-  Memory-maps the binary and provides direct tensor views without copying.
+  Memory-maps the binary, loads the config and provides direct tensor views without copying.
 
 - [x] **Tokenizer**  *(src/tokenizer/tokenizer.cpp)*   
   The tokenizer implements a full byte-pair encoding (BPE) system compatible with Mistral’s vocabulary format. It loads the tokenizer.json, builds vocabulary and merge maps, applies Metaspace pre-tokenization           (replacing spaces with ▁), and encodes UTF-8 text by iteratively merging token pairs according to their rank. It also supports byte-fallback for unseen characters using the <0xNN> convention from the original         Mistral tokenizer.

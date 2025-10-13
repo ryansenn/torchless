@@ -10,12 +10,12 @@ int main() {
         int result = t.func();
         if (result != 0) {
             failed++;
-            std::cout << t.name << " has failed\n";
+            std::cout << t.name << " has failed" << std::endl;
         }
     }
 
     int passed = total - failed;
-    std::cout << "\nSummary: " << passed << " / " << total << " tests passed\n";
+    std::cout << std::endl << "Summary: " << passed << " / " << total << " tests passed" << std::endl;
 
     return 0;
 }
