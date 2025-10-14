@@ -14,13 +14,13 @@ I'm building a C++ inference engine from scratch that runs large language models
 - [x] **Tensor** *(src/common/tensor.cpp)*   
   Minimal tensor struct over float* with shape, size, strides, at(), reshape(), and copy helpers.
 
-- [x] **CPU Kernels** *(src/backend/cpu/kernels.cpp)*   
-  Baseline implementations of core ops (e.g. matmul, softmax, pow) to be optimized later
+- [x] **CPU Kernels** *(src/backend/cpu/kernels.cpp)*
+  Baseline implementations of core ops (e.g. matmul, softmax, mul) to be optimized later
 
-- [ ] **Mistral architecture implementation** *(src/model/components.cpp)*
+- [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*
   - [ ] Implement each module and validate against its PyTorch reference
     - [ ] Embedding
-    - [ ] RMSNorm
+    - [x] RMSNorm
     - [ ] Rotary Embedding
     - [ ] MLP
     - [ ] Attention

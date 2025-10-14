@@ -2,6 +2,7 @@
 #include <iostream>
 #include "../../../src/loader/parameters.h"
 #include "../../../src/common/kernels.h"
+#include "../../../src/model/mistral/modules.h"
 
 struct TestCase {
     std::string name;
