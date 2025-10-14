@@ -13,6 +13,22 @@ int test_sum(){
     return 0;
 }
 
+int test_add(){
+    Tensor x({1.0f, 2.0f, 3.0f}, {3});
+    float c = 2.5f;
+    Tensor expected({3.5f, 4.5f, 5.5f}, {3});
+    Tensor xout({0.0f, 0.0f, 0.0f}, {3});
+
+    add(xout, x, c);
+
+    if (!equals(xout, expected)){
+        std::cout << "tensor add mismatch" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
 int test_mul(){
     Tensor x({-1.5f, 0.0f, 2.5f, 4.2f}, {4});
     float scalar = -3.0f;
@@ -59,6 +75,26 @@ int test_sqrt(){
 }
 
 RegisterTest sum_reg("test sum", &test_sum);
+RegisterTest add_reg("test add", &test_add);
 RegisterTest mul_reg("test mul", &test_mul);
 RegisterTest pow_reg("test pow", &test_pow);
 RegisterTest sqrt_reg("test sqrt", &test_sqrt);
+
+
+int test_matmul(){
+    Tensor w({1, 2, 3, 4, 5, 6}, {2, 3});
+    Tensor x({10, 20, 30}, {3});
+    Tensor xout({0, 0}, {2});
+    Tensor expected({140, 320}, {2});
+
+    matmul(xout, w, x);
+
+    if (!equals(xout, expected)){
+        std::cout << "matmul mismatch" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+RegisterTest matmul_reg("test matmul", &test_matmul);
