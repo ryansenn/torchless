@@ -6,24 +6,24 @@
 
 struct Tensor {
     float* data; // need to free this at some point
-    std::vector<int64_t> shape;
+    std::vector<size_t> shape;
     size_t size;
-    std::vector<int64_t> strides;
+    std::vector<size_t> strides;
 
     size_t get_size() const;
     void init_strides();
 
     Tensor(){}
-    Tensor(float* data, std::vector<int64_t> shape);
-    Tensor(std::vector<int64_t> shape);
-    Tensor(std::vector<float> arr, std::vector<int64_t> shape);
+    Tensor(float* data, std::vector<size_t> shape);
+    Tensor(std::vector<size_t> shape);
+    Tensor(std::vector<float> arr, std::vector<size_t> shape);
 
     void copy_from(const Tensor& tensor);
     void copy_from(const float* new_data, size_t size_in_bytes);
 
-    Tensor at(std::initializer_list<int64_t> idx);
+    Tensor at(std::initializer_list<size_t> idx);
 
-    Tensor reshape(std::vector<int64_t> new_shape);
+    Tensor reshape(std::vector<size_t> new_shape);
 
-    void check_shape(const std::vector<int64_t>& expected_shape) const;
+    void check_shape(const std::vector<size_t>& expected_shape) const;
 };

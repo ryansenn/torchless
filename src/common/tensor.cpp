@@ -22,20 +22,20 @@ void Tensor::init_strides() {
     }
 }
 
-Tensor::Tensor(float* data, std::vector<int64_t> shape)
+Tensor::Tensor(float* data, std::vector<size_t> shape)
         : data(data), shape(std::move(shape)) {
     size = get_size();
     init_strides();
 }
 
-Tensor::Tensor(std::vector<int64_t> shape)
+Tensor::Tensor(std::vector<size_t> shape)
         : shape(std::move(shape)) {
     size = get_size();
     data = new float[size]; // need to free this at some point
     init_strides();
 }
 
-Tensor::Tensor(std::vector<float> arr, std::vector<int64_t> shape) : shape(std::move(shape)) {
+Tensor::Tensor(std::vector<float> arr, std::vector<size_t> shape) : shape(std::move(shape)) {
     size = get_size();
     data = new float[size]; // need to free this at some point
     init_strides();
@@ -55,7 +55,7 @@ void Tensor::copy_from(const float* new_data, size_t size_in_bytes) {
     std::memcpy(static_cast<void*>(data), new_data, size_in_bytes);
 }
 
-Tensor Tensor::at(std::initializer_list<int64_t> idx) {
+Tensor Tensor::at(std::initializer_list<size_t> idx) {
     assert(idx.size() <= shape.size() && "Too many indices for tensor");
     float* new_data = data;
 
@@ -66,18 +66,18 @@ Tensor Tensor::at(std::initializer_list<int64_t> idx) {
         i++;
     }
 
-    std::vector<int64_t> new_shape(shape.begin() + i, shape.end());
+    std::vector<size_t> new_shape(shape.begin() + i, shape.end());
     return Tensor(new_data, new_shape);
 }
 
-Tensor Tensor::reshape(std::vector<int64_t> new_shape) {
+Tensor Tensor::reshape(std::vector<size_t> new_shape) {
     size_t new_size = 1;
     for (auto d : new_shape) new_size *= d;
     assert(new_size == size && "Reshape size mismatch");
     return Tensor(data, new_shape);
 }
 
-void Tensor::check_shape(const std::vector<int64_t>& expected_shape) const {
+void Tensor::check_shape(const std::vector<size_t>& expected_shape) const {
     if (shape != expected_shape) {
         std::cerr << "FATAL: shape mismatch" << std::endl;
 
