@@ -19,7 +19,7 @@ I'm building a C++ inference engine from scratch that runs large language models
 
 - [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*
   - [ ] Implement each module and validate against its PyTorch reference
-    - [ ] Embedding
+    - [x] Embedding
     - [x] RMSNorm
     - [ ] Rotary Embedding
     - [ ] MLP

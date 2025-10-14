@@ -1,5 +1,36 @@
 #include "setup/context.h"
 
+
+int test_embedding() {
+    // table: 4 embeddings, dim=3
+    Tensor table({
+                         0.1f, 0.2f, 0.3f,
+                         0.4f, 0.5f, 0.6f,
+                         0.7f, 0.8f, 0.9f,
+                         1.0f, 1.1f, 1.2f
+                 }, {4, 3});
+
+    Embedding emb(table);
+
+    std::vector<size_t> idx{3, 1, 3, 0};
+    Tensor out = emb.forward(idx);
+
+    Tensor expected({
+                            1.0f, 1.1f, 1.2f,
+                            0.4f, 0.5f, 0.6f,
+                            1.0f, 1.1f, 1.2f,
+                            0.1f, 0.2f, 0.3f
+                    }, {4, 3});
+
+    if (!equals(out, expected)) {
+        std::cout << "Embedding mismatch" << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+RegisterTest embedding_reg("test embedding", &test_embedding);
+
 int test_rmsnorm() {
     Tensor x({2.4f, 7.8f, 1.1f, 5.3f, 9.0f, 4.7f, 6.2f, 3.8f, 8.5f, 0.6f}, {10});
     Tensor g({0.8f, 1.2f, 1.0f, 0.9f, 1.1f, 1.3f, 0.7f, 1.0f, 1.2f, 0.95f}, {10});
