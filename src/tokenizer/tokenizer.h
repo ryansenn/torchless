@@ -16,7 +16,7 @@ struct Tokenizer {
     // Maps a packed (left,right) token pair to its merged token ID to avoid recomputing merges during encoding
     std::unordered_map<uint64_t, uint32_t> merge_to_id;
 
-    uint32_t get_id(const std::string& token) const;
+    std::vector<uint32_t> get_id(const std::string& token) const;
 
     uint64_t pack(uint32_t left, uint32_t right) const;
     uint64_t get_lowest_pair(std::vector<uint32_t>& tokens) const;

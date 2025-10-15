@@ -31,4 +31,42 @@ int test_tokenizer_encode(){
     return 0;
 }
 
-static RegisterTest load_weights("tokenizer encode",&test_tokenizer_encode);
+static RegisterTest tokenizer_encode("tokenizer encode",&test_tokenizer_encode);
+
+
+int test_tokenizer_encode_byte_fallback(){
+    Model m = get_model();
+
+    const std::string text = std::string("A") + "\xEE\x80\x80" + "B";
+
+    std::vector<uint32_t> got = m.params->tokenizer.encode(text);
+
+    // Multiple bytes fallback from 1 token (241, 131, 131)
+    const std::vector<uint32_t> expected = {
+            1,
+            330,
+            241,
+            131,
+            131,
+            28760
+    };
+
+    if (got.size() != expected.size()) {
+        std::cout << "tokenizer encode fallback: length mismatch, got "
+                  << got.size() << " vs " << expected.size() << std::endl;
+        return 1;
+    }
+
+    for (size_t i = 0; i < got.size(); ++i) {
+        if (got[i] != expected[i]) {
+            std::cout << "tokenizer encode fallback: id mismatch at " << i
+                      << ", got " << got[i] << " vs " << expected[i] << std::endl;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static RegisterTest tokenizer_encode_fallback("tokenizer encode fallback",&test_tokenizer_encode_byte_fallback);
+

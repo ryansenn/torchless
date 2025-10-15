@@ -13,20 +13,25 @@ uint64_t Tokenizer::pack(uint32_t left, uint32_t right) const{
     return packed;
 }
 
-uint32_t Tokenizer::get_id(const std::string& token) const{
+std::vector<uint32_t> Tokenizer::get_id(const std::string& token) const{
     auto it = token_to_id.find(token);
 
     // This is the byte fallback
     if (it == token_to_id.end()){
-        unsigned char b = static_cast<unsigned char>(token[0]);
-        char buf[8];
-        snprintf(buf, sizeof(buf), "<0x%02X>", b);
-        auto bit = token_to_id.find(buf);
-        return bit->second;
-    }
-    return it->second;
-}
+        std::vector<uint32_t> res;
 
+        for (int i=0; i<token.size(); i++) {
+            unsigned char b = static_cast<unsigned char>(token[i]);
+            char buf[8];
+            snprintf(buf, sizeof(buf), "<0x%02X>", b);
+            auto bit = token_to_id.find(buf);
+            res.push_back(bit->second);
+        }
+
+        return res;
+    }
+    return {it->second};
+}
 
 
 void Tokenizer::load(nlohmann::json tokenizer){
@@ -143,7 +148,9 @@ std::vector<uint32_t> Tokenizer::encode(std::string text) const {
         else if ((b0 & 0xF8) == 0xF0) len = 4;          // 11110xxx
 
         std::string s = text.substr(i, len);
-        tokens.push_back(get_id(s));
+
+        std::vector<uint32_t> ids = get_id(s);
+        tokens.insert(tokens.end(), ids.begin(), ids.end());
         i += len;
     }
 
