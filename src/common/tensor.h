@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <initializer_list>
 
+// TODO: Either make Tensor fully own its memory or be a pure view.
+// TODO: Make it memory safe
 struct Tensor {
     float* data; // need to free this at some point
     std::vector<size_t> shape;
@@ -22,6 +24,7 @@ struct Tensor {
     void copy_from(const float* new_data, size_t size_in_bytes);
 
     Tensor at(std::initializer_list<size_t> idx);
+    float max();
 
     Tensor reshape(std::vector<size_t> new_shape);
 

@@ -91,13 +91,10 @@ void Parameters::load_parameters(const std::string& path){
     read(fd, &header_size, sizeof(header_size));
 
     // Read and parse the JSON Header
-    char header[header_size+1];
+    char header[header_size+1]; // TODO: Apparently using a runtime size is unsafe, should replace this?
     read(fd, &header, header_size);
     header[header_size] = '\0';
     nlohmann::json header_json = nlohmann::json::parse(std::string(header));
-
-    float x;
-    read(fd, &x, sizeof(x));
 
     load_config(header_json);
     tokenizer.load(header_json["tokenizer"]);

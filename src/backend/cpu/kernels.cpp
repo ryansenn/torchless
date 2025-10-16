@@ -47,6 +47,30 @@ void matmul(Tensor& xout, Tensor& w, Tensor& x){
     }
 }
 
+// Here we compute the max and subtract it from each logit to avoid overflow,
+// keeping the relative ratios unchanged (softmax is shift-invariant)
+void softmax(Tensor& xout, Tensor x){
+    float maxv = x.max();
+    float total = 0;
+    for (int i=0; i<x.size; i++){
+        xout.data[i] = std::expf(x.data[i] - maxv);
+        total += xout.data[i];
+    }
+    mul(xout, xout, 1/total);
+}
+
+// RoPE rotates tokens based on their position in a sequence.
+// The idea is that tokens that are close to each other
+// should have a smaller angle difference between them
+
+// We perform 2D rotations each pair in tensor x
+// The higher the position in sequence, the more we rotate
+// The rotation also shrinks exponentially as we advance in the tensor
+void rope(Tensor& xout, Tensor& x){
+
+}
+
+
 
 
 

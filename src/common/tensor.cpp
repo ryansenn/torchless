@@ -70,6 +70,16 @@ Tensor Tensor::at(std::initializer_list<size_t> idx) {
     return Tensor(new_data, new_shape);
 }
 
+float Tensor::max(){
+    float result = data[0];
+
+    for (int i=0; i<size; i++){
+        result = std::max(result, data[i]);
+    }
+
+    return result;
+}
+
 Tensor Tensor::reshape(std::vector<size_t> new_shape) {
     size_t new_size = 1;
     for (auto d : new_shape) new_size *= d;

@@ -14,14 +14,13 @@ I'm building a C++ inference engine from scratch that runs large language models
 - [x] **Tensor** *(src/common/tensor.cpp)*   
   Minimal tensor struct over float* with shape, size, strides, at(), reshape(), and copy helpers.
 
-- [x] **CPU Kernels** *(src/backend/cpu/kernels.cpp)*
-  Baseline implementations of core ops (e.g. matmul, softmax, mul) to be optimized later
+- [x] **CPU Ops** *(src/backend/cpu/kernels.cpp)*
+  Baseline implementations of core ops (e.g. matmul, softmax) to be optimized later
 
 - [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*
   - [ ] Implement each module and validate against its PyTorch reference
     - [x] Embedding
     - [x] RMSNorm
-    - [ ] Rotary Embedding
     - [ ] MLP
     - [ ] Attention
     - [ ] Decoder
@@ -38,7 +37,11 @@ I'm building a C++ inference engine from scratch that runs large language models
 
 ## Resources
 - [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
-- [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
-- [Hugging Face - Mistral Implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
-- [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
-- [PyTorch Documentation](https://docs.pytorch.org/docs/stable/index.html)
+- [PyTorch Documentation](https://docs.pytorch.org/docs/stable/index.html)  
+
+- [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)  
+
+- [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)  
+- [Hugging Face - Mistral Implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)  
+
+- [Video for intuition behind Rotary Positional Embedding](https://www.youtube.com/watch?v=V8r__fXx7tU)  

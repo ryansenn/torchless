@@ -98,3 +98,19 @@ int test_matmul(){
 }
 
 RegisterTest matmul_reg("test matmul", &test_matmul);
+
+int test_softmax(){
+    Tensor x({1.0f, 2.0f, 3.0f}, {3});
+    Tensor xout({0.0f, 0.0f, 0.0f}, {3});
+    Tensor expected({0.09003057f, 0.24472848f, 0.66524094f}, {3});
+
+    softmax(xout, x);
+
+    if (!equals(xout, expected)){
+        std::cout << "softmax mismatch" << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+RegisterTest softmaxl_reg("test softmax", &test_softmax);

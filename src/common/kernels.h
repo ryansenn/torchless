@@ -14,5 +14,7 @@ void pow(Tensor& xout, Tensor& x, int e);
 void sqrt(Tensor& xout, Tensor& x);
 
 void matmul(Tensor& xout, Tensor& w, Tensor& x);
+void softmax(Tensor& xout, Tensor x);
+void rope(Tensor& xout, Tensor& x);
 
 #endif // MATH_OPS_H
