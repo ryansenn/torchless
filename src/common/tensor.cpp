@@ -51,8 +51,9 @@ void Tensor::copy_from(const Tensor& tensor) {
     std::memcpy(data, tensor.data, tensor.get_size() * sizeof(float));
 }
 
-void Tensor::copy_from(const float* new_data, size_t size_in_bytes) {
-    std::memcpy(static_cast<void*>(data), new_data, size_in_bytes);
+Tensor Tensor::clone(){
+    Tensor out(shape);
+    out.copy_from(*this);
 }
 
 Tensor Tensor::at(std::initializer_list<size_t> idx) {

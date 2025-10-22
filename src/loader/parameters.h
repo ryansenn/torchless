@@ -4,6 +4,8 @@
 #include "../tokenizer/tokenizer.h"
 #include "../common/json.hpp"
 
+#pragma once
+
 struct Config {
     int hidden_size;
     int intermediate_size;

@@ -15,12 +15,13 @@ I'm building a C++ inference engine from scratch that runs large language models
   Minimal tensor struct over float* with shape, size, strides, at(), reshape(), and copy helpers.
 
 - [x] **CPU Ops** *(src/backend/cpu/kernels.cpp)*
-  Baseline implementations of core ops (e.g. matmul, softmax) to be optimized later
+  Baseline implementations of core ops (e.g. matmul, softmax, RoPE) to be optimized later
 
 - [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*
-  - [ ] Implement each module and validate against its PyTorch reference
+  - [ ] Implement each module and validate against its PyTorch/HF reference
     - [x] Embedding
     - [x] RMSNorm
+    - [x] Rotary Embedding
     - [ ] MLP
     - [ ] Attention
     - [ ] Decoder

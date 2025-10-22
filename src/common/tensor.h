@@ -22,6 +22,7 @@ struct Tensor {
 
     void copy_from(const Tensor& tensor);
     void copy_from(const float* new_data, size_t size_in_bytes);
+    Tensor clone();
 
     Tensor at(std::initializer_list<size_t> idx);
     float max();
