@@ -30,4 +30,6 @@ struct Tensor {
     Tensor reshape(std::vector<size_t> new_shape);
 
     void check_shape(const std::vector<size_t>& expected_shape) const;
+
+    void print();
 };

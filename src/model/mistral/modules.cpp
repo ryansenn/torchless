@@ -40,10 +40,9 @@ Tensor RMSNorm::forward(Tensor &x) {
     return x;
 }
 
-// This computes the RoPE inverse frequencies, there are multiple RoPE frequency variants
-// Default: linear scaling rope frequencies. HF Implementation: https://github.com/huggingface/transformers/blob/main/src/transformers/modeling_rope_utils.py#L178
-// General formula:
-// inv_freq[i] = (1 / rope_theta^(i / (head_dim/2))) / factor
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L290
+// This computes the RoPE inverse frequencies
+// inv_freq[i] = (1 / rope_theta^(i / (head_dim))) / factor
 void RotaryEmbedding::init_freq() {
     for (int i=0;i<inv_freq.size;i+=2){
         float freq = 1.0f / std::pow(rope_theta, float(i)/inv_freq.size);

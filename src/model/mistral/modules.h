@@ -38,7 +38,7 @@ struct RotaryEmbedding {
     // https://github.com/huggingface/transformers/blob/main/src/transformers/modeling_rope_utils.py#L178
     void init_freq();
 
-    RotaryEmbedding(Config& config) : rope_theta(config.rope_theta), head_dim(config.head_dim), inv_freq({head_dim}){
+    RotaryEmbedding(const Config& config) : rope_theta(config.rope_theta), head_dim(config.head_dim), inv_freq({head_dim}){
         init_freq();
     }
 

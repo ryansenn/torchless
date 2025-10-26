@@ -54,6 +54,7 @@ void Tensor::copy_from(const Tensor& tensor) {
 Tensor Tensor::clone(){
     Tensor out(shape);
     out.copy_from(*this);
+    return out;
 }
 
 Tensor Tensor::at(std::initializer_list<size_t> idx) {
@@ -104,4 +105,11 @@ void Tensor::check_shape(const std::vector<size_t>& expected_shape) const {
 
         assert(false);
     }
+}
+
+void Tensor::print(){
+    for (int i=0;i<size;i++){
+        std::cout << data[i] << " ";
+    }
+    std::cout << std::endl;
 }

@@ -38,11 +38,12 @@ I'm building a C++ inference engine from scratch that runs large language models
 
 ## Resources
 - [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
-- [PyTorch Documentation](https://docs.pytorch.org/docs/stable/index.html)  
+- [PyTorch Documentation](https://docs.pytorch.org/docs/stable/index.html)
 
-- [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)  
+- [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
 
-- [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)  
-- [Hugging Face - Mistral Implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)  
+- [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
+- [Hugging Face - Mistral Implementation](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
 
-- [Video for intuition behind Rotary Positional Embedding](https://www.youtube.com/watch?v=V8r__fXx7tU)  
+- [Positional Encoding Intuition](https://www.youtube.com/watch?v=T3OT8kqoqjc)
+- [Rotary Positional Embedding](https://www.youtube.com/watch?v=V8r__fXx7tU)  
