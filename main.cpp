@@ -11,12 +11,23 @@ int main(){
     Tensor cos = emb.at({0});
     Tensor sin = emb.at({1});
 
-    //r.inv_freq.print();
+    size_t n_heads = 1;
+    size_t seq_len = 4;
+    size_t head_dim = cos.shape[1];
 
-    //sin.at({1}).print();
+    Tensor x({n_heads, seq_len, head_dim});
+    Tensor xout({n_heads, seq_len, head_dim});
 
-    cos.at({1}).print();
+    for (size_t i = 0; i < x.size; i++)
+        x.data[i] = static_cast<float>(i%128) / 10.0f;
 
+    rope(xout, x, cos, sin);
+
+    for (size_t i =0;i<4;i++){
+        x.at({0,i}).print();
+        xout.at({0,i}).print();
+        std::cout << std::endl;
+    }
 
     return 0;
 }

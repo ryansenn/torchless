@@ -56,8 +56,8 @@ void RotaryEmbedding::init_freq() {
 // The forward pass generates cos/sin position encodings for RoPE.
 // Take the inv_freq at each position, multiply them by position and apply cos/sin
 // Returns 2D tensor containing where
-//      out[0] = cos position encodings
-//      out[1] = sin position encodings
+//      out[0] = cos position encodings [seq_len, head_dim]
+//      out[1] = sin position encodings [seq_len, head_dim]
 Tensor RotaryEmbedding::forward(std::vector<size_t> ids) {
     Tensor out({2, ids.size(),head_dim});
     Tensor cos = out.at({0});

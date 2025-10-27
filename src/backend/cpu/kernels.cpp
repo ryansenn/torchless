@@ -27,13 +27,32 @@ void softmax(Tensor& xout, Tensor x){
     mul(xout, xout, 1/total);
 }
 
-// RoPE rotates tokens based on their position in a sequence.
-// The idea is that tokens that are close to each other
-// should have a smaller angle difference between them
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L58
 // We perform 2D rotations each pair
 // [x', y'] = [x*cosθ - y*sinθ, x*sinθ + y*cosθ]
+// The same cos/sin embedding is reused for every head
+// Inputs:
+//   x: [n_heads, seq_len, head_dim] (q or k)
+//   cos, sin: [seq_len, head_dim]
 void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
+    size_t n_heads = x.shape[0];
+    size_t seq_len = x.shape[1];
+    size_t head_size = x.shape[2];
 
+    for (int h = 0; h<n_heads; h++){
+        for (int p = 0; p < seq_len; p++){
+            int start = h*x.strides[0] + p *x.strides[1];
+            for (int i = start; i < start+head_size; i+=2){
+                float xi = x.data[i];
+                float yi = x.data[i+1];
+                float c = cos.data[p*cos.strides[0] + (i % head_size)];
+                float s = sin.data[p*sin.strides[0] + (i % head_size)];
+                xout.data[i] = xi*c - yi*s;
+                xout.data[i+1] = xi*s + yi*c;
+            }
+        }
+    }
 }
 
 
