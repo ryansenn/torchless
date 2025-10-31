@@ -6,6 +6,9 @@
 // I may choose to refactor this in the future
 
 
+// TODO: I need to remove all memory allocations in forward passes and use inference state buffers or OUT buffers
+
+
 // https://docs.pytorch.org/docs/stable/generated/torch.nn.Embedding.html
 // This one makes a copy, I'm not returning the raw embed weights
 // Given a list of indices, we return a 2D tensor containing the tensors at those indices
@@ -44,10 +47,9 @@ Tensor RMSNorm::forward(Tensor &x) {
 // This computes the RoPE inverse frequencies
 // inv_freq[i] = (1 / rope_theta^(i / (head_dim))) / factor
 void RotaryEmbedding::init_freq() {
-    for (int i=0;i<inv_freq.size;i+=2){
+    for (int i=0;i<inv_freq.size/2;i++){
         float freq = 1.0f / std::pow(rope_theta, float(i)/inv_freq.size);
         inv_freq.data[i] = freq;
-        inv_freq.data[i+1] = freq;
     }
 }
 
@@ -59,7 +61,7 @@ void RotaryEmbedding::init_freq() {
 //      out[0] = cos position encodings [seq_len, head_dim]
 //      out[1] = sin position encodings [seq_len, head_dim]
 Tensor RotaryEmbedding::forward(std::vector<size_t> ids) {
-    Tensor out({2, ids.size(),head_dim});
+    Tensor out({2, ids.size(),head_dim/2});
     Tensor cos = out.at({0});
     Tensor sin = out.at({1});
 

@@ -19,7 +19,7 @@ int main(){
     Tensor xout({n_heads, seq_len, head_dim});
 
     for (size_t i = 0; i < x.size; i++)
-        x.data[i] = static_cast<float>(i%128) / 10.0f;
+        x.data[i] = static_cast<float>(i%128) / 256.0f;
 
     rope(xout, x, cos, sin);
 

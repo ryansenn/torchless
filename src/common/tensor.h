@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <initializer_list>
 
-// TODO: Either make Tensor fully own its memory or be a pure view.
-// TODO: Make it memory safe
+// TODO: Tensors will be views, need to remove all memory allocations
+
 struct Tensor {
-    float* data; // need to free this at some point
+    float* data;
     std::vector<size_t> shape;
     size_t size;
     std::vector<size_t> strides;
@@ -17,8 +17,6 @@ struct Tensor {
 
     Tensor(){}
     Tensor(float* data, std::vector<size_t> shape);
-    Tensor(std::vector<size_t> shape);
-    Tensor(std::vector<float> arr, std::vector<size_t> shape);
 
     void copy_from(const Tensor& tensor);
     void copy_from(const float* new_data, size_t size_in_bytes);
@@ -28,8 +26,6 @@ struct Tensor {
     float max();
 
     Tensor reshape(std::vector<size_t> new_shape);
-
-    void check_shape(const std::vector<size_t>& expected_shape) const;
 
     void print();
 };
