@@ -13,7 +13,7 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
 - [x] **Tokenizer**  *(src/tokenizer/tokenizer.cpp)*   
   The tokenizer implements a full byte-pair encoding (BPE) system compatible with Mistral’s vocabulary format. It loads the tokenizer.json, builds vocabulary and merge maps, applies Metaspace pre-tokenization           (replacing spaces with ▁), and encodes UTF-8 text by iteratively merging token pairs according to their rank. It also supports byte-fallback for unseen characters using the <0xNN> convention from the original         Mistral tokenizer.
 
-- [ ] **Tensor** *(src/common/tensor.cpp)*   
+- [x] **Tensor** *(src/common/tensor.cpp)*   
   Lightweight view over memory with shape and strides
 
 - [ ] **Inference State** *(src/common/inference_state.h)*  

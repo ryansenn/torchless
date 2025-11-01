@@ -6,6 +6,8 @@ int main(){
     std::shared_ptr<Parameters> params = std::make_shared<Parameters>();
     params->load_parameters("../model.bin");
 
+    Arena arena(1024 * 1024);
+
     RotaryEmbedding r(params->config);
     Tensor emb = r.forward({0,1,2,3});
     Tensor cos = emb.at({0});
@@ -15,8 +17,8 @@ int main(){
     size_t seq_len = 4;
     size_t head_dim = cos.shape[1];
 
-    Tensor x({n_heads, seq_len, head_dim});
-    Tensor xout({n_heads, seq_len, head_dim});
+    Tensor x(arena, {n_heads, seq_len, head_dim});
+    Tensor xout(arena, {n_heads, seq_len, head_dim});
 
     for (size_t i = 0; i < x.size; i++)
         x.data[i] = static_cast<float>(i%128) / 256.0f;

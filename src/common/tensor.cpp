@@ -5,9 +5,9 @@
 
 size_t Tensor::get_size() const {
     size_t s = 1;
-    for (auto d : shape) {
+    for (size_t d : shape) {
         assert(d > 0 && "dim=0 not supported");
-        s *= static_cast<size_t>(d);
+        s *= d;
     }
     return s;
 }
@@ -15,17 +15,24 @@ size_t Tensor::get_size() const {
 void Tensor::init_strides() {
     strides.assign(shape.size(), 1);
     if (shape.size() < 2) return;
-    int64_t stride = 1;
-    for (int64_t i = static_cast<int64_t>(shape.size()) - 2; i >= 0; --i) {
+    size_t stride = 1;
+    for (int i = shape.size() - 2; i >= 0; --i) {
         stride *= shape[i+1];
         strides[i] = stride;
     }
 }
 
-Tensor::Tensor(float* data, std::vector<size_t> shape)
-        : data(data), shape(std::move(shape)) {
-    size = get_size();
+Tensor::Tensor(float* data, const std::vector<size_t>& shape) : shape(shape), size(get_size()), data(data){
     init_strides();
+}
+
+Tensor::Tensor(Arena& arena, const std::vector<size_t>& shape) : shape(shape), size(get_size()), data(arena.allocate(size)){
+    init_strides();
+}
+
+Tensor::Tensor(Arena& arena, const std::vector<float>& arr, std::vector<size_t>& shape) : shape(shape), size(get_size()), data(arena.allocate(size)){
+    init_strides();
+    std::copy(arr.begin(), arr.end(), data);
 }
 
 void Tensor::copy_from(const Tensor& tensor) {
@@ -49,11 +56,9 @@ Tensor Tensor::at(std::initializer_list<size_t> idx) {
 
 float Tensor::max(){
     float result = data[0];
-
     for (int i=0; i<size; i++){
         result = std::max(result, data[i]);
     }
-
     return result;
 }
 
