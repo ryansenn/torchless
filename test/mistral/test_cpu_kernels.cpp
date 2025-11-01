@@ -1,7 +1,7 @@
 #include "setup/context.h"
 
 int test_sum(){
-    Tensor x({1.1f,2.2f,3.3f,4.4f,5.5f,6.6f}, {6});
+    Tensor x(arena, {1.1f,2.2f,3.3f,4.4f,5.5f,6.6f}, {6});
     float expected = 23.1f;
 
     if (!equals(sum(x), expected)){
@@ -14,10 +14,10 @@ int test_sum(){
 }
 
 int test_add(){
-    Tensor x({1.0f, 2.0f, 3.0f}, {3});
+    Tensor x(arena, {1.0f, 2.0f, 3.0f}, {3});
     float c = 2.5f;
-    Tensor expected({3.5f, 4.5f, 5.5f}, {3});
-    Tensor xout({0.0f, 0.0f, 0.0f}, {3});
+    Tensor expected(arena, {3.5f, 4.5f, 5.5f}, {3});
+    Tensor xout(arena, {0.0f, 0.0f, 0.0f}, {3});
 
     add(xout, x, c);
 
@@ -30,9 +30,9 @@ int test_add(){
 }
 
 int test_mul(){
-    Tensor x({-1.5f, 0.0f, 2.5f, 4.2f}, {4});
+    Tensor x(arena, {-1.5f, 0.0f, 2.5f, 4.2f}, {4});
     float scalar = -3.0f;
-    Tensor expected({4.5f, 0.0f, -7.5f, -12.6f}, {4});
+    Tensor expected(arena, {4.5f, 0.0f, -7.5f, -12.6f}, {4});
 
     mul(x, x, scalar);
 
@@ -45,9 +45,9 @@ int test_mul(){
 }
 
 int test_pow(){
-    Tensor x({2.0f, 3.0f, 4.0f}, {3});
+    Tensor x(arena, {2.0f, 3.0f, 4.0f}, {3});
     float power = 2.0f;
-    Tensor expected({4.0f, 9.0f, 16.0f}, {3});
+    Tensor expected(arena, {4.0f, 9.0f, 16.0f}, {3});
 
     pow(x, x, power);
 
@@ -61,8 +61,8 @@ int test_pow(){
 
 
 int test_sqrt(){
-    Tensor x({1.0f, 4.0f, 9.0f, 16.0f}, {4});
-    Tensor expected({1.0f, 2.0f, 3.0f, 4.0f}, {4});
+    Tensor x(arena, {1.0f, 4.0f, 9.0f, 16.0f}, {4});
+    Tensor expected(arena, {1.0f, 2.0f, 3.0f, 4.0f}, {4});
 
     sqrt(x, x);
 
@@ -82,10 +82,10 @@ RegisterTest sqrt_reg("test sqrt", &test_sqrt);
 
 
 int test_matmul(){
-    Tensor w({1, 2, 3, 4, 5, 6}, {2, 3});
-    Tensor x({10, 20, 30}, {3});
-    Tensor xout({0, 0}, {2});
-    Tensor expected({140, 320}, {2});
+    Tensor w(arena, {1, 2, 3, 4, 5, 6}, {2, 3});
+    Tensor x(arena, {10, 20, 30}, {3});
+    Tensor xout(arena, {0, 0}, {2});
+    Tensor expected(arena, {140, 320}, {2});
 
     matmul(xout, w, x);
 
@@ -100,9 +100,9 @@ int test_matmul(){
 RegisterTest matmul_reg("test matmul", &test_matmul);
 
 int test_softmax(){
-    Tensor x({1.0f, 2.0f, 3.0f}, {3});
-    Tensor xout({0.0f, 0.0f, 0.0f}, {3});
-    Tensor expected({0.09003057f, 0.24472848f, 0.66524094f}, {3});
+    Tensor x(arena, {1.0f, 2.0f, 3.0f}, {3});
+    Tensor xout(arena, {0.0f, 0.0f, 0.0f}, {3});
+    Tensor expected(arena, {0.09003057f, 0.24472848f, 0.66524094f}, {3});
 
     softmax(xout, x);
 

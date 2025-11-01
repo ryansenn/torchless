@@ -8,7 +8,7 @@
 
 // TODO: I need to remove all memory allocations in forward passes and use inference state buffers or OUT buffers
 
-
+/*
 // https://docs.pytorch.org/docs/stable/generated/torch.nn.Embedding.html
 // This one makes a copy, I'm not returning the raw embed weights
 // Given a list of indices, we return a 2D tensor containing the tensors at those indices
@@ -83,3 +83,4 @@ Tensor RotaryEmbedding::forward(std::vector<size_t> ids) {
 
     return out;
 }
+*/

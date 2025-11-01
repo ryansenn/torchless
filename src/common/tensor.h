@@ -35,7 +35,7 @@ struct Tensor {
 
     Tensor(float* data, const std::vector<size_t>& shape);
     Tensor(Arena& arena, const std::vector<size_t>& shape);
-    Tensor(Arena& arena, const std::vector<float>& arr, std::vector<size_t>& shape);
+    Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape);
 
     void copy_from(const Tensor& tensor);
 

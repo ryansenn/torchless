@@ -30,7 +30,7 @@ Tensor::Tensor(Arena& arena, const std::vector<size_t>& shape) : shape(shape), s
     init_strides();
 }
 
-Tensor::Tensor(Arena& arena, const std::vector<float>& arr, std::vector<size_t>& shape) : shape(shape), size(get_size()), data(arena.allocate(size)){
+Tensor::Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape) : shape(shape), size(get_size()), data(arena.allocate(size)){
     init_strides();
     std::copy(arr.begin(), arr.end(), data);
 }

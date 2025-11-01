@@ -2,8 +2,8 @@
 #include "../../loader/parameters.h"
 
 // NOTE:
-// All modules in this inference engine perform operations in-place on the input tensor
-// This means there is no autograd/training support and implementation differs from standard pytorch
+// Modules perform operations in-place on the input tensor
+// This means there is no autograd/training support
 // I may choose to refactor this in the future
 
 
@@ -25,6 +25,7 @@ struct RMSNorm {
     Tensor forward(Tensor& x);
 };
 
+/*
 // Build cos/sin embeddings for RoPE
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L268
 struct RotaryEmbedding {
@@ -44,3 +45,4 @@ struct RotaryEmbedding {
 
     Tensor forward(std::vector<size_t> ids);
 };
+*/
