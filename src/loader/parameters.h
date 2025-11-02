@@ -36,9 +36,3 @@ struct Parameters {
     void load_weights(char* p, nlohmann::json& header);
     void load_parameters(const std::string& path);
 };
-
-struct Model {
-    std::shared_ptr<const Parameters> params;
-
-    Model(std::shared_ptr<const Parameters> params) : params(params) {}
-};

@@ -2,20 +2,19 @@
 
 std::vector<TestCase> tests;
 
-Model& get_model(){
+std::shared_ptr<Parameters> get_params(){
     static bool init = false;
 
     static std::shared_ptr<Parameters> params = std::make_shared<Parameters>();
-    static Model model(params);
 
     if (init){
-        return model;
+        return params;
     }
 
     params->load_parameters("../model.bin");
     init = true;
 
-    return model;
+    return params;
 }
 
 bool equals(float x, float y){

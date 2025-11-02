@@ -1,50 +1,50 @@
 #include "setup/context.h"
 
 int test_load_config(){
-    Model m = get_model();
+    std::shared_ptr<Parameters> params = get_params();
 
-    if (m.params->config.hidden_size != 4096) {
-        std::cout << "hidden_size mismatch: got " << m.params->config.hidden_size
+    if (params->config.hidden_size != 4096) {
+        std::cout << "hidden_size mismatch: got " << params->config.hidden_size
                   << ", want 4096" << std::endl;
         return 1;
     }
-    if (m.params->config.intermediate_size != 14336) {
-        std::cout << "intermediate_size mismatch: got " << m.params->config.intermediate_size
+    if (params->config.intermediate_size != 14336) {
+        std::cout << "intermediate_size mismatch: got " << params->config.intermediate_size
                   << ", want 14336" << std::endl;
         return 1;
     }
-    if (m.params->config.n_layers != 32) {
-        std::cout << "n_layers mismatch: got " << m.params->config.n_layers
+    if (params->config.n_layers != 32) {
+        std::cout << "n_layers mismatch: got " << params->config.n_layers
                   << ", want 32" << std::endl;
         return 1;
     }
-    if (m.params->config.n_heads != 32) {
-        std::cout << "n_heads mismatch: got " << m.params->config.n_heads
+    if (params->config.n_heads != 32) {
+        std::cout << "n_heads mismatch: got " << params->config.n_heads
                   << ", want 32" << std::endl;
         return 1;
     }
-    if (m.params->config.n_kv_heads != 8) {
-        std::cout << "n_kv_heads mismatch: got " << m.params->config.n_kv_heads
+    if (params->config.n_kv_heads != 8) {
+        std::cout << "n_kv_heads mismatch: got " << params->config.n_kv_heads
                   << ", want 8" << std::endl;
         return 1;
     }
-    if (m.params->config.vocab_size != 32000) {
-        std::cout << "vocab_size mismatch: got " << m.params->config.vocab_size
+    if (params->config.vocab_size != 32000) {
+        std::cout << "vocab_size mismatch: got " << params->config.vocab_size
                   << ", want 32000" << std::endl;
         return 1;
     }
-    if (m.params->config.max_seq_len != 32768) {
-        std::cout << "max_seq_len mismatch: got " << m.params->config.max_seq_len
+    if (params->config.max_seq_len != 32768) {
+        std::cout << "max_seq_len mismatch: got " << params->config.max_seq_len
                   << ", want 32768" << std::endl;
         return 1;
     }
-    if (std::abs(m.params->config.rope_theta - 10000.0f) > 1e-3f) {
-        std::cout << "rope_theta mismatch: got " << m.params->config.rope_theta
+    if (std::abs(params->config.rope_theta - 10000.0f) > 1e-3f) {
+        std::cout << "rope_theta mismatch: got " << params->config.rope_theta
                   << ", want 10000.0" << std::endl;
         return 1;
     }
-    if (std::abs(m.params->config.norm_eps - 1e-5f) > 1e-8f) {
-        std::cout << "norm_eps mismatch: got " << m.params->config.norm_eps
+    if (std::abs(params->config.norm_eps - 1e-5f) > 1e-8f) {
+        std::cout << "norm_eps mismatch: got " << params->config.norm_eps
                   << ", want 1e-5" << std::endl;
         return 1;
     }
@@ -96,26 +96,26 @@ static const std::vector<Expected> expected_tensors = {
 };
 
 int test_load_weights() {
-    Model m = get_model();
+    std::shared_ptr<Parameters> params = get_params();
 
     // Check we have the expected number of tensors loaded
 
-    if (m.params->global_weights.size() != 3) {
+    if (params->global_weights.size() != 3) {
         std::cerr << "Global tensor count mismatch: got "
-                  << m.params->global_weights.size() << ", want 3\n";
+                  << params->global_weights.size() << ", want 3\n";
         return 1;
     }
 
-    if (m.params->layer_weights.size() != m.params->config.n_layers) {
+    if (params->layer_weights.size() != params->config.n_layers) {
         std::cerr << "Layer count mismatch: got "
-                  << m.params->layer_weights.size() << ", want 32\n";
+                  << params->layer_weights.size() << ", want 32\n";
         return 1;
     }
 
-    for (size_t i = 0; i < m.params->layer_weights.size(); ++i) {
-        if (m.params->layer_weights[i].size() != 9) {
+    for (size_t i = 0; i < params->layer_weights.size(); ++i) {
+        if (params->layer_weights[i].size() != 9) {
             std::cerr << "Layer " << i << " tensor count mismatch: got "
-                      << m.params->layer_weights[i].size() << ", want 9\n";
+                      << params->layer_weights[i].size() << ", want 9\n";
             return 1;
         }
     }
@@ -126,18 +126,18 @@ int test_load_weights() {
         const Tensor* t = nullptr;
 
         if (e.layer == -1) {
-            auto it = m.params->global_weights.find(e.key);
-            if (it == m.params->global_weights.end()) {
+            auto it = params->global_weights.find(e.key);
+            if (it == params->global_weights.end()) {
                 std::cerr << "Missing global tensor: " << e.key << "\n";
                 return 1;
             }
             t = it->second.get();
         } else {
-            if (e.layer < 0 || e.layer >= (int)m.params->layer_weights.size()) {
+            if (e.layer < 0 || e.layer >= (int)params->layer_weights.size()) {
                 std::cerr << "Invalid layer index " << e.layer << " for " << e.key << "\n";
                 return 1;
             }
-            auto& lw = m.params->layer_weights[e.layer];
+            auto& lw = params->layer_weights[e.layer];
             auto it = lw.find(e.key);
             if (it == lw.end()) {
                 std::cerr << "Missing tensor: " << e.key << "\n";

@@ -1,10 +1,10 @@
 #include "setup/context.h"
 
 int test_tokenizer_encode(){
-    Model m = get_model();
+    std::shared_ptr<Parameters> params = get_params();
 
     const std::string text = "The quick brown fox jumps over the lazy dog. Mistral models tokenize text using byte pair encoding, handling punctuation, emojis 😊, and multilingual words like déjà vu or 中文 with care.";
-    std::vector<uint32_t> got = m.params->tokenizer.encode(text);
+    std::vector<uint32_t> got = params->tokenizer.encode(text);
 
     const std::vector<uint32_t> expected = {
             1, 415, 2936, 9060, 285, 1142, 461, 10575, 754, 272,
@@ -35,11 +35,11 @@ static RegisterTest tokenizer_encode("tokenizer encode",&test_tokenizer_encode);
 
 
 int test_tokenizer_encode_byte_fallback(){
-    Model m = get_model();
+    std::shared_ptr<Parameters> params = get_params();
 
     const std::string text = std::string("A") + "\xEE\x80\x80" + "B";
 
-    std::vector<uint32_t> got = m.params->tokenizer.encode(text);
+    std::vector<uint32_t> got = params->tokenizer.encode(text);
 
     // Multiple bytes fallback from 1 token (241, 131, 131)
     const std::vector<uint32_t> expected = {

@@ -17,7 +17,7 @@ struct RegisterTest {
     }
 };
 
-Model& get_model();
+std::shared_ptr<Parameters> get_params();
 inline Arena arena(1024*1024); // 4 MB
 
 bool equals(float x, float y);
