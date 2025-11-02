@@ -7,14 +7,14 @@
 #pragma once
 
 struct Config {
-    int hidden_size;
-    int intermediate_size;
-    int n_layers;
-    int n_heads;
-    int n_kv_heads;
-    int vocab_size;
-    int max_seq_len;
-    int head_dim;
+    size_t hidden_size;
+    size_t intermediate_size;
+    size_t n_layers;
+    size_t n_heads;
+    size_t n_kv_heads;
+    size_t vocab_size;
+    size_t max_seq_len;
+    size_t head_dim;
     float rope_theta;
     float norm_eps;
 };
