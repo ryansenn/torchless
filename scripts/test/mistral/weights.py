@@ -1,8 +1,8 @@
 import safetensors
 import torch
 
-f1 = "../../Mistral-7B-v0.1/model-00001-of-00002.safetensors"
-f2 = "../../Mistral-7B-v0.1/model-00002-of-00002.safetensors"
+f1 = "../../../Mistral-7B-v0.1/model-00001-of-00002.safetensors"
+f2 = "../../../Mistral-7B-v0.1/model-00002-of-00002.safetensors"
 
 
 def list_tensors(f):

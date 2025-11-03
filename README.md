@@ -1,5 +1,5 @@
 # torchless
-I'm building a inference engine from scratch that runs large language models directly from their raw weights. The goal is to learn C++ and machine learning, so far with more rewrites and segfaults than i anticipated :) 
+I'm building a inference engine from scratch that runs large language models directly from their raw weights. The main goal is to learn C++ and LLMs at a deeper level, so far a fair share of rewrites and painful segfaults :) 
 
 The first phase focuses on achieving a working inference pass for the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1), and the second phase will focus on performance improvements.
 

@@ -18,6 +18,7 @@ struct RegisterTest {
 };
 
 std::shared_ptr<Parameters> get_params();
+inline InferenceState infer(get_params()->config);
 inline Arena arena(1024*1024); // 4 MB
 
 bool equals(float x, float y);
