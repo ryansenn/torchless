@@ -22,4 +22,4 @@ inline InferenceState infer(get_params()->config);
 inline Arena arena(1024*1024); // 4 MB
 
 bool equals(float x, float y);
-bool equals(Tensor& x, Tensor& y);
+bool equals(const Tensor& x, const Tensor& y);

@@ -13,15 +13,15 @@ struct InferenceState {
     size_t seq_len = 0;
 
     Tensor inv_freq; // [head_dim / 2]
-    Tensor cos; // [50, head_dim]
-    Tensor sin; // [50, head_dim]
+    Tensor cos; // [head_dim]
+    Tensor sin; // [head_dim]
 
     InferenceState(Config& config) : config(config),
                                      arena(10 * 1024 * 1024), // 40MB, how much memory will be needed?
                                      hidden_state(arena, {MAX_SEQ_LEN, config.hidden_size}), // Only 50 tokens at a time?
 
                                      inv_freq(arena, {config.head_dim / 2}),
-                                     cos(arena, {MAX_SEQ_LEN, config.head_dim}),
-                                     sin(arena, {MAX_SEQ_LEN, config.head_dim})
+                                     cos(arena, {config.head_dim}),
+                                     sin(arena, {config.head_dim})
                                      {}
 };

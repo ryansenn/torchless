@@ -17,8 +17,15 @@ void RotaryEmbedding::init_freq(InferenceState& infer, Config& config) {
     }
 }
 
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L319
+// The forward pass generates cos/sin position encodings for RoPE.
+// Take the inv_freq at each position, multiply them by position and apply cos/sin
 void RotaryEmbedding::forward(InferenceState& infer){
-
+    for (size_t i=0; i<infer.cos.size; i++){
+        size_t j = i % (infer.inv_freq.size / 2);
+        infer.cos.data[i] = std::cos(infer.inv_freq.data[j] * infer.pos);
+        infer.sin.data[i] = std::sin(infer.inv_freq.data[j] * infer.pos);
+    }
 }
 
 void Attention::forward(InferenceState &infer) {
@@ -34,6 +41,8 @@ void Decoder::forward(InferenceState &infer){
     // Residuals
 }
 
+// I think I will process one token at a time for now
+// And do a rewrite to support multiple tokens
 void Model::forward(InferenceState &infer, const std::vector<size_t> &ids) {
     infer.seq_len += ids.size();
     embedding.forward(infer, ids);

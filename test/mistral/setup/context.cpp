@@ -23,13 +23,16 @@ bool equals(float x, float y){
     return std::fabs(x - y) < atol;
 }
 
-bool equals(Tensor& x, Tensor& y){
+bool equals(const Tensor& x, const Tensor& y){
     if (x.shape != y.shape){
         return false;
     }
 
     for (int i=0; i<x.size; i++){
         if (!equals(x.data[i], y.data[i])){
+            std::cout << "Mismatch at pos " << i
+                      << ": expected " << y.data[i]
+                      << ", got " << x.data[i] << std::endl;
             return false;
         }
     }
