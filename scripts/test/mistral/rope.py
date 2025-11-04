@@ -2,6 +2,7 @@ from transformers import MistralConfig
 import torch
 
 from typing import Optional, Union
+from printer import show
 
 config = MistralConfig.from_json_file("../../../Mistral-7B-v0.1/config.json")
 
@@ -87,8 +88,10 @@ cos = cos.squeeze(0)
 sin = sin.squeeze(0)
 #print(cos[0])
 #print(sin[0])
-print(cos[1])
-print(sin[1])
+#print(cos[1])
+#print(sin[1])
+#show(sin[1])
+show(emb.inv_freq)
 
 
 

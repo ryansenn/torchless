@@ -2,6 +2,8 @@
 #include <iostream>
 
 int main() {
+    load_expected_values();
+
     int total   = 0;
     int failed  = 0;
 

@@ -1,4 +1,6 @@
 #include "context.h"
+#include <fstream>
+#include <sstream>
 
 std::vector<TestCase> tests;
 
@@ -15,6 +17,25 @@ std::shared_ptr<Parameters> get_params(){
     init = true;
 
     return params;
+}
+
+void load_expected_values(){
+    std::ifstream f("expected.txt");
+    std::string line, name;
+
+    while (std::getline(f, name)){
+        if (name == "") continue;
+        std::getline(f, line);
+        std::stringstream ss(line);
+        float x;
+        size_t i = 0;
+        std::vector<float> data;
+        while (ss >> x){
+            data.push_back(x);
+            i++;
+        }
+        expected.emplace(name, Tensor(arena, data, {i}));
+    }
 }
 
 bool equals(float x, float y){

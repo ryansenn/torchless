@@ -9,3 +9,4 @@ file(GLOB_RECURSE TEST_MISTRAL CONFIGURE_DEPENDS "test/mistral/*.cpp")
 
 add_executable(main_exec main.cpp ${SRC})
 add_executable(test_exec ${SRC} ${TEST_MISTRAL})
+configure_file(test/mistral/expected.txt expected.txt COPYONLY)
