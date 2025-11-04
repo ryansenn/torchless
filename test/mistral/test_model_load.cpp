@@ -33,8 +33,8 @@ int test_load_config(){
                   << ", want 32000" << std::endl;
         return 1;
     }
-    if (params->config.max_seq_len != 32768) {
-        std::cout << "max_seq_len mismatch: got " << params->config.max_seq_len
+    if (params->config.max_position_embeddings != 32768) {
+        std::cout << "max_seq_len mismatch: got " << params->config.max_position_embeddings
                   << ", want 32768" << std::endl;
         return 1;
     }

@@ -9,6 +9,9 @@ x = torch.tensor([(i % 128) / 10.0 for i in range(4 * 128)], dtype=torch.float32
 position_ids = torch.tensor([[0,1,2,3]])
 cos, sin = emb.forward(x,position_ids)
 
+print(emb.inv_freq)
+print(cos.shape)
+print(sin.shape)
 """
 cos = cos.squeeze(0)
 sin = sin.squeeze(0)
@@ -38,5 +41,5 @@ def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
     return q_embed, k_embed
 
 q2, k = apply_rotary_pos_emb(q, q, cos, sin)
-print(q2[0][0][1])
+#print(q2[0][0][1])
 

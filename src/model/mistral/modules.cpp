@@ -3,6 +3,44 @@
 
 void Embedding::forward(InferenceState& infer, const std::vector<size_t>& ids){
     for (size_t i=0;i<ids.size();i++){
-        infer.hidden.at({i}).copy_from(table.at({i}));
+        infer.hidden_state.at({i}).copy_from(table.at({i}));
     }
+}
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L290
+// Computes RoPE inverse frequencies
+// inv_freq[i] = (1 / rope_theta^(i / (head_dim))) / factor
+void RotaryEmbedding::init_freq(InferenceState& infer, Config& config) {
+    for (int i=0;i<infer.inv_freq.size;i++){
+        float freq = 1.0f / std::pow(config.rope_theta, float(i)/infer.inv_freq.size);
+        infer.inv_freq.data[i] = freq;
+    }
+}
+
+void RotaryEmbedding::forward(InferenceState& infer){
+
+}
+
+void Attention::forward(InferenceState &infer) {
+    // Get q, k, v
+    // Rotate q and k
+
+
+}
+
+void Decoder::forward(InferenceState &infer){
+    // Self attention
+
+    // Residuals
+}
+
+void Model::forward(InferenceState &infer, const std::vector<size_t> &ids) {
+    infer.seq_len += ids.size();
+    embedding.forward(infer, ids);
+
+    // Should use a causal mask to restrict attention to the window
+    // For now, I’ll attend only to tokens in the window
+    // On GPU, it’s faster to compute full attention and mask afterward
+
+    // Create layers of decoders
 }

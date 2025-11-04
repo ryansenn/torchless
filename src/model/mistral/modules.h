@@ -12,11 +12,34 @@ struct Embedding {
     void forward(InferenceState& infer, const std::vector<size_t>& ids);
 };
 
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L268
+struct RotaryEmbedding {
+    static void init_freq(InferenceState& infer, Config& config);
+    static void forward(InferenceState& infer);
+};
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L123
+struct Attention {
+    RotaryEmbedding rotary_emb;
+
+    void forward(InferenceState& infer);
+};
+
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L206
+struct Decoder {
+    void forward(InferenceState& infer);
+};
+
+
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L334
 struct Model {
     std::shared_ptr<Parameters> params;
+    Embedding embedding;
 
-    Model(std::shared_ptr<Parameters> params) : params(params) {}
+    Model(std::shared_ptr<Parameters> params) : params(params),
+                                                embedding(*params->global_weights["model.embed_tokens.weight"])
+                                                {}
 
     void forward(InferenceState& infer, const std::vector<size_t>& ids);
 };

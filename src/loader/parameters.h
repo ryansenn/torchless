@@ -13,8 +13,9 @@ struct Config {
     size_t n_heads;
     size_t n_kv_heads;
     size_t vocab_size;
-    size_t max_seq_len;
     size_t head_dim;
+    size_t sliding_window;
+    size_t max_position_embeddings;
     float rope_theta;
     float norm_eps;
 };

@@ -38,9 +38,10 @@ void Parameters::load_config(nlohmann::json& header){
     config.n_heads           = std::stoi(m["n_heads"].get<std::string>());
     config.n_kv_heads        = std::stoi(m["n_kv_heads"].get<std::string>());
     config.vocab_size        = std::stoi(m["vocab_size"].get<std::string>());
-    config.max_seq_len       = std::stoi(m["max_seq_len"].get<std::string>());
+    config.sliding_window    = std::stoi(m["sliding_window"].get<std::string>());
     config.rope_theta        = std::stof(m["rope_theta"].get<std::string>());
     config.norm_eps          = std::stof(m["norm_eps"].get<std::string>());
+    config.max_position_embeddings = std::stoi(m["max_position_embeddings"].get<std::string>());
     config.head_dim          = config.hidden_size / config.n_heads;
 }
 

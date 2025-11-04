@@ -9,8 +9,8 @@ int test_embedding() {
     std::vector<size_t> idx{0, 31999};
     emb.forward(infer, idx);
 
-    Tensor emb1 = infer.hidden.at({0});
-    Tensor emb2 = infer.hidden.at({1});
+    Tensor emb1 = infer.hidden_state.at({0});
+    Tensor emb2 = infer.hidden_state.at({1});
 
     if (!equals(emb1.data[0], -2.1864e-36f)) {
         std::cout << "emb1[0][0] mismatch" << std::endl;
@@ -33,6 +33,36 @@ int test_embedding() {
 }
 
 RegisterTest embedding_reg("test embedding", &test_embedding);
+
+int test_rotary_embedding_inv_freq(){
+    std::shared_ptr<Parameters> params = get_params();
+
+    RotaryEmbedding::init_freq(infer, params->config);
+
+    Tensor expected(arena, {
+            1.0000e+00, 8.6596e-01, 7.4989e-01, 6.4938e-01, 5.6234e-01, 4.8697e-01,
+            4.2170e-01, 3.6517e-01, 3.1623e-01, 2.7384e-01, 2.3714e-01, 2.0535e-01,
+            1.7783e-01, 1.5399e-01, 1.3335e-01, 1.1548e-01, 1.0000e-01, 8.6596e-02,
+            7.4989e-02, 6.4938e-02, 5.6234e-02, 4.8697e-02, 4.2170e-02, 3.6517e-02,
+            3.1623e-02, 2.7384e-02, 2.3714e-02, 2.0535e-02, 1.7783e-02, 1.5399e-02,
+            1.3335e-02, 1.1548e-02, 1.0000e-02, 8.6596e-03, 7.4989e-03, 6.4938e-03,
+            5.6234e-03, 4.8697e-03, 4.2170e-03, 3.6517e-03, 3.1623e-03, 2.7384e-03,
+            2.3714e-03, 2.0535e-03, 1.7783e-03, 1.5399e-03, 1.3335e-03, 1.1548e-03,
+            1.0000e-03, 8.6596e-04, 7.4989e-04, 6.4938e-04, 5.6234e-04, 4.8697e-04,
+            4.2170e-04, 3.6517e-04, 3.1623e-04, 2.7384e-04, 2.3714e-04, 2.0535e-04,
+            1.7783e-04, 1.5399e-04, 1.3335e-04, 1.1548e-04
+    }, {64});
+
+    if (!equals(expected, infer.inv_freq)){
+        std::cout << "Rotary embedding inv freq mismatch" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+RegisterTest rotary_embedding_inv_freq_reg("test rotary embedding inv freq", &test_rotary_embedding_inv_freq);
+
 
 /*
 
