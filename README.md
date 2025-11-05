@@ -11,7 +11,7 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
   Memory-maps the binary, loads the config and provides direct tensor views.
 
 - [x] **Tokenizer**  *(src/tokenizer/tokenizer.cpp)*   
-  The tokenizer implements a full byte-pair encoding (BPE) system compatible with Mistral’s vocabulary format. It loads the tokenizer.json, builds vocabulary and merge maps, applies Metaspace pre-tokenization           (replacing spaces with ▁), and encodes UTF-8 text by iteratively merging token pairs according to their rank. It also supports byte-fallback for unseen characters using the <0xNN> convention from the original         Mistral tokenizer.
+  The tokenizer implements full byte-pair encoding (BPE) compatible with Mistral’s vocabulary. It loads tokenizer.json, builds vocab and merge maps, applies Metaspace pre-tokenization (spaces → ▁), encodes UTF-8 text by merging token pairs by rank, and supports byte fallback for unseen characters using the <0xNN> convention
 
 - [x] **Tensor** *(src/common/tensor.cpp)*   
   Lightweight view over memory with shape and strides
@@ -26,7 +26,7 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
   Implementing each module with validation against PyTorch/HF
     - [x] Embedding
     - [x] RMSNorm
-    - [ ] Rotary Embedding
+    - [x] Rotary Embedding
     - [ ] MLP
     - [ ] Attention
     - [ ] Decoder

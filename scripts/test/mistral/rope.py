@@ -90,8 +90,10 @@ sin = sin.squeeze(0)
 #print(sin[0])
 #print(cos[1])
 #print(sin[1])
-#show(sin[1])
-show(emb.inv_freq)
+#show(cos[1])
+#show(emb.inv_freq)
+
+print(cos[1])
 
 
 

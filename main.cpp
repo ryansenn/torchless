@@ -13,7 +13,11 @@ int main(){
     RotaryEmbedding::forward(infer);
 
     infer.cos.print();
-    infer.sin.print();
+    // infer.sin.print();
+
+    std::cout << infer.cos.data[32] << std::endl;
+    std::cout << infer.cos.data[33] << std::endl;
+    std::cout << infer.cos.data[34] << std::endl;
 
     return 0;
 }

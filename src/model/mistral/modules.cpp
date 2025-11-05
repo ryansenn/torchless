@@ -1,4 +1,5 @@
 #include "modules.h"
+#include <iostream>
 
 
 void Embedding::forward(InferenceState& infer, const std::vector<size_t>& ids){
@@ -22,9 +23,8 @@ void RotaryEmbedding::init_freq(InferenceState& infer, Config& config) {
 // Take the inv_freq at each position, multiply them by position and apply cos/sin
 void RotaryEmbedding::forward(InferenceState& infer){
     for (size_t i=0; i<infer.cos.size; i++){
-        size_t j = i % (infer.inv_freq.size / 2);
-        infer.cos.data[i] = std::cos(infer.inv_freq.data[j] * infer.pos);
-        infer.sin.data[i] = std::sin(infer.inv_freq.data[j] * infer.pos);
+        infer.cos.data[i] = std::cos(infer.inv_freq.data[i % infer.inv_freq.size] * infer.pos);
+        infer.sin.data[i] = std::sin(infer.inv_freq.data[i % infer.inv_freq.size] * infer.pos);
     }
 }
 
