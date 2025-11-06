@@ -57,12 +57,12 @@ int test_rotary_embedding(){
     infer.pos = 0;
     RotaryEmbedding::forward(infer);
 
-    if (!equals(infer.cos, expected.at("expected_cos0"))){
+    if (!equals(infer.cos, expected.at("cos0"))){
         std::cout << "rotary embedding cos mismatch pos 0" << std::endl;
         return 1;
     }
 
-    if (!equals(infer.sin, expected.at("expected_sin0"))){
+    if (!equals(infer.sin, expected.at("sin0"))){
         std::cout << "rotary embedding sin mismatch pos 0" << std::endl;
         return 1;
     }
@@ -70,12 +70,12 @@ int test_rotary_embedding(){
     infer.pos = 3;
     RotaryEmbedding::forward(infer);
 
-    if (!equals(infer.cos, expected.at("expected_cos3"))){
+    if (!equals(infer.cos, expected.at("cos3"))){
         std::cout << "rotary embedding cos mismatch pos 3" << std::endl;
         return 1;
     }
 
-    if (!equals(infer.sin, expected.at("expected_sin3"))){
+    if (!equals(infer.sin, expected.at("sin3"))){
         std::cout << "rotary embedding sin mismatch pos 3" << std::endl;
         return 1;
     }

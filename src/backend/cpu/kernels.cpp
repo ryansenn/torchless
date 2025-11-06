@@ -36,22 +36,24 @@ void softmax(Tensor& xout, Tensor x){
 //   x: [n_heads, seq_len, head_dim] (q or k)
 //   cos, sin: [seq_len, head_dim]
 
-// Original RoPE rotates consecutive dim pairs (i, i+1), but Mistral uses a half-split layout.
-// Here each dim i is rotated with i + head_dim/2, matching Mistral/LLaMA's rotate_half() behavior.
+// Original RoPE rotates consecutive dim pairs (i, i+1), but Mistral uses a half-split layout?
+// Each dim i is rotated with i + head_dim/2
+
+// TODO: This only works 1 token at time (assumed seq_len = 1), cos/sin is only given for 1 pos
 void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
     size_t n_heads = x.shape[0];
     size_t seq_len = x.shape[1];
     size_t head_size = x.shape[2];
     size_t half = head_size/2;
 
-    for (int h = 0; h<n_heads; h++){
-        for (int p = 0; p < seq_len; p++){
+    for (size_t h = 0; h<n_heads; h++){
+        for (size_t p = 0; p < seq_len; p++){
             int start = h*x.strides[0] + p *x.strides[1];
-            for (int i = start; i < start+head_size; i+=2){
+            for (int i = start; i < start+half; i++){
                 float xi = x.data[i];
                 float yi = x.data[i+half];
-                float c = cos.data[p*cos.strides[0] + (i % head_size)];
-                float s = sin.data[p*sin.strides[0] + (i % head_size)];
+                float c = cos.data[i % head_size];
+                float s = sin.data[i % head_size];
                 xout.data[i] = xi*c - yi*s;
                 xout.data[i+half] = xi*s + yi*c;
             }
@@ -61,7 +63,6 @@ void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
 
 
 // Not sure if I will be using all of those
-
 float sum(Tensor& x){
     float r = 0.0f;
     for (int i=0; i<x.size; i++){

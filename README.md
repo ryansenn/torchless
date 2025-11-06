@@ -11,28 +11,28 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
   Memory-maps the binary, loads the config and provides direct tensor views.
 
 - [x] **Tokenizer**  *(src/tokenizer/tokenizer.cpp)*   
-  The tokenizer implements full byte-pair encoding (BPE) compatible with Mistral’s vocabulary. It loads tokenizer.json, builds vocab and merge maps, applies Metaspace pre-tokenization (spaces → ▁), encodes UTF-8 text by merging token pairs by rank, and supports byte fallback for unseen characters using the <0xNN> convention
+  The tokenizer implements full byte-pair encoding (BPE) compatible with Mistral’s vocabulary. It loads tokenizer.json, builds vocab and merge maps, applies Metaspace pre-tokenization, encodes UTF-8 text by merging token pairs by rank, and supports byte fallback
 
 - [x] **Tensor** *(src/common/tensor.cpp)*   
   Lightweight view over memory with shape and strides
 
+- [ ] **CPU Ops** *(src/backend/cpu/kernels.cpp)*   
+  Baseline implementations of (e.g. matmul, softmax, RoPE) to be optimized later
+
 - [ ] **Inference State** *(src/common/inference_state.h)*  
   Holds temporary memory and per-stream data used during inference
-
-- [ ] **CPU Ops** *(src/backend/cpu/kernels.cpp)*   
-  Baseline implementations of core ops (e.g. matmul, softmax, RoPE) to be optimized later
 
 - [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*   
   Implementing each module with validation against PyTorch/HF
     - [x] Embedding
     - [x] RMSNorm
     - [x] Rotary Embedding
-    - [ ] MLP
     - [ ] Attention
+    - [ ] KV Cache
+    - [ ] MLP
     - [ ] Decoder
     - [ ] LM Head
     - [ ] Model
-    - [ ] KV Cache
 
 - [ ] **CLI I/O**
 

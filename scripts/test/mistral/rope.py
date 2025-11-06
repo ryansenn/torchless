@@ -75,7 +75,7 @@ class MistralRotaryEmbedding(torch.nn.Module):
 
 emb = MistralRotaryEmbedding(config)
 x = torch.tensor([(i % 128) / 10.0 for i in range(4 * 128)], dtype=torch.float32).view(1, 4, 1, 128)
-position_ids = torch.tensor([[0,3]])
+position_ids = torch.tensor([[0,1,2,3]])
 cos, sin = emb.forward(x,position_ids)
 
 #print(emb.inv_freq)
@@ -84,22 +84,18 @@ cos, sin = emb.forward(x,position_ids)
 #print(emb.attention_scaling)
 
 
-cos = cos.squeeze(0)
-sin = sin.squeeze(0)
 #print(cos[0])
 #print(sin[0])
 #print(cos[1])
 #print(sin[1])
 #show(cos[1])
 #show(emb.inv_freq)
-
-print(cos[1])
-
+#print(cos[1])
 
 
-q = torch.tensor([(i % 128) / 256 for i in range(4 * 128)])
-q = q.view(1,1, 4, 128)
-
+# 3 tokens
+q = torch.tensor([[i / 256 for i in range(128)] for j in range(4)])
+q = q.view(1, 1, 4, 128)
 
 def rotate_half(x):
     """Rotates half the hidden dims of the input."""
@@ -111,10 +107,21 @@ def rotate_half(x):
 def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
     cos = cos.unsqueeze(unsqueeze_dim)
     sin = sin.unsqueeze(unsqueeze_dim)
+    print((q[0][0][1][0], rotate_half(q)[0][0][1][0]))
+    print(((q * cos)[0][0][1][0], (rotate_half(q) * sin)[0][0][1][0]))
     q_embed = (q * cos) + (rotate_half(q) * sin)
     k_embed = (k * cos) + (rotate_half(k) * sin)
     return q_embed, k_embed
 
-#q2, k = apply_rotary_pos_emb(q, q, cos, sin)
-#print(q2[0][0][1])
+#[1,2,3,4]
+#[cos1,cos2,cos3,cos4] + [sin-3,sin-4,sin1,sin2]
+#[cos1 -sin3, cos2 - sin4, cos3 + sin1, cos4 + sin2]
 
+
+q2, k = apply_rotary_pos_emb(q, q, cos, sin)
+#print(q[0][0][1])
+#show(q2[0][0][0])
+show(q2[0][0][2])
+
+
+#print(q[0][0][1] == q2[0][0][1])
