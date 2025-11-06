@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from printer import show, dump
 
 class MistralRMSNorm(nn.Module):
     def __init__(self, g, eps=1e-6):
@@ -18,9 +19,14 @@ class MistralRMSNorm(nn.Module):
         return self.weight * hidden_states.to(input_dtype)
 
 
-x = torch.tensor([2.4, 7.8, 1.1, 5.3, 9.0, 4.7, 6.2, 3.8, 8.5, 0.6])
-g = torch.tensor([0.8, 1.2, 1.0, 0.9, 1.1, 1.3, 0.7, 1.0, 1.2, 0.95])
+x = torch.randn(4096)
+g = torch.randn(4096)
+
 norm = MistralRMSNorm(g)
 y = norm(x)
-print(y)
+
+dump("norm_x",x)
+dump("norm_g", g)
+dump("norm_y", y)
+
 

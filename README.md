@@ -16,7 +16,7 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
 - [x] **Tensor** *(src/common/tensor.cpp)*   
   Lightweight view over memory with shape and strides
 
-- [ ] **CPU Ops** *(src/backend/cpu/kernels.cpp)*   
+- [x] **CPU Ops** *(src/backend/cpu/kernels.cpp)*   
   Baseline implementations of (e.g. matmul, softmax, RoPE) to be optimized later
 
 - [ ] **Inference State** *(src/common/inference_state.h)*  

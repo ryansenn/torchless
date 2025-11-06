@@ -18,7 +18,7 @@ struct InferenceState {
 
     InferenceState(Config& config) : config(config),
                                      arena(10 * 1024 * 1024), // 40MB, how much memory will be needed?
-                                     hidden_state(arena, {MAX_SEQ_LEN, config.hidden_size}), // Only 50 tokens at a time?
+                                     hidden_state(arena, {config.hidden_size}), // Only 1 token at a time, pretty sure i will be having to rewrite this
 
                                      inv_freq(arena, {config.head_dim / 2}),
                                      cos(arena, {config.head_dim}),

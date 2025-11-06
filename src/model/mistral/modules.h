@@ -25,9 +25,20 @@ struct Attention {
     void forward(InferenceState& infer);
 };
 
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L58
+struct RMSNorm {
+    Tensor g;
+    float e = 1e-6f;
+
+    RMSNorm(Tensor& g) : g(g) {}
+    void forward(InferenceState& infer);
+};
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L206
 struct Decoder {
+    RMSNorm norm;
+
+    Decoder(Tensor& g) : norm(g){}
     void forward(InferenceState& infer);
 };
 
