@@ -19,20 +19,20 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
 - [x] **CPU Ops** *(src/backend/cpu/kernels.cpp)*   
   Baseline implementations of (e.g. matmul, softmax, RoPE) to be optimized later
 
-- [ ] **Inference State** *(src/common/inference_state.h)*  
+- [x] **Inference State** *(src/common/inference_state.h)*  
   Holds temporary memory and per-stream data used during inference
 
+- [ ] **KV Cache**   
+  Caches per-layer attention keys and values to reuse past context
+
 - [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*   
-  Implementing each module with validation against PyTorch/HF
+  Implement each module and test against PyTorch/HF
     - [x] Embedding
     - [x] RMSNorm
     - [x] Rotary Embedding
     - [ ] Attention
-    - [ ] KV Cache
     - [ ] MLP
-    - [ ] Decoder
     - [ ] LM Head
-    - [ ] Model
 
 - [ ] **CLI I/O**
 
@@ -47,7 +47,7 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
 
 #### Implementations
 - [Hugging Face - Mistral model](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
-- [Andrew Chan - yalm](https://github.com/andrewkchan/yalm)
+- [Andrew Chan - yalm](https://andrewkchan.dev/posts/yalm.html)
 - [Georgi Gerganov - GGML (tensor/operations)](https://github.com/ggml-org/llama.cpp/tree/master/ggml)
 
 #### References

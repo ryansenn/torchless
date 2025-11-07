@@ -8,24 +8,14 @@ int main(){
     Arena arena(1024*1024);
     InferenceState infer(params->config);
 
-    RotaryEmbedding::init_freq(infer, params->config);
+    auto& w = params->layer_weights[0];
+    Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"));
 
-    infer.pos = 2;
-    RotaryEmbedding::forward(infer);
+    Embedding embedding(params->global_weights.at("model.embed_tokens.weight"));
+    embedding.forward(infer, {50});
+    attn.forward(infer);
 
-    // q = torch.tensor([[i / 256 for i in range(128)] for j in range(4)])
-
-    Tensor q(arena, {4*128});
-    for (int i=0;i<q.shape[0];i++){
-        q.data[i] = (i%128) / 256.0f;
-    }
-    q = q.reshape({1,4,128});
-
-    //q.at({1}).print();
-
-    rope(q, q, infer.cos, infer.sin);
-
-    q.at({0,2}).print();
+    infer.q.print();
 
     return 0;
 }

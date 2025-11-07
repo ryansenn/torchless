@@ -1,11 +1,9 @@
 #include "modules.h"
 #include <iostream>
 
-
+// Assumes only 1 id
 void Embedding::forward(InferenceState& infer, const std::vector<size_t>& ids){
-    for (size_t i=0;i<ids.size();i++){
-        infer.hidden_state.at({i}).copy_from(table.at({i}));
-    }
+    infer.hidden_state.copy_from(table.at({ids[0]}));
 }
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L290
@@ -28,13 +26,6 @@ void RotaryEmbedding::forward(InferenceState& infer){
     }
 }
 
-void Attention::forward(InferenceState &infer) {
-    // Get q, k, v
-    // Rotate q and k
-
-
-}
-
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L195
 // x*g / sqrt(sum(x^2) + e)
 void RMSNorm::forward(InferenceState& infer) {
@@ -54,9 +45,29 @@ void RMSNorm::forward(InferenceState& infer) {
     }
 }
 
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L140
+void Attention::forward(InferenceState &infer) {
+
+    // Get q, k, v
+    // [proj, hidden_size] @ [hidden_size, 1] = [proj]
+    matmul(infer.q, q_proj, infer.hidden_state);
+    matmul(infer.k, k_proj, infer.hidden_state);
+    matmul(infer.v, v_proj, infer.hidden_state);
+
+    // Populate cos/sin embeddings
+    RotaryEmbedding::forward(infer);
+
+    // Rotate Q,K
+    rope(infer.q, infer.q, infer.cos, infer.sin);
+    rope(infer.k, infer.k, infer.cos, infer.sin);
+
+    // Perform attention with previous tokens in window
+}
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L215
 void Decoder::forward(InferenceState &infer){
     // Layer norm
-
+    norm.forward(infer);
 
     // Self attention
 

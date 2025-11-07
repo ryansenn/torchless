@@ -1,22 +1,44 @@
 #include "setup/context.h"
 
-int test_attention() {
+int test_attention1() {
     std::shared_ptr<Parameters> params = get_params();
+
+    auto& w = params->layer_weights[0];
+    Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"));
+
+    infer.hidden_state.copy_from(expected.at("attn1_h"));
+
+    attn.forward(infer);
+
+    if (!equals(infer.q, expected.at("attn1_q"))){
+        std::cout << "Attention q mismatch" << std::endl;
+        return 1;
+    }
+
+    if (!equals(infer.k, expected.at("attn1_k"))){
+        std::cout << "Attention k mismatch" << std::endl;
+        return 1;
+    }
+
+    if (!equals(infer.v, expected.at("attn1_v"))){
+        std::cout << "Attention v mismatch" << std::endl;
+        return 1;
+    }
 
     return 0;
 }
 
+RegisterTest attention1_reg("test attention first part", &test_attention1);
 
 int test_embedding() {
     std::shared_ptr<Parameters> params = get_params();
 
     Embedding emb(params->global_weights.at("model.embed_tokens.weight"));
 
-    std::vector<size_t> idx{0, 31999};
+    std::vector<size_t> idx{0};
     emb.forward(infer, idx);
 
-    Tensor emb1 = infer.hidden_state.at({0});
-    Tensor emb2 = infer.hidden_state.at({1});
+    Tensor emb1 = infer.hidden_state;
 
     if (!equals(emb1.data[0], -2.1864e-36f)) {
         std::cout << "emb1[0][0] mismatch" << std::endl;
@@ -26,6 +48,11 @@ int test_embedding() {
         std::cout << "emb1[0][-1] mismatch" << std::endl;
         return 1;
     }
+
+    idx[0] = 31999;
+    emb.forward(infer, idx);
+    Tensor emb2 = infer.hidden_state;
+
     if (!equals(emb2.data[0], -0.0040f)) {
         std::cout << "emb2[-1][0] mismatch" << std::endl;
         return 1;

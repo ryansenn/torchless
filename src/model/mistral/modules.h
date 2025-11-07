@@ -18,13 +18,6 @@ struct RotaryEmbedding {
     static void forward(InferenceState& infer);
 };
 
-// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L123
-struct Attention {
-    RotaryEmbedding rotary_emb;
-
-    void forward(InferenceState& infer);
-};
-
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L58
 struct RMSNorm {
     Tensor g;
@@ -34,11 +27,27 @@ struct RMSNorm {
     void forward(InferenceState& infer);
 };
 
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L123
+struct Attention {
+    Tensor q_proj;
+    Tensor k_proj;
+    Tensor v_proj;
+
+    Attention(const Tensor& q_proj, const Tensor& k_proj, const Tensor& v_proj) : q_proj(q_proj), k_proj(k_proj), v_proj(v_proj) {}
+    void forward(InferenceState& infer);
+};
+
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L206
 struct Decoder {
     RMSNorm norm;
+    Attention attn;
 
-    Decoder(Tensor& g) : norm(g){}
+    Decoder(Tensor& g, std::unordered_map<std::string, Tensor>& w) :
+                                norm(g),
+                                attn(w.at("self_attn.w_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"))
+                                {}
+
+
     void forward(InferenceState& infer);
 };
 
@@ -49,7 +58,7 @@ struct Model {
     Embedding embedding;
 
     Model(std::shared_ptr<Parameters> params) : params(params),
-                                                embedding(*params->global_weights["model.embed_tokens.weight"])
+                                                embedding(params->global_weights.at("model.embed_tokens.weight"))
                                                 {}
 
     void forward(InferenceState& infer, const std::vector<size_t>& ids);
