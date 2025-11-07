@@ -1,10 +1,16 @@
 #include "setup/context.h"
 
+int test_attention() {
+    std::shared_ptr<Parameters> params = get_params();
+
+    return 0;
+}
+
 
 int test_embedding() {
     std::shared_ptr<Parameters> params = get_params();
 
-    Embedding emb(*params->global_weights["model.embed_tokens.weight"]);
+    Embedding emb(params->global_weights.at("model.embed_tokens.weight"));
 
     std::vector<size_t> idx{0, 31999};
     emb.forward(infer, idx);

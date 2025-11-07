@@ -73,26 +73,26 @@ static const std::vector<Expected> expected_tensors = {
         {"model.embed_tokens.weight", -1, {32000, 4096}, -2.1864194925294548e-36f, -0.00250244140625f},
         {"model.norm.weight",         -1, {4096},         5.34375f,                 5.28125f},
         // first layer (layer 0)
-        {"model.layers.0.input_layernorm.weight",          0, {4096},        -7.4803829193115234e-06f,  0.006591796875f},
-        {"model.layers.0.post_attention_layernorm.weight", 0, {4096},         0.41796875f,              0.400390625f},
-        {"model.layers.0.self_attn.q_proj.weight",         0, {4096, 4096},   5.3882598876953125e-05f, -0.000492095947265625f},
-        {"model.layers.0.self_attn.k_proj.weight",         0, {1024, 4096},  -1.564621925354004e-06f,   0.000873565673828125f},
-        {"model.layers.0.self_attn.v_proj.weight",         0, {1024, 4096},  -0.00041961669921875f,     0.00151824951171875f},
-        {"model.layers.0.self_attn.o_proj.weight",         0, {4096, 4096},   0.000675201416015625f,   -0.00090789794921875f},
-        {"model.layers.0.mlp.gate_proj.weight",            0, {14336, 4096}, -0.00421142578125f,       -0.003753662109375f},
-        {"model.layers.0.mlp.up_proj.weight",              0, {14336, 4096}, -0.0001773834228515625f,   7.43865966796875e-05f},
-        {"model.layers.0.mlp.down_proj.weight",            0, {4096, 14336}, -0.0026397705078125f,     -0.001953125f},
+        {"input_layernorm.weight",          0, {4096},        -7.4803829193115234e-06f,  0.006591796875f},
+        {"post_attention_layernorm.weight", 0, {4096},         0.41796875f,              0.400390625f},
+        {"self_attn.q_proj.weight",         0, {4096, 4096},   5.3882598876953125e-05f, -0.000492095947265625f},
+        {"self_attn.k_proj.weight",         0, {1024, 4096},  -1.564621925354004e-06f,   0.000873565673828125f},
+        {"self_attn.v_proj.weight",         0, {1024, 4096},  -0.00041961669921875f,     0.00151824951171875f},
+        {"self_attn.o_proj.weight",         0, {4096, 4096},   0.000675201416015625f,   -0.00090789794921875f},
+        {"mlp.gate_proj.weight",            0, {14336, 4096}, -0.00421142578125f,       -0.003753662109375f},
+        {"mlp.up_proj.weight",              0, {14336, 4096}, -0.0001773834228515625f,   7.43865966796875e-05f},
+        {"mlp.down_proj.weight",            0, {4096, 14336}, -0.0026397705078125f,     -0.001953125f},
 
         // last layer (layer 31)
-        {"model.layers.31.input_layernorm.weight",          31, {4096},        2.53125f,                 2.671875f},
-        {"model.layers.31.post_attention_layernorm.weight", 31, {4096},        3.703125f,                3.71875f},
-        {"model.layers.31.self_attn.q_proj.weight",         31, {4096, 4096},  0.000484466552734375f,   -0.00168609619140625f},
-        {"model.layers.31.self_attn.k_proj.weight",         31, {1024, 4096},  0.001739501953125f,       0.0006866455078125f},
-        {"model.layers.31.self_attn.v_proj.weight",         31, {1024, 4096},  0.00177001953125f,       -0.00049591064453125f},
-        {"model.layers.31.self_attn.o_proj.weight",         31, {4096, 4096}, -0.0022430419921875f,     -0.001678466796875f},
-        {"model.layers.31.mlp.gate_proj.weight",            31, {14336, 4096},  0.000270843505859375f,   0.00116729736328125f},
-        {"model.layers.31.mlp.up_proj.weight",              31, {14336, 4096},  0.001495361328125f,       0.0013580322265625f},
-        {"model.layers.31.mlp.down_proj.weight",            31, {4096, 14336},  0.00180816650390625f,     0.0024566650390625f},
+        {"input_layernorm.weight",          31, {4096},        2.53125f,                 2.671875f},
+        {"post_attention_layernorm.weight", 31, {4096},        3.703125f,                3.71875f},
+        {"self_attn.q_proj.weight",         31, {4096, 4096},  0.000484466552734375f,   -0.00168609619140625f},
+        {"self_attn.k_proj.weight",         31, {1024, 4096},  0.001739501953125f,       0.0006866455078125f},
+        {"self_attn.v_proj.weight",         31, {1024, 4096},  0.00177001953125f,       -0.00049591064453125f},
+        {"self_attn.o_proj.weight",         31, {4096, 4096}, -0.0022430419921875f,     -0.001678466796875f},
+        {"mlp.gate_proj.weight",            31, {14336, 4096},  0.000270843505859375f,   0.00116729736328125f},
+        {"mlp.up_proj.weight",              31, {14336, 4096},  0.001495361328125f,       0.0013580322265625f},
+        {"mlp.down_proj.weight",            31, {4096, 14336},  0.00180816650390625f,     0.0024566650390625f},
 };
 
 int test_load_weights() {
@@ -123,7 +123,7 @@ int test_load_weights() {
     // Check some of the tensors have right shape, first value and last value
 
     for (const auto& e : expected_tensors) {
-        const Tensor* t = nullptr;
+        Tensor* t;
 
         if (e.layer == -1) {
             auto it = params->global_weights.find(e.key);
@@ -131,7 +131,7 @@ int test_load_weights() {
                 std::cerr << "Missing global tensor: " << e.key << "\n";
                 return 1;
             }
-            t = it->second.get();
+            t = &it->second;
         } else {
             if (e.layer < 0 || e.layer >= (int)params->layer_weights.size()) {
                 std::cerr << "Invalid layer index " << e.layer << " for " << e.key << "\n";
@@ -143,7 +143,7 @@ int test_load_weights() {
                 std::cerr << "Missing tensor: " << e.key << "\n";
                 return 1;
             }
-            t = it->second.get();
+            t = &it->second;
         }
 
         const float* p = t->data;

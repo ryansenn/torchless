@@ -45,12 +45,12 @@ void Parameters::load_config(nlohmann::json& header){
     config.head_dim          = config.hidden_size / config.n_heads;
 }
 
-void Parameters::load_tensor(std::unordered_map<std::string, std::unique_ptr<Tensor>>& m, char* p, const std::string& key, nlohmann::json& value){
+void Parameters::load_tensor(std::unordered_map<std::string, Tensor>& m, char* p, const std::string& key, nlohmann::json& value){
     uint64_t offset = value["offset"];
     std::vector<size_t> shape = value["shape"];
 
-    std::unique_ptr<Tensor> t = std::make_unique<Tensor>(reinterpret_cast<float*>(p + offset), shape);
-    m.insert({key, std::move(t)});
+    Tensor t = Tensor(reinterpret_cast<float*>(p + offset), shape);
+    m.insert({key, t});
 }
 
 // Load Tensor views for all weights using offsets from the JSON header.
@@ -69,7 +69,7 @@ void Parameters::load_weights(char* p, nlohmann::json& header){
             std::string rest = key.substr(model_prefix.size());
             int i = std::stoi(rest.substr(0, rest.find(".")));
 
-            load_tensor(layer_weights[i], p, key, value);
+            load_tensor(layer_weights[i], p, rest.substr(rest.find(".") + 1), value);
             continue;
         }
 
