@@ -6,3 +6,4 @@ cmake-build-debug/
 src/common/json.hpp
 __pycache__/
 venv
+scripts/test/output.txt

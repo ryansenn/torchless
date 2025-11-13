@@ -12,5 +12,7 @@ def list_tensors(f):
             flat = tensor.flatten()
             print(name, tensor.shape, flat[0].item(), flat[-1].item())
 
+
+
 list_tensors(f1)
 list_tensors(f2)

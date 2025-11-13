@@ -47,7 +47,6 @@ void RMSNorm::forward(InferenceState& infer) {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L140
 void Attention::forward(InferenceState &infer) {
-
     // Get q, k, v
     // [proj, hidden_size] @ [hidden_size, 1] = [proj]
     matmul(infer.q, q_proj, infer.hidden_state);

@@ -2,7 +2,8 @@ import torch
 from transformers import MistralConfig
 from torch import nn
 from typing import Optional
-from printer import show, dump
+from printer import show, dump, get_tensor
+import safetensors
 
 from transformers.models.mistral.modeling_mistral import apply_rotary_pos_emb, MistralRotaryEmbedding
 
@@ -10,7 +11,6 @@ config = MistralConfig.from_json_file("../../../Mistral-7B-v0.1/config.json")
 
 class MistralAttention(nn.Module):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
-
     def __init__(self, config: MistralConfig, layer_idx: int):
         super().__init__()
         self.config = config
@@ -32,10 +32,13 @@ class MistralAttention(nn.Module):
     ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
         input_shape = hidden_states.shape[:-1]
         hidden_shape = (*input_shape, -1, self.head_dim)
-
         query_states = self.q_proj(hidden_states).view(hidden_shape).transpose(1, 2)
         key_states = self.k_proj(hidden_states).view(hidden_shape).transpose(1, 2)
         value_states = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
+
+        #dump("pre_q", query_states)
+        #dump("pre_k", query_states)
+        #dump("pre_v", query_states)
 
         cos, sin = position_embeddings
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
@@ -44,6 +47,15 @@ class MistralAttention(nn.Module):
 
 
 m = MistralAttention(config, 0)
+
+state = {
+    "q_proj.weight": get_tensor("model.layers.0.self_attn.q_proj.weight"),
+    "k_proj.weight": get_tensor("model.layers.0.self_attn.k_proj.weight"),
+    "v_proj.weight": get_tensor("model.layers.0.self_attn.v_proj.weight"),
+    "o_proj.weight": get_tensor("model.layers.0.self_attn.o_proj.weight"),
+}
+m.load_state_dict(state)
+
 emb = MistralRotaryEmbedding(config)
 x = torch.tensor([(i % 128) / 10.0 for i in range(4 * 128)], dtype=torch.float32).view(1, 4, 1, 128)
 position_ids = torch.tensor([[0]])

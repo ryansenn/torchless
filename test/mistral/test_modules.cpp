@@ -2,6 +2,7 @@
 
 int test_attention1() {
     std::shared_ptr<Parameters> params = get_params();
+    infer.pos = 0;
 
     auto& w = params->layer_weights[0];
     Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"));
