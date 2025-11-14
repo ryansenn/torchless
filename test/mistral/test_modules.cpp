@@ -1,6 +1,36 @@
 #include "setup/context.h"
 
-int test_attention1() {
+int test_kv_cache() {
+    infer.pos = 5;
+
+    Tensor dummy(arena, infer.k_state.shape);
+    for(int i=0;i<dummy.size;i++){
+        dummy.data[i] = float(i);
+    }
+
+    infer.k_state.copy_from(dummy);
+    infer.v_state.copy_from(dummy);
+
+    infer.push_kv();
+
+    for (size_t h=0; h<infer.config.n_kv_heads; h++){
+        if (!equals(infer.k_cache.at({h, infer.pos}), dummy.at({h}))){
+            std::cout << "KV Cache push k mismatch" << std::endl;
+            return 1;
+        }
+
+        if (!equals(infer.v_cache.at({h, infer.pos}), dummy.at({h}))){
+            std::cout << "KV Cache push v mismatch" << std::endl;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+RegisterTest kv_cache_reg("test kv cache", &test_kv_cache);
+
+int test_attention() {
     std::shared_ptr<Parameters> params = get_params();
     infer.pos = 0;
 
@@ -11,25 +41,27 @@ int test_attention1() {
 
     attn.forward(infer);
 
-    if (!equals(infer.q, expected.at("attn1_q"))){
+    if (!equals(infer.q_state, expected.at("attn1_q"))){
         std::cout << "Attention q mismatch" << std::endl;
         return 1;
     }
 
-    if (!equals(infer.k, expected.at("attn1_k"))){
+    if (!equals(infer.k_state, expected.at("attn1_k"))){
         std::cout << "Attention k mismatch" << std::endl;
         return 1;
     }
 
-    if (!equals(infer.v, expected.at("attn1_v"))){
+    if (!equals(infer.v_state, expected.at("attn1_v"))){
         std::cout << "Attention v mismatch" << std::endl;
         return 1;
     }
 
+
+
     return 0;
 }
 
-RegisterTest attention1_reg("test attention first part", &test_attention1);
+RegisterTest attention_qkv_reg("test attention QKV Projection and rotation", &test_attention);
 
 int test_embedding() {
     std::shared_ptr<Parameters> params = get_params();

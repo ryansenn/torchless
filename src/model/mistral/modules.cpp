@@ -49,22 +49,25 @@ void RMSNorm::forward(InferenceState& infer) {
 void Attention::forward(InferenceState &infer) {
     // Get q, k, v
     // [proj, hidden_size] @ [hidden_size, 1] = [proj]
-    matmul(infer.q, q_proj, infer.hidden_state);
-    matmul(infer.k, k_proj, infer.hidden_state);
-    matmul(infer.v, v_proj, infer.hidden_state);
+    matmul(infer.q_state, q_proj, infer.hidden_state);
+    matmul(infer.k_state, k_proj, infer.hidden_state);
+    matmul(infer.v_state, v_proj, infer.hidden_state);
 
     // Populate cos/sin embeddings
     RotaryEmbedding::forward(infer);
 
     // Rotate Q,K
-    rope(infer.q, infer.q, infer.cos, infer.sin);
-    rope(infer.k, infer.k, infer.cos, infer.sin);
+    rope(infer.q_state, infer.q_state, infer.cos, infer.sin);
+    rope(infer.k_state, infer.k_state, infer.cos, infer.sin);
+
+    // Push to cache
 
     // Perform attention with previous tokens in window
+
 }
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L215
-void Decoder::forward(InferenceState &infer){
+void Layer::forward(InferenceState &infer){
     // Layer norm
     norm.forward(infer);
 
@@ -83,5 +86,5 @@ void Model::forward(InferenceState &infer, const std::vector<size_t> &ids) {
     // For now, I’ll attend only to tokens in the window
     // will compute full attention and mask afterward
 
-    // Create layers of decoders
+    // forward each layer
 }

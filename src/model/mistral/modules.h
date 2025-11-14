@@ -38,11 +38,11 @@ struct Attention {
 };
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L206
-struct Decoder {
+struct Layer {
     RMSNorm norm;
     Attention attn;
 
-    Decoder(Tensor& g, std::unordered_map<std::string, Tensor>& w) :
+    Layer(Tensor& g, std::unordered_map<std::string, Tensor>& w) :
                                 norm(g),
                                 attn(w.at("self_attn.w_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"))
                                 {}

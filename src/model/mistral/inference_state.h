@@ -17,9 +17,19 @@ struct InferenceState {
     Tensor cos; // [head_dim]
     Tensor sin; // [head_dim]
 
-    Tensor q; // [n_heads * head_dim]
-    Tensor k; // [n_kv_heads * head_dim]
-    Tensor v; // [n_kv_heads * head_dim]
+    Tensor q_state; // [n_heads, head_dim]
+    Tensor k_state; // [n_kv_heads, head_dim]
+    Tensor v_state; // [n_kv_heads, head_dim]
+
+    Tensor k_cache; // [n_kv_heads, seq_len, head_dim]
+    Tensor v_cache; // [n_kv_heads, seq_len, head_dim]
+
+    void push_kv(){
+        for (size_t h=0;h<config.n_kv_heads;h++){
+            k_cache.at({h, pos}).copy_from(k_state.at({h}));
+            v_cache.at({h, pos}).copy_from(v_state.at({h}));
+        }
+    }
 
     InferenceState(Config& config) : config(config),
                                      arena(100 * 1024 * 1024), // 400MB, how much memory will be needed?
@@ -29,8 +39,11 @@ struct InferenceState {
                                      cos(arena, {config.head_dim}),
                                      sin(arena, {config.head_dim}),
 
-                                     q(arena, {config.n_heads * config.head_dim}),
-                                     k(arena, {config.n_kv_heads * config.head_dim}),
-                                     v(arena, {config.n_kv_heads * config.head_dim})
+                                     q_state(arena, {config.n_heads, config.head_dim}),
+                                     k_state(arena, {config.n_kv_heads, config.head_dim}),
+                                     v_state(arena, {config.n_kv_heads, config.head_dim}),
+
+                                     k_cache(arena, {config.n_kv_heads, MAX_SEQ_LEN, config.head_dim}),
+                                     v_cache(arena, {config.n_kv_heads, MAX_SEQ_LEN, config.head_dim})
                                      {}
 };

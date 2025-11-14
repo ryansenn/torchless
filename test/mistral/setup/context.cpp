@@ -45,7 +45,7 @@ bool equals(float x, float y){
 }
 
 bool equals(const Tensor& x, const Tensor& y){
-    if (x.shape != y.shape){
+    if (x.size != y.size){
         return false;
     }
 
