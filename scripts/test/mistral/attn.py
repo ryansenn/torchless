@@ -96,7 +96,9 @@ class MistralAttention(nn.Module):
             scaling=self.scaling
             )
 
-        return query_states, key_states, value_states
+        attn_output = attn_output.reshape(*input_shape, -1).contiguous()
+        attn_output = self.o_proj(attn_output)
+        return attn_output, attn_weights
 
 
 m = MistralAttention(config, 0)
@@ -117,9 +119,11 @@ cos, sin = emb.forward(x,position_ids)
 torch.manual_seed(0)
 h = torch.randn(1,1,4096)
 
-q,k,v = m.forward(h,(cos,sin), None)
+attn_output, attn_weights = m.forward(h,(cos,sin), None)
 
-dump("attn1_h", h)
-dump("attn1_q", q)
-dump("attn1_k", k)
-dump("attn1_v", v)
+#dump("attn1_h", h)
+#dump("attn1_q", q)
+#dump("attn1_k", k)
+#dump("attn1_v", v)
+
+dump("attn_result1", attn_output)

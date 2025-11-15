@@ -7,7 +7,7 @@ void matmul(Tensor& xout, Tensor& w, Tensor& x){
     size_t n = w.shape[0];
     size_t d = w.shape[1];
 
-    assert(x.shape[0] == d && xout.size >= n && "matmul shape mismatch");
+    assert(x.size == d && xout.size >= n && "matmul shape mismatch");
 
     for (int i=0; i<n; i++){
         xout.data[i] = 0;

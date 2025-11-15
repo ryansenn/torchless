@@ -32,8 +32,17 @@ struct Attention {
     Tensor q_proj;
     Tensor k_proj;
     Tensor v_proj;
+    Tensor o_proj;
 
-    Attention(const Tensor& q_proj, const Tensor& k_proj, const Tensor& v_proj) : q_proj(q_proj), k_proj(k_proj), v_proj(v_proj) {}
+    Attention(const Tensor& q_proj,
+              const Tensor& k_proj,
+              const Tensor& v_proj,
+              const Tensor& o_proj)
+            : q_proj(q_proj),
+              k_proj(k_proj),
+              v_proj(v_proj),
+              o_proj(o_proj) {}
+
     void forward(InferenceState& infer);
 };
 
@@ -44,7 +53,10 @@ struct Layer {
 
     Layer(Tensor& g, std::unordered_map<std::string, Tensor>& w) :
                                 norm(g),
-                                attn(w.at("self_attn.w_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"))
+                                attn(w.at("self_attn.w_proj.weight"),
+                                     w.at("self_attn.k_proj.weight"),
+                                     w.at("self_attn.v_proj.weight"),
+                                     w.at("self_attn.o_proj.weight"))
                                 {}
 
 

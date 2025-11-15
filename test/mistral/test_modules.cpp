@@ -6,7 +6,7 @@ int test_attention() {
     infer.pos = 0;
 
     auto& w = params->layer_weights[0];
-    Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"));
+    Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"), w.at("self_attn.o_proj.weight"));
 
     infer.hidden_state.copy_from(expected.at("attn1_h"));
 
@@ -35,8 +35,14 @@ int test_attention() {
     }
 
     // Check context
-    if (!equals(infer.context, expected.at("attn_output"))){
+    if (!equals(infer.context, expected.at("attn1_context"))){
         std::cout << "Attention output mismatch" << std::endl;
+        return 1;
+    }
+
+    // Check final hidden_state
+    if (!equals(infer.hidden_state, expected.at("attn1_output"))){
+        std::cout << "Attention result mismatch" << std::endl;
         return 1;
     }
 

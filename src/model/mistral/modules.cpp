@@ -88,6 +88,8 @@ void Attention::forward(InferenceState &infer) {
         row_matmul(context_head, score_head, v_head);
     }
 
+    // o_proj [4096, 4096] @ context [4096]
+    matmul(infer.hidden_state, o_proj, infer.context);
 }
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L215

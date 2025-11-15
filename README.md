@@ -35,7 +35,7 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
   - [x] Embedding
   - [x] RMSNorm
   - [x] Rotary Embedding
-  - [ ] Attention
+  - [x] Attention
   - [ ] MLP
   - [ ] LM Head
 
