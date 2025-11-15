@@ -1,5 +1,50 @@
 #include "setup/context.h"
 
+
+int test_attention() {
+    std::shared_ptr<Parameters> params = get_params();
+    infer.pos = 0;
+
+    auto& w = params->layer_weights[0];
+    Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"));
+
+    infer.hidden_state.copy_from(expected.at("attn1_h"));
+
+    attn.forward(infer);
+
+    if (!equals(infer.q_state, expected.at("attn1_q"))){
+        std::cout << "Attention q mismatch" << std::endl;
+        return 1;
+    }
+
+    if (!equals(infer.k_state, expected.at("attn1_k"))){
+        std::cout << "Attention k mismatch" << std::endl;
+        return 1;
+    }
+
+    if (!equals(infer.v_state, expected.at("attn1_v"))){
+        std::cout << "Attention v mismatch" << std::endl;
+        return 1;
+    }
+
+    // Since we only attend to 1 token, the score for each head is expected to be 1
+    for (size_t h=0; h<infer.config.n_heads; h++){
+        if (!equals(infer.scores.at({h}).data[0], 1.0f)){
+            std::cout << "Attention scores after 1 token expected to be 1" << std::endl;
+        }
+    }
+
+    // Check context
+    if (!equals(infer.context, expected.at("attn_output"))){
+        std::cout << "Attention output mismatch" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+RegisterTest attention_qkv_reg("test attention QKV Projection and rotation", &test_attention);
+
 int test_kv_cache() {
     infer.pos = 5;
 
@@ -29,39 +74,6 @@ int test_kv_cache() {
 }
 
 RegisterTest kv_cache_reg("test kv cache", &test_kv_cache);
-
-int test_attention() {
-    std::shared_ptr<Parameters> params = get_params();
-    infer.pos = 0;
-
-    auto& w = params->layer_weights[0];
-    Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"));
-
-    infer.hidden_state.copy_from(expected.at("attn1_h"));
-
-    attn.forward(infer);
-
-    if (!equals(infer.q_state, expected.at("attn1_q"))){
-        std::cout << "Attention q mismatch" << std::endl;
-        return 1;
-    }
-
-    if (!equals(infer.k_state, expected.at("attn1_k"))){
-        std::cout << "Attention k mismatch" << std::endl;
-        return 1;
-    }
-
-    if (!equals(infer.v_state, expected.at("attn1_v"))){
-        std::cout << "Attention v mismatch" << std::endl;
-        return 1;
-    }
-
-
-
-    return 0;
-}
-
-RegisterTest attention_qkv_reg("test attention QKV Projection and rotation", &test_attention);
 
 int test_embedding() {
     std::shared_ptr<Parameters> params = get_params();

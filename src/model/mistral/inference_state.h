@@ -24,6 +24,9 @@ struct InferenceState {
     Tensor k_cache; // [n_kv_heads, seq_len, head_dim]
     Tensor v_cache; // [n_kv_heads, seq_len, head_dim]
 
+    Tensor scores; // [n_heads, seq_len]
+    Tensor context; // [n_heads, head_dim]
+
     void push_kv(){
         for (size_t h=0;h<config.n_kv_heads;h++){
             k_cache.at({h, pos}).copy_from(k_state.at({h}));
@@ -44,6 +47,10 @@ struct InferenceState {
                                      v_state(arena, {config.n_kv_heads, config.head_dim}),
 
                                      k_cache(arena, {config.n_kv_heads, MAX_SEQ_LEN, config.head_dim}),
-                                     v_cache(arena, {config.n_kv_heads, MAX_SEQ_LEN, config.head_dim})
+                                     v_cache(arena, {config.n_kv_heads, MAX_SEQ_LEN, config.head_dim}),
+
+                                     scores(arena, {config.n_heads, MAX_SEQ_LEN}),
+                                     context(arena, {config.n_heads, config.head_dim})
+
                                      {}
 };

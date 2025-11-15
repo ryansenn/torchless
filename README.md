@@ -1,5 +1,5 @@
 # torchless
-I'm building an inference engine from scratch that runs large language models directly from their raw weights. This project is educational meant to learn LLM inference at a deep level.
+I'm building an inference engine from scratch that runs large language models directly from their raw weights. This project is educational meant to learn LLM inference at a deeper level.
 
 The first phase focuses on achieving a working inference pass for the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1), and the second phase will focus on performance improvements.
 

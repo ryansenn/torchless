@@ -60,9 +60,33 @@ void Attention::forward(InferenceState &infer) {
     rope(infer.q_state, infer.q_state, infer.cos, infer.sin);
     rope(infer.k_state, infer.k_state, infer.cos, infer.sin);
 
-    // Push to cache
+    // Push KV to cache
+    infer.push_kv();
 
-    // Perform attention with previous tokens in window
+    // Perform attention with tokens in window
+    // softmax ( QK^t / sqrt(head_dim) ) * V
+    // TODO: Try repeating K and do 1 matmul instead of 32 individual ones
+
+    // Reuse each KV head 4 times
+    for (size_t h=0; h<infer.config.n_heads; h++){
+        // [seq_len, 128] @ [128]
+        Tensor q_head = infer.q_state.at({h}); // [128]
+        Tensor k_head = infer.k_cache.at({h/4}).reshape({infer.pos+1, infer.config.head_dim}); // [seq_len, 128]
+        Tensor score_head = infer.scores.at({h}).reshape({infer.pos+1});
+
+        // KQ
+        matmul(score_head, k_head, q_head);
+        // Divide by dk
+        mul(score_head, score_head, 1/sqrt(infer.config.head_dim));
+        // Softmax
+        softmax(score_head, score_head); // [seq_len]
+
+        Tensor v_head = infer.v_cache.at({h/4}).reshape({infer.pos+1, infer.config.head_dim});  // [seq_len, 128]
+        Tensor context_head = infer.context.at({h});
+
+        // score_head [seq_len] @ v_head [seq_len, head_dim]
+        row_matmul(context_head, score_head, v_head);
+    }
 
 }
 

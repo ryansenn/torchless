@@ -65,7 +65,7 @@ float Tensor::max(){
 Tensor Tensor::reshape(std::vector<size_t> new_shape) {
     size_t new_size = 1;
     for (auto d : new_shape) new_size *= d;
-    assert(new_size == size && "Reshape size mismatch");
+    assert(new_size <= size && "Reshape size mismatch");
     return Tensor(data, new_shape);
 }
 

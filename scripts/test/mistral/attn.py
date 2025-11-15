@@ -1,13 +1,50 @@
 import torch
 from transformers import MistralConfig
 from torch import nn
-from typing import Optional
+from typing import Optional, Callable
 from printer import show, dump, get_tensor
 import safetensors
 
 from transformers.models.mistral.modeling_mistral import apply_rotary_pos_emb, MistralRotaryEmbedding
 
 config = MistralConfig.from_json_file("../../../Mistral-7B-v0.1/config.json")
+
+def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
+    """
+    This is the equivalent of torch.repeat_interleave(x, dim=1, repeats=n_rep). The hidden states go from (batch,
+    num_key_value_heads, seqlen, head_dim) to (batch, num_attention_heads, seqlen, head_dim)
+    """
+    batch, num_key_value_heads, slen, head_dim = hidden_states.shape
+    if n_rep == 1:
+        return hidden_states
+    hidden_states = hidden_states[:, :, None, :, :].expand(batch, num_key_value_heads, n_rep, slen, head_dim)
+    return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
+def eager_attention_forward(
+        module: nn.Module,
+        query: torch.Tensor,
+        key: torch.Tensor,
+        value: torch.Tensor,
+        attention_mask: Optional[torch.Tensor],
+        scaling: float,
+        dropout: float = 0.0
+):
+    key_states = repeat_kv(key, module.num_key_value_groups)
+    value_states = repeat_kv(value, module.num_key_value_groups)
+
+    attn_weights = torch.matmul(query, key_states.transpose(2, 3)) * scaling
+    if attention_mask is not None:
+        causal_mask = attention_mask[:, :, :, : key_states.shape[-2]]
+        attn_weights = attn_weights + causal_mask
+
+    dump("attn_weights", attn_weights)
+
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+    #attn_weights = nn.functional.dropout(attn_weights, p=dropout, training=module.training)
+    attn_output = torch.matmul(attn_weights, value_states)
+    attn_output = attn_output.transpose(1, 2).contiguous()
+    dump("attn_output", attn_output)
+
+    return attn_output, attn_weights
 
 class MistralAttention(nn.Module):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
@@ -29,6 +66,9 @@ class MistralAttention(nn.Module):
             self,
             hidden_states: torch.Tensor,
             position_embeddings: tuple[torch.Tensor, torch.Tensor],
+            attention_mask: Optional[torch.Tensor],
+            past_key_values = None,
+            cache_position = None
     ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
         input_shape = hidden_states.shape[:-1]
         hidden_shape = (*input_shape, -1, self.head_dim)
@@ -42,6 +82,19 @@ class MistralAttention(nn.Module):
 
         cos, sin = position_embeddings
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
+
+
+        attention_interface: Callable = eager_attention_forward
+
+        attn_output, attn_weights = attention_interface(
+            self,
+            query_states,
+            key_states,
+            value_states,
+            attention_mask,
+            dropout=0.0 if not self.training else self.attention_dropout,
+            scaling=self.scaling
+            )
 
         return query_states, key_states, value_states
 
@@ -61,9 +114,10 @@ x = torch.tensor([(i % 128) / 10.0 for i in range(4 * 128)], dtype=torch.float32
 position_ids = torch.tensor([[0]])
 cos, sin = emb.forward(x,position_ids)
 
+torch.manual_seed(0)
 h = torch.randn(1,1,4096)
 
-q,k,v = m.forward(h,(cos,sin))
+q,k,v = m.forward(h,(cos,sin), None)
 
 dump("attn1_h", h)
 dump("attn1_q", q)
