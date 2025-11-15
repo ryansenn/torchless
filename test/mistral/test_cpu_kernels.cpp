@@ -47,6 +47,27 @@ int test_matmul(){
 
 RegisterTest matmul_reg("test matmul", &test_matmul);
 
+int test_row_matmul(){
+    Tensor w(arena, {1, 2,
+                     3, 4,
+                     5, 6}, {3, 2});
+    Tensor x(arena, {10, 20, 30}, {3});
+    Tensor xout(arena, {0, 0}, {2});
+    Tensor expected(arena, {220, 280}, {2});
+
+    row_matmul(xout, x, w);
+
+    if (!equals(xout, expected)){
+        std::cout << "row_matmul mismatch" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+RegisterTest row_matmul_reg("test row matmul", &test_row_matmul);
+
+
 int test_softmax(){
     Tensor x(arena, {1.0f, 2.0f, 3.0f}, {3});
     Tensor xout(arena, {0.0f, 0.0f, 0.0f}, {3});

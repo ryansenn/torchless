@@ -7,14 +7,15 @@
 
 #include "tensor.h"
 
+void matmul(Tensor& xout, Tensor& w, Tensor& x);
+void row_matmul(Tensor& xout, Tensor& x, Tensor& w);
+void softmax(Tensor& xout, Tensor x);
+void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin);
+
 float sum(Tensor& x);
 void add(Tensor& xout, Tensor& x, float c);
 void mul(Tensor& xout, Tensor&x, float c);
 void pow(Tensor& xout, Tensor& x, int e);
 void sqrt(Tensor& xout, Tensor& x);
-
-void matmul(Tensor& xout, Tensor& w, Tensor& x);
-void softmax(Tensor& xout, Tensor x);
-void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin);
 
 #endif // MATH_OPS_H

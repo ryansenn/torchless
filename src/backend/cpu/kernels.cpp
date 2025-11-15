@@ -2,21 +2,40 @@
 #include "../../common/kernels.h"
 
 // This only works for
-// W (d,n) @ x (n,) = xout (d,)
+// W (n,d) @ x (d,) = xout (n,)
 void matmul(Tensor& xout, Tensor& w, Tensor& x){
-    size_t d = w.shape[0];
-    size_t n = w.shape[1];
+    size_t n = w.shape[0];
+    size_t d = w.shape[1];
 
-    assert(x.shape[0] == n && xout.size == d && "matmul shape mismatch");
+    assert(x.shape[0] == d && xout.size >= n && "matmul shape mismatch");
 
-    for (int i=0; i<d; i++){
+    for (int i=0; i<n; i++){
         xout.data[i] = 0;
-        for (int j=0; j<n; j++){
-            xout.data[i] += w.data[i*n+j] * x.data[j];
+        for (int j=0; j<d; j++){
+            xout.data[i] += w.data[i*d+j] * x.data[j];
         }
     }
 }
 
+
+
+// x (,n) @ W (n,d) = xout (d,)
+void row_matmul(Tensor& xout, Tensor& x, Tensor& w){
+    size_t n = w.shape[0];
+    size_t d = w.shape[1];
+
+    assert(x.shape[0] == n && xout.size >= d && "matmul shape mismatch");
+
+    for (int i=0; i<d; i++){
+        xout.data[i] = 0;
+        for (int j=0; j<n; j++){
+            xout.data[i] += w.data[j*d+i] * x.data[j];
+        }
+    }
+}
+
+
+// e^x / sum(e^x)
 // Here we compute the max and subtract it from each logit to avoid overflow,
 // keeping the relative ratios unchanged (softmax is shift-invariant)
 void softmax(Tensor& xout, Tensor x){
