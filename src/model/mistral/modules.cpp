@@ -92,25 +92,56 @@ void Attention::forward(InferenceState &infer) {
     matmul(infer.hidden_state, o_proj, infer.context);
 }
 
-// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L215
-void Layer::forward(InferenceState &infer){
-    // Layer norm
-    norm.forward(infer);
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L46
+// Mistral uses a SwiGLU feedforward block
+// It runs the input through two linear projections.
+// The first gives the main signal, the second goes through a silu activation
+// Then multiplies these two paths together and apply the final projection
+void MLP::forward(InferenceState &infer) {
+    // gate_proj [14336, 4096] @ hidden_state [4096]
+    matmul(infer.mlp_gate, gate_proj, infer.hidden_state);
 
-    // Self attention
+    // Activation
+    silu(infer.mlp_gate, infer.mlp_gate);
 
-    // Residuals
+    // up_proj [14336, 4096] @ hidden_state [4096]
+    matmul(infer.mlp_up, gate_proj, infer.hidden_state);
+
+    // Multiply
+    mul(infer.mlp_gate, infer.mlp_gate, infer.mlp_up);
+
+    // down_proj [4096, 14336] @ [14336]
+    matmul(infer.hidden_state, down_proj, infer.mlp_gate);
 }
 
-// I think I will process one token at a time for now
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L215
+void Layer::forward(InferenceState &infer){
+    // Populate residual using block input
+    infer.residual.copy_from(infer.hidden_state);
+
+    // Layer norm
+    input_norm.forward(infer);
+
+    // Self attention
+    attn.forward(infer);
+
+    // Add residual to hidden state
+    add(infer.hidden_state, infer.hidden_state, infer.residual);
+
+    // Layer norm
+    output_norm.forward(infer);
+
+    // Feed forward
+
+}
+
+// Processes 1 token at a time
 // And do a refactor/rewrite to support multiple tokens
 void Model::forward(InferenceState &infer, const std::vector<size_t> &ids) {
     infer.seq_len += ids.size();
     embedding.forward(infer, ids);
 
-    // Should use a causal mask to restrict attention to the window
-    // For now, I’ll attend only to tokens in the window
-    // will compute full attention and mask afterward
+    // Should use a causal mask to restrict attention to the window?
 
     // forward each layer
 }

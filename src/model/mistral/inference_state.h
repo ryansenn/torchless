@@ -10,6 +10,7 @@ struct InferenceState {
     Arena arena;
 
     Tensor hidden_state; // [hidden_size]
+    Tensor residual; // [hidden_size]
     size_t pos = 0;
     size_t seq_len = 0;
 
@@ -27,6 +28,9 @@ struct InferenceState {
     Tensor scores; // [n_heads, seq_len]
     Tensor context; // [n_heads, head_dim]
 
+    Tensor mlp_gate; // [intermediate_size]
+    Tensor mlp_up; // [intermediate_size]
+
     void push_kv(){
         for (size_t h=0;h<config.n_kv_heads;h++){
             k_cache.at({h, pos}).copy_from(k_state.at({h}));
@@ -37,6 +41,7 @@ struct InferenceState {
     InferenceState(Config& config) : config(config),
                                      arena(100 * 1024 * 1024), // 400MB, how much memory will be needed?
                                      hidden_state(arena, {config.hidden_size}), // Only 1 token at a time, pretty sure i will be having to rewrite this
+                                     residual(arena, {config.hidden_size}),
 
                                      inv_freq(arena, {config.head_dim / 2}),
                                      cos(arena, {config.head_dim}),
@@ -50,7 +55,10 @@ struct InferenceState {
                                      v_cache(arena, {config.n_kv_heads, MAX_SEQ_LEN, config.head_dim}),
 
                                      scores(arena, {config.n_heads, MAX_SEQ_LEN}),
-                                     context(arena, {config.n_heads, config.head_dim})
+                                     context(arena, {config.n_heads, config.head_dim}),
+
+                                     mlp_gate(arena, {config.intermediate_size}),
+                                     mlp_up(arena, {config.intermediate_size})
 
                                      {}
 };

@@ -23,7 +23,7 @@ struct RMSNorm {
     Tensor g;
     float e = 1e-6f;
 
-    RMSNorm(Tensor& g) : g(g) {}
+    RMSNorm(const Tensor& g) : g(g) {}
     void forward(InferenceState& infer);
 };
 
@@ -46,17 +46,37 @@ struct Attention {
     void forward(InferenceState& infer);
 };
 
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L35
+struct MLP {
+    Tensor down_proj;
+    Tensor gate_proj;
+    Tensor up_proj;
+
+    MLP(const Tensor& down_proj, const Tensor& gate_proj, const Tensor& up_proj) : down_proj(down_proj), gate_proj(gate_proj), up_proj(up_proj){}
+
+    void forward(InferenceState& infer);
+};
+
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L206
 struct Layer {
-    RMSNorm norm;
+    RMSNorm input_norm;
+    RMSNorm output_norm;
     Attention attn;
+    MLP mlp;
 
-    Layer(Tensor& g, std::unordered_map<std::string, Tensor>& w) :
-                                norm(g),
+    Layer(const Tensor& input_norm, const Tensor& output_norm, std::unordered_map<std::string, Tensor>& w) :
+
+                                input_norm(input_norm),
+                                output_norm(output_norm),
+
                                 attn(w.at("self_attn.w_proj.weight"),
                                      w.at("self_attn.k_proj.weight"),
                                      w.at("self_attn.v_proj.weight"),
-                                     w.at("self_attn.o_proj.weight"))
+                                     w.at("self_attn.o_proj.weight")),
+
+                                mlp(w.at("mlp.down_proj.weight"),
+                                     w.at("mlp.gate_proj.weight"),
+                                     w.at("mlp.up_proj.weight"))
                                 {}
 
 

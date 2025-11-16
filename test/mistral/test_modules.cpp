@@ -51,6 +51,28 @@ int test_attention() {
 
 RegisterTest attention_qkv_reg("test attention QKV Projection and rotation", &test_attention);
 
+int test_mlp(){
+    std::shared_ptr<Parameters> params = get_params();
+    auto w = params->layer_weights[0];
+
+    MLP mlp(w.at("mlp.down_proj.weight"),
+            w.at("mlp.gate_proj.weight"),
+            w.at("mlp.up_proj.weight"));
+
+    infer.hidden_state.copy_from(expected.at("mlp_h"));
+
+    mlp.forward(infer);
+
+    if (!equals(infer.hidden_state, expected.at("mlp_output"))){
+        std::cout << "MLP feedforward result mismatch" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+RegisterTest mlp_feedforward_reg("test attention feedforward mlp", &test_mlp);
+
 int test_kv_cache() {
     infer.pos = 5;
 
