@@ -16,8 +16,13 @@ void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin);
 void silu(Tensor& xout, Tensor& x);
 
 float sum(Tensor& x);
+
+void add(Tensor& xout, Tensor& x, Tensor& y);
 void add(Tensor& xout, Tensor& x, float c);
-void mul(Tensor& xout, Tensor&x, float c);
+
+void mul(Tensor& xout, Tensor& x, Tensor& y);
+void mul(Tensor& xout, Tensor& x, float c);
+
 void pow(Tensor& xout, Tensor& x, int e);
 void sqrt(Tensor& xout, Tensor& x);
 

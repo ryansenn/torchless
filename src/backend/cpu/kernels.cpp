@@ -90,6 +90,8 @@ void silu(Tensor& xout, Tensor& x){
 }
 
 
+
+
 // Not sure if I will be using all of those
 float sum(Tensor& x){
     float r = 0.0f;
@@ -99,9 +101,22 @@ float sum(Tensor& x){
     return r;
 }
 
+void add(Tensor& xout, Tensor& x, Tensor& y){
+    for (int i = 0; i < x.size; i++) {
+        xout.data[i] = x.data[i] + y.data[i];
+    }
+}
+
+
 void add(Tensor& xout, Tensor& x, float c){
     for (int i = 0; i < x.size; i++) {
         xout.data[i] = x.data[i] + c;
+    }
+}
+
+void mul(Tensor& xout, Tensor& x, Tensor& y){
+    for (int i = 0; i < x.size; i++) {
+        xout.data[i] = x.data[i] * y.data[i];
     }
 }
 
