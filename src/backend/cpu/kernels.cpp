@@ -38,7 +38,7 @@ void row_matmul(Tensor& xout, Tensor& x, Tensor& w){
 // e^x / sum(e^x)
 // Here we compute the max and subtract it from each logit to avoid overflow,
 // keeping the relative ratios unchanged (softmax is shift-invariant)
-void softmax(Tensor& xout, Tensor x){
+void softmax(Tensor& xout, Tensor& x){
     float maxv = x.max();
     float total = 0;
     for (int i=0; i<x.size; i++){
@@ -79,6 +79,13 @@ void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
                 xout.data[i+half] = xi*s + yi*c;
             }
         }
+    }
+}
+
+// x / (1 + exp(-x))
+void silu(Tensor& xout, Tensor& x){
+    for (int i=0;i<x.size;i++){
+        xout.data[i] = x.data[i] / (1 + exp(-x.data[i]));
     }
 }
 

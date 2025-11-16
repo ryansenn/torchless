@@ -85,6 +85,29 @@ int test_softmax(){
 RegisterTest softmaxl_reg("test softmax", &test_softmax);
 
 
+int test_silu(){
+    Tensor x(arena, {-2.0f, -1.0f, 0.0f, 1.0f, 2.0f}, {5});
+
+    Tensor expected(arena, {
+            -2.0f / (1 + expf(2.0f)),
+            -1.0f / (1 + expf(1.0f)),
+            0.0f,
+            1.0f / (1 + expf(-1.0f)),
+            2.0f / (1 + expf(-2.0f))
+    }, {5});
+
+    Tensor xout(arena, {5});
+
+    silu(xout, x);
+
+    if (!equals(xout, expected)){
+        std::cout << "tensor silu mismatch" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
 
 int test_sum(){
     Tensor x(arena, {1.1f,2.2f,3.3f,4.4f,5.5f,6.6f}, {6});
