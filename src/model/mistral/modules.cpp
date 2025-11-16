@@ -105,7 +105,7 @@ void MLP::forward(InferenceState &infer) {
     silu(infer.mlp_gate, infer.mlp_gate);
 
     // up_proj [14336, 4096] @ hidden_state [4096]
-    matmul(infer.mlp_up, gate_proj, infer.hidden_state);
+    matmul(infer.mlp_up, up_proj, infer.hidden_state);
 
     // Multiply
     mul(infer.mlp_gate, infer.mlp_gate, infer.mlp_up);

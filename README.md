@@ -1,7 +1,5 @@
 # torchless
-I'm building an inference engine from scratch that runs large language models directly from their raw weights. This project is educational meant to learn LLM inference at a deeper level.
-
-The first phase focuses on achieving a working inference pass for the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1), and the second phase will focus on performance improvements.
+Torchless is an LLM inference engine built from scratch
 
 # Roadmap
 
@@ -11,38 +9,33 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
   - [x] **In-memory loader** *(src/loader/parameters.cpp)*  
     Memory-maps the binary, loads the config and provides direct tensor views.
 
-<br>  
-
 - [x] **Tensor & Ops**
   - [x] Tensor implemented as a view over memory with shape/strides *(src/common/tensor.cpp)*
   - [x] Math operations (e.g. matmul, softmax, RoPE) to be optimized later *(src/backend/cpu/kernels.cpp)*
 
-<br>  
-
 - [x] **Tokenizer**  *(src/tokenizer/tokenizer.cpp)*     
   The tokenizer implements full byte-pair encoding (BPE) compatible with Mistral’s vocabulary. It loads tokenizer.json, builds vocab and merge maps, applies Metaspace pre-tokenization, encodes UTF-8 text by merging token pairs by rank, and supports byte fallback
-
-
-<br>  
 
 - [x] **Inference State** *(src/common/inference_state.h)*  
   Holds temporary memory and KV cache used during inference
 
-<br>  
-
-- [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*   
-  Each module implementation and test against PyTorch/HF
-  - [x] Embedding
-  - [x] RMSNorm
-  - [x] Rotary Embedding
-  - [x] Attention
-  - [x] MLP
-  - [ ] Decoder
-  - [ ] LM Head
-
-<br>  
+- [ ] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*
+  - Each module implemented and tested against PyTorch/HF
+    - [x] **Embedding** - Looks up initial embedding from token ids.
+    - [x] **RMSNorm** - computes the RMS over the current hidden_state, normalizes it, and applies the learned gain vector g
+    - [x] **Rotary Embedding** - precomputes inverse frequencies from rope_theta and fills cos/sin tensors for RoPE for each position.
+    - [x] **Attention** - projects hidden_state into Q/K/V, applies RoPE to Q and K, updates the KV cache, runs grouped-query attention over the window, then applies the output projection back into hidden_state
+    - [x] **Feedforward MLP** - implements the SwiGLU feedforward: linear projections + SiLU
+    - [x] **Layer** - runs norm, attention, and MLP with residuals around each subblock
+    - [ ] **LM Head**
 
 - [ ] **CLI I/O**
+
+- [ ] **Quantization**
+
+- [ ] **Parallelization**
+
+- [ ] **Custom CUDA Kernels**
 
 # Resources
 
@@ -58,5 +51,6 @@ The first phase focuses on achieving a working inference pass for the [Mistral 7
 - [Andrew Chan - yalm](https://andrewkchan.dev/posts/yalm.html)
 - [Georgi Gerganov - GGML (tensor/operations)](https://github.com/ggml-org/llama.cpp/tree/master/ggml)
 
-#### References
-- [PyTorch Documentation](https://docs.pytorch.org/docs/stable/index.html)
+My C++ Mistral architecture implementation matches the HF transformers python implementation. Each module has been checked against it.
+
+Andrew Chan's yaml project was the inspiration for starting this project, strongly recommend his blog posts.

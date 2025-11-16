@@ -88,13 +88,7 @@ RegisterTest softmaxl_reg("test softmax", &test_softmax);
 int test_silu(){
     Tensor x(arena, {-2.0f, -1.0f, 0.0f, 1.0f, 2.0f}, {5});
 
-    Tensor expected(arena, {
-            -2.0f / (1 + expf(2.0f)),
-            -1.0f / (1 + expf(1.0f)),
-            0.0f,
-            1.0f / (1 + expf(-1.0f)),
-            2.0f / (1 + expf(-2.0f))
-    }, {5});
+    Tensor expected(arena, {-0.2384, -0.2689,  0.0000,  0.7311,  1.7616}, {5});
 
     Tensor xout(arena, {5});
 
@@ -107,6 +101,8 @@ int test_silu(){
 
     return 0;
 }
+
+RegisterTest silu_reg("test silu", &test_silu);
 
 
 int test_sum(){

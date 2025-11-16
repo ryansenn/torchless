@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from transformers import MistralConfig
 from transformers.activations import ACT2FN
-from printer import dump
+from printer import dump, get_tensor
 
 
 class MistralMLP(nn.Module):
@@ -17,6 +17,10 @@ class MistralMLP(nn.Module):
         self.act_fn = ACT2FN[config.hidden_act]
 
     def forward(self, x):
+        #dump("first", self.gate_proj(x)[:5])
+        dump("second", self.up_proj(x)[:5])
+        #dump("third", self.act_fn(self.gate_proj(x))[:5])
+        #dump("fourth", (self.act_fn(self.gate_proj(x)) * self.up_proj(x))[:5])
         down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
         return down_proj
 
@@ -27,10 +31,15 @@ h = torch.randn(4096)
 
 mlp = MistralMLP(config)
 
+state = {
+    "down_proj.weight": get_tensor("model.layers.0.mlp.down_proj.weight"),
+    "gate_proj.weight": get_tensor("model.layers.0.mlp.gate_proj.weight"),
+    "up_proj.weight": get_tensor("model.layers.0.mlp.up_proj.weight"),
+}
+mlp.load_state_dict(state)
+
 y = mlp.forward(h)
 
-dump("mlp_h", h)
-dump("mlp_output", y)
-
-
+#dump("mlp_h", h)
+#dump("mlp_output", y)
 
