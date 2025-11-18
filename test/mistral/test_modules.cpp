@@ -125,8 +125,8 @@ int test_embedding() {
 
     Embedding emb(params->global_weights.at("model.embed_tokens.weight"));
 
-    std::vector<size_t> idx{0};
-    emb.forward(infer, idx);
+    size_t token_id = 0;
+    emb.forward(infer, token_id);
 
     Tensor emb1 = infer.hidden_state;
 
@@ -139,8 +139,8 @@ int test_embedding() {
         return 1;
     }
 
-    idx[0] = 31999;
-    emb.forward(infer, idx);
+    token_id = 31999;
+    emb.forward(infer, token_id);
     Tensor emb2 = infer.hidden_state;
 
     if (!equals(emb2.data[0], -0.0040f)) {

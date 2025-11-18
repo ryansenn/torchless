@@ -9,7 +9,7 @@ struct Embedding {
     size_t num_embeddings;
     size_t embedding_dim;
     Embedding(Tensor& table) : table(table), num_embeddings(table.shape[0]), embedding_dim(table.shape[1]) {}
-    void forward(InferenceState& infer, const std::vector<size_t>& ids);
+    void forward(InferenceState& infer, size_t token_id);
 };
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L268
@@ -88,11 +88,15 @@ struct Layer {
 struct Model {
     std::shared_ptr<Parameters> params;
     Embedding embedding;
+    RMSNorm norm;
+    std::vector<Layer> layers;
 
-    Model(std::shared_ptr<Parameters> params) : params(params),
-                                                embedding(params->global_weights.at("model.embed_tokens.weight"))
-                                                {}
+    Model(std::shared_ptr<Parameters> params) : params(params), embedding(params->global_weights.at("model.embed_tokens.weight")), norm(params->global_weights.at("model.norm.weight")){
+        for (int i=0;i<params->config.n_layers; i++){
+            layers.emplace_back(params->layer_weights[i]);
+        }
+    }
 
-    void forward(InferenceState& infer, const std::vector<size_t>& ids);
+    void forward(InferenceState& infer, size_t token_id);
 };
 

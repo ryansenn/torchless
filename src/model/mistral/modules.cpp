@@ -2,8 +2,8 @@
 #include <iostream>
 
 // Assumes only 1 id
-void Embedding::forward(InferenceState& infer, const std::vector<size_t>& ids){
-    infer.hidden_state.copy_from(table.at({ids[0]}));
+void Embedding::forward(InferenceState& infer, size_t token_id){
+    infer.hidden_state.copy_from(table.at({token_id}));
 }
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L290
@@ -141,13 +141,19 @@ void Layer::forward(InferenceState &infer){
     add(infer.hidden_state, infer.hidden_state, infer.residual);
 }
 
-// Processes 1 token at a time
-// And do a refactor/rewrite to support multiple tokens
-void Model::forward(InferenceState &infer, const std::vector<size_t> &ids) {
-    infer.seq_len += ids.size();
-    embedding.forward(infer, ids);
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L334
+// Processes 1 token at a time and do a rewrite to support multiple tokens
+void Model::forward(InferenceState &infer, size_t token_id) {
+    // Get token embedding
+    embedding.forward(infer, token_id);
 
-    // Should use a causal mask to restrict attention to the window?
+    // Forward each layer
+    for (auto& layer : layers) {
+        layer.forward(infer);
+    }
 
-    // forward each layer
+    // Norm
+    norm.forward(infer);
+
+    infer.pos++;
 }
