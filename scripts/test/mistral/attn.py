@@ -2,12 +2,29 @@ import torch
 from transformers import MistralConfig
 from torch import nn
 from typing import Optional, Callable
+
+from transformers.masking_utils import create_causal_mask, create_sliding_window_causal_mask
+
 from printer import show, dump, get_tensor
 import safetensors
 
-from transformers.models.mistral.modeling_mistral import apply_rotary_pos_emb, MistralRotaryEmbedding
+from transformers.models.mistral.modeling_mistral import MistralRotaryEmbedding
 
 config = MistralConfig.from_json_file("../../../Mistral-7B-v0.1/config.json")
+
+def rotate_half(x):
+    x1 = x[..., : x.shape[-1] // 2]
+    x2 = x[..., x.shape[-1] // 2 :]
+    return torch.cat((-x2, x1), dim=-1)
+
+
+def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    cos = cos.unsqueeze(unsqueeze_dim)
+    sin = sin.unsqueeze(unsqueeze_dim)
+    q_embed = (q * cos) + (rotate_half(q) * sin)
+    k_embed = (k * cos) + (rotate_half(k) * sin)
+    print(q_embed[0][0][1])
+    return q_embed, k_embed
 
 def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
     """
@@ -25,24 +42,19 @@ def eager_attention_forward(
         key: torch.Tensor,
         value: torch.Tensor,
         attention_mask: Optional[torch.Tensor],
-        scaling: float,
-        dropout: float = 0.0
+        scaling: float
 ):
     key_states = repeat_kv(key, module.num_key_value_groups)
     value_states = repeat_kv(value, module.num_key_value_groups)
-
     attn_weights = torch.matmul(query, key_states.transpose(2, 3)) * scaling
+
     if attention_mask is not None:
         causal_mask = attention_mask[:, :, :, : key_states.shape[-2]]
         attn_weights = attn_weights + causal_mask
 
-    dump("attn_weights", attn_weights)
-
     attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
-    #attn_weights = nn.functional.dropout(attn_weights, p=dropout, training=module.training)
     attn_output = torch.matmul(attn_weights, value_states)
     attn_output = attn_output.transpose(1, 2).contiguous()
-    dump("attn_output", attn_output)
 
     return attn_output, attn_weights
 
@@ -76,23 +88,21 @@ class MistralAttention(nn.Module):
         key_states = self.k_proj(hidden_states).view(hidden_shape).transpose(1, 2)
         value_states = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
 
-        #dump("pre_q", query_states)
-        #dump("pre_k", query_states)
-        #dump("pre_v", query_states)
-
         cos, sin = position_embeddings
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
 
+        for i in range(1,4):
+            dump("attn_q"+str(i), query_states.transpose(1, 2)[0][i-1])
+            dump("attn_k"+str(i), key_states.transpose(1, 2)[0][i-1])
+            dump("attn_v"+str(i), value_states.transpose(1, 2)[0][i-1])
 
-        attention_interface: Callable = eager_attention_forward
 
-        attn_output, attn_weights = attention_interface(
+        attn_output, attn_weights = eager_attention_forward(
             self,
             query_states,
             key_states,
             value_states,
             attention_mask,
-            dropout=0.0 if not self.training else self.attention_dropout,
             scaling=self.scaling
             )
 
@@ -113,17 +123,42 @@ m.load_state_dict(state)
 
 emb = MistralRotaryEmbedding(config)
 x = torch.tensor([(i % 128) / 10.0 for i in range(4 * 128)], dtype=torch.float32).view(1, 4, 1, 128)
-position_ids = torch.tensor([[0]])
+position_ids = torch.tensor([[0,1,2]])
 cos, sin = emb.forward(x,position_ids)
 
 torch.manual_seed(0)
-h = torch.randn(1,1,4096)
+h0 = torch.randn(1, 1, 4096)
+h1 = torch.randn(1, 1, 4096)
+h2 = torch.randn(1, 1, 4096)
 
-attn_output, attn_weights = m.forward(h,(cos,sin), None)
+hidden_states = torch.cat([h0, h1, h2], dim=1)
 
-#dump("attn1_h", h)
-#dump("attn1_q", q)
-#dump("attn1_k", k)
-#dump("attn1_v", v)
+config._attn_implementation = "eager"
 
-dump("attn_result1", attn_output)
+mask_function = create_causal_mask if config.sliding_window is None else create_sliding_window_causal_mask
+causal_mask = mask_function(
+    config=config,
+    input_embeds=hidden_states,
+    attention_mask=None,
+    cache_position=position_ids[0],
+    past_key_values=None,
+    position_ids=position_ids,
+)
+
+attn_output, attn_weights = m.forward(hidden_states,(cos,sin), causal_mask)
+
+dump("attn_h1", h0)
+dump("attn_h2", h1)
+dump("attn_h3", h2)
+
+
+#for i in range(1,4):
+    #dump("attn_w" + str(i), attn_weights[0,:,i-1,:i])
+
+dump("attn_o1", attn_output[0][0])
+dump("attn_o2", attn_output[0][1])
+dump("attn_o3", attn_output[0][2])
+
+
+
+

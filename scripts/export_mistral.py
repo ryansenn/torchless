@@ -6,6 +6,9 @@ import safetensors
 import torch
 
 """
+Usage: 
+python export_mistral.py path/to/Mistral-7B-v0.1
+
 This script converts a Hugging Face Mistral model into one standardized binary file that can be fed into the inference engine.
 
 Inputs (from the downloaded model directory):

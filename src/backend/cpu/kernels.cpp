@@ -63,21 +63,19 @@ void softmax(Tensor& xout, Tensor& x){
 // TODO: This only works 1 token at time (assumed seq_len = 1), cos/sin is only given for 1 pos
 void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
     size_t n_heads = x.shape[0];
-    size_t seq_len = x.shape[1];
+    //size_t seq_len = x.shape[1];
     size_t head_size = x.shape[2];
     size_t half = head_size/2;
 
     for (size_t h = 0; h<n_heads; h++){
-        for (size_t p = 0; p < seq_len; p++){
-            int start = h*x.strides[0] + p *x.strides[1];
-            for (int i = start; i < start+half; i++){
-                float xi = x.data[i];
-                float yi = x.data[i+half];
-                float c = cos.data[i % head_size];
-                float s = sin.data[i % head_size];
-                xout.data[i] = xi*c - yi*s;
-                xout.data[i+half] = xi*s + yi*c;
-            }
+        int start = h*x.strides[0];
+        for (int i = start; i < start+half; i++){
+            float xi = x.data[i];
+            float yi = x.data[i+half];
+            float c = cos.data[i - start];
+            float s = sin.data[i - start];
+            xout.data[i] = xi*c - yi*s;
+            xout.data[i+half] = xi*s + yi*c;
         }
     }
 }

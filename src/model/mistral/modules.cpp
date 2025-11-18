@@ -116,7 +116,7 @@ void MLP::forward(InferenceState &infer) {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L215
 void Layer::forward(InferenceState &infer){
-    // Populate residual using block input
+    // Copy input into residual
     infer.residual.copy_from(infer.hidden_state);
 
     // Layer norm
@@ -128,11 +128,17 @@ void Layer::forward(InferenceState &infer){
     // Add residual to hidden state
     add(infer.hidden_state, infer.hidden_state, infer.residual);
 
+    // Copy input into residual
+    infer.residual.copy_from(infer.hidden_state);
+
     // Layer norm
     output_norm.forward(infer);
 
     // Feed forward
+    mlp.forward(infer);
 
+    // Add residual
+    add(infer.hidden_state, infer.hidden_state, infer.residual);
 }
 
 // Processes 1 token at a time

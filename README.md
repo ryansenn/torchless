@@ -51,6 +51,6 @@ Torchless is an LLM inference engine built from scratch
 - [Andrew Chan - yalm](https://andrewkchan.dev/posts/yalm.html)
 - [Georgi Gerganov - GGML (tensor/operations)](https://github.com/ggml-org/llama.cpp/tree/master/ggml)
 
-My C++ Mistral architecture implementation matches the HF transformers python implementation. Each module has been checked against it.
+My C++ Mistral architecture implementation matches the HF transformers python implementation
 
-Andrew Chan's yaml project was the inspiration for starting this project, strongly recommend his blog posts.
+Andrew Chan's yaml project was the inspiration for starting this project, strongly recommend his blog posts

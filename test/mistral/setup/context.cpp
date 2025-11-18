@@ -24,7 +24,7 @@ void load_expected_values(){
     std::string line, name;
 
     while (std::getline(f, name)){
-        if (name == "") continue;
+        if (name == "" || name[0] == '#') continue;
         std::getline(f, line);
         std::stringstream ss(line);
         float x;

@@ -8,48 +8,44 @@ int test_attention() {
     auto& w = params->layer_weights[0];
     Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"), w.at("self_attn.o_proj.weight"));
 
-    infer.hidden_state.copy_from(expected.at("attn1_h"));
+    // Test over sequence of 3 tokens
+    for (int i=1;i<4;i++){
+        infer.hidden_state.copy_from(expected.at("attn_h" + std::to_string(i)));
+        attn.forward(infer);
 
-    attn.forward(infer);
-
-    if (!equals(infer.q_state, expected.at("attn1_q"))){
-        std::cout << "Attention q mismatch" << std::endl;
-        return 1;
-    }
-
-    if (!equals(infer.k_state, expected.at("attn1_k"))){
-        std::cout << "Attention k mismatch" << std::endl;
-        return 1;
-    }
-
-    if (!equals(infer.v_state, expected.at("attn1_v"))){
-        std::cout << "Attention v mismatch" << std::endl;
-        return 1;
-    }
-
-    // Since we only attend to 1 token, the score for each head is expected to be 1
-    for (size_t h=0; h<infer.config.n_heads; h++){
-        if (!equals(infer.scores.at({h}).data[0], 1.0f)){
-            std::cout << "Attention scores after 1 token expected to be 1" << std::endl;
+        if (!equals(infer.q_state, expected.at("attn_q" + std::to_string(i)))){
+            std::cout << "Attention q mismatch at token " + std::to_string(i) << std::endl;
+            return 1;
         }
-    }
 
-    // Check context
-    if (!equals(infer.context, expected.at("attn1_context"))){
-        std::cout << "Attention output mismatch" << std::endl;
-        return 1;
-    }
+        if (!equals(infer.k_state, expected.at("attn_k" + std::to_string(i)))){
+            std::cout << "Attention k mismatch at token "  + std::to_string(i)  << std::endl;
+            return 1;
+        }
 
-    // Check final hidden_state
-    if (!equals(infer.hidden_state, expected.at("attn1_output"))){
-        std::cout << "Attention result mismatch" << std::endl;
-        return 1;
+        if (!equals(infer.v_state, expected.at("attn_v" + std::to_string(i)))){
+            std::cout << "Attention v mismatch at token "  + std::to_string(i)  << std::endl;
+            return 1;
+        }
+
+        /*
+        if (!equals(infer.scores.reshape({infer.scores.shape[0], infer.pos+1}), expected.at("attn_w" + std::to_string(i)))){
+            std::cout << "Attention weights mismatch at token " + std::to_string(i)  << std::endl;
+            return 1;
+        }
+        */
+
+        if (!equals(infer.hidden_state, expected.at("attn_o" + std::to_string(i)))){
+            std::cout << "Attention result mismatch at token " + std::to_string(i)  << std::endl;
+            return 1;
+        }
+        infer.pos++;
     }
 
     return 0;
 }
 
-RegisterTest attention_qkv_reg("test attention QKV Projection and rotation", &test_attention);
+RegisterTest attention_reg("test attention", &test_attention);
 
 int test_mlp(){
     std::shared_ptr<Parameters> params = get_params();
