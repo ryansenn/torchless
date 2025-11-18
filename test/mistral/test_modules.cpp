@@ -1,5 +1,26 @@
 #include "setup/context.h"
 
+int test_layer() {
+    std::shared_ptr<Parameters> params = get_params();
+    infer.pos = 0;
+
+    Layer layer(params->layer_weights[0]);
+
+    // Test over sequence of 3 tokens
+    for (int i=1;i<4;i++) {
+        infer.hidden_state.copy_from(expected.at("layer_h" + std::to_string(i)));
+        layer.forward(infer);
+
+        if (!equals(infer.hidden_state, expected.at("layer_o" + std::to_string(i)))){
+            std::cout << "Layer mismatch at token " + std::to_string(i) << std::endl;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+RegisterTest layer_reg("test layer", &test_layer);
 
 int test_attention() {
     std::shared_ptr<Parameters> params = get_params();

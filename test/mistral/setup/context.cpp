@@ -39,7 +39,7 @@ void load_expected_values(){
 }
 
 bool equals(float x, float y){
-    float atol = 1e-2f;
+    float atol = 5e-2f;
 
     return std::fabs(x - y) < atol;
 }

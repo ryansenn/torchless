@@ -64,12 +64,12 @@ struct Layer {
     Attention attn;
     MLP mlp;
 
-    Layer(const Tensor& input_norm, const Tensor& output_norm, std::unordered_map<std::string, Tensor>& w) :
+    Layer(const std::unordered_map<std::string, Tensor>& w) :
 
-                                input_norm(input_norm),
-                                output_norm(output_norm),
+                                input_norm(w.at("input_layernorm.weight")),
+                                output_norm(w.at("post_attention_layernorm.weight")),
 
-                                attn(w.at("self_attn.w_proj.weight"),
+                                attn(w.at("self_attn.q_proj.weight"),
                                      w.at("self_attn.k_proj.weight"),
                                      w.at("self_attn.v_proj.weight"),
                                      w.at("self_attn.o_proj.weight")),
