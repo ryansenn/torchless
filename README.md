@@ -20,15 +20,17 @@ Torchless is an LLM inference engine built from scratch
   Holds temporary memory and KV cache used during inference
 
 - [x] **Mistral architecture implementation** *(src/model/mistral/modules.cpp)*
-  - Each module implemented and tested against PyTorch/HF
-    - [x] **Embedding** - Looks up initial embedding from token ids
-    - [x] **RMSNorm** - computes the RMS over the current hidden_state, normalizes it, and applies the learned gain vector g
-    - [x] **Rotary Embedding** - precomputes inverse frequencies from rope_theta and fills cos/sin tensors for RoPE for each position
-    - [x] **Attention** - projects hidden_state into Q/K/V, applies RoPE to Q and K, updates the KV cache, runs grouped-query attention over the window, then applies the output projection back into hidden_state
-    - [x] **Feedforward MLP** - implements the SwiGLU feedforward: linear projections + SiLU
-    - [x] **Layer** - runs norm, attention, and MLP with residuals around each subblock
-    - [x] **Model** - embeds input token and runs it through all decoder layers
-    - [x] **LM Head** - the final linear layer that projects the last hidden state to the vocabulary size, yielding logits
+  - [x] **Embedding** - Looks up initial embedding from token ids
+  - [x] **RMSNorm** - computes the RMS over the current hidden_state, normalizes it, and applies the learned gain vector g
+  - [x] **Rotary Embedding** - precomputes inverse frequencies from rope_theta and fills cos/sin tensors for RoPE for each position
+  - [x] **Attention** - projects hidden_state into Q/K/V, applies RoPE to Q and K, updates the KV cache, runs grouped-query attention over the window, then applies the output projection back into hidden_state
+  - [x] **Feedforward MLP** - implements the SwiGLU feedforward: linear projections + SiLU
+  - [x] **Layer** - runs norm, attention, and MLP with residuals around each subblock
+  - [x] **Model** - embeds input token and runs it through all decoder layers
+  - [x] **LM Head** - the final linear layer that projects the last hidden state to the vocabulary size, yielding logits
+  
+- [x] **Parity Tests** *(test/mistral)*  
+  Comprehensive validation of all inference components (tokenizer, modules, kernels) by checking that their outputs match those produced by the Hugging Face Mistral implementation  
 
 - [ ] Token Generation  
   runs the token-generation loop by repeatedly forwarding the model, taking the final-token logits, sampling the next token

@@ -8,7 +8,9 @@ int main(){
     InferenceState infer(params->config);
 
     Model model(params);
-    model.forward(infer, 0);
+    model.forward(infer, 1);
+
+    infer.hidden_state.print();
 
     return 0;
 }

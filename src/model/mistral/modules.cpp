@@ -157,3 +157,9 @@ void Model::forward(InferenceState &infer, size_t token_id) {
 
     infer.pos++;
 }
+
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L430
+void LMHead::forward(InferenceState &infer) {
+    matmul(infer.logits, lm_head, infer.hidden_state);
+}

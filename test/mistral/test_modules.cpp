@@ -227,3 +227,32 @@ int test_rmsnorm() {
 }
 
 RegisterTest rmsnorm_reg("test rmsnorm", &test_rmsnorm);
+
+
+int test_lm_head() {
+    std::shared_ptr<Parameters> params = get_params();
+
+    LMHead l(params);
+    infer.hidden_state.copy_from(expected.at("lmhead_x"));
+
+    l.forward(infer);
+
+    if (!equals(infer.logits.data[0], 0.0362)) {
+        std::cout << "lm head mismatch 1. expected=0.0362 got="
+                  << infer.logits.data[0] << std::endl;
+        return 1;
+    }
+
+    if (!equals(infer.logits.data[31999], -0.0254)) {
+        std::cout << "lm head mismatch 2. expected=-0.0254 got="
+                  << infer.logits.data[31999] << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+
+RegisterTest lm_head_reg("test lm head", &test_lm_head);
+
+

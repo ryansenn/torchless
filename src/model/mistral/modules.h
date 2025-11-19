@@ -46,6 +46,7 @@ struct Attention {
     void forward(InferenceState& infer);
 };
 
+
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L35
 struct MLP {
     Tensor down_proj;
@@ -56,6 +57,7 @@ struct MLP {
 
     void forward(InferenceState& infer);
 };
+
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L206
 struct Layer {
@@ -86,17 +88,28 @@ struct Layer {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L334
 struct Model {
-    std::shared_ptr<Parameters> params;
     Embedding embedding;
     RMSNorm norm;
     std::vector<Layer> layers;
 
-    Model(std::shared_ptr<Parameters> params) : params(params), embedding(params->global_weights.at("model.embed_tokens.weight")), norm(params->global_weights.at("model.norm.weight")){
+    Model(std::shared_ptr<Parameters> params) : embedding(params->global_weights.at("model.embed_tokens.weight")), norm(params->global_weights.at("model.norm.weight")){
         for (int i=0;i<params->config.n_layers; i++){
             layers.emplace_back(params->layer_weights[i]);
         }
     }
 
     void forward(InferenceState& infer, size_t token_id);
+};
+
+
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L414
+struct LMHead {
+    Model model;
+    Tensor lm_head; // [4096, vocab_size]
+
+    LMHead(std::shared_ptr<Parameters> params) : model(params), lm_head(params->global_weights.at("lm_head.weight")) {}
+
+    void forward(InferenceState& infer);
 };
 
