@@ -2,7 +2,7 @@
 #include "../../common/tensor.h"
 #include "../../loader/parameters.h"
 
-inline size_t MAX_SEQ_LEN = 50;
+inline size_t MAX_SEQ_LEN = 500;
 
 // Holds tensor memory used during inference
 struct InferenceState {

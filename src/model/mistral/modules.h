@@ -86,13 +86,24 @@ struct Layer {
 };
 
 
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L414
+struct LMHead {
+    Tensor lm_head; // [4096, vocab_size]
+
+    LMHead(std::shared_ptr<Parameters> params) : lm_head(params->global_weights.at("lm_head.weight")) {}
+
+    void forward(InferenceState& infer);
+};
+
+
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L334
 struct Model {
     Embedding embedding;
     RMSNorm norm;
+    LMHead lmHead;
     std::vector<Layer> layers;
 
-    Model(std::shared_ptr<Parameters> params) : embedding(params->global_weights.at("model.embed_tokens.weight")), norm(params->global_weights.at("model.norm.weight")){
+    Model(std::shared_ptr<Parameters> params) : embedding(params->global_weights.at("model.embed_tokens.weight")), norm(params->global_weights.at("model.norm.weight")), lmHead(params){
         for (int i=0;i<params->config.n_layers; i++){
             layers.emplace_back(params->layer_weights[i]);
         }
@@ -103,13 +114,4 @@ struct Model {
 
 
 
-// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L414
-struct LMHead {
-    Model model;
-    Tensor lm_head; // [4096, vocab_size]
-
-    LMHead(std::shared_ptr<Parameters> params) : model(params), lm_head(params->global_weights.at("lm_head.weight")) {}
-
-    void forward(InferenceState& infer);
-};
 

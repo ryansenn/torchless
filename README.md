@@ -1,5 +1,9 @@
 # Torchless
-Torchless is an LLM inference engine built from scratch
+Torchless is an LLM inference engine built from scratch in pure C++.
+
+It runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1) and produces outputs that match the Hugging Face reference implementation.
+
+The core architecture is complete and correct, and the current work is centered on improving execution speed. GPU support is the next major milestone!
 
 # Roadmap
 
@@ -28,18 +32,19 @@ Torchless is an LLM inference engine built from scratch
   - [x] **Layer** - runs norm, attention, and MLP with residuals around each subblock
   - [x] **Model** - embeds input token and runs it through all decoder layers
   - [x] **LM Head** - the final linear layer that projects the last hidden state to the vocabulary size, yielding logits
-  
+
 - [x] **Parity Tests** *(test/mistral)*  
-  Comprehensive validation of all inference components (tokenizer, modules, kernels) by checking that their outputs match those produced by the Hugging Face Mistral implementation  
-
-- [ ] Token Generation  
-  runs the token-generation loop by repeatedly forwarding the model, taking the final-token logits, sampling the next token
-
-- [ ] **CLI I/O**
+  Comprehensive validation of all inference components (tokenizer, modules, ops) by checking that their outputs match those produced by the Hugging Face Mistral implementation
 
 - [ ] **Quantization**
 
-- [ ] **Parallelization**
+- [ ] **SIMD**
+
+- [x] Token Generation & Sampler
+  - [x] Basic text completion with greedy decoding
+  - [ ] Multinomial Sampling & temperature scaling
+
+- [ ] **CLI I/O**
 
 - [ ] **Custom CUDA Kernels**
 

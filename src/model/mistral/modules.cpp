@@ -141,6 +141,13 @@ void Layer::forward(InferenceState &infer){
     add(infer.hidden_state, infer.hidden_state, infer.residual);
 }
 
+
+// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L430
+void LMHead::forward(InferenceState &infer) {
+    matmul(infer.logits, lm_head, infer.hidden_state);
+}
+
+
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L334
 // Processes 1 token at a time and do a rewrite to support multiple tokens
 void Model::forward(InferenceState &infer, size_t token_id) {
@@ -155,11 +162,8 @@ void Model::forward(InferenceState &infer, size_t token_id) {
     // Norm
     norm.forward(infer);
 
+    // Get logits
+    lmHead.forward(infer);
+
     infer.pos++;
-}
-
-
-// https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L430
-void LMHead::forward(InferenceState &infer) {
-    matmul(infer.logits, lm_head, infer.hidden_state);
 }
