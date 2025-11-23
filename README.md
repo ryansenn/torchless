@@ -1,5 +1,5 @@
 # Torchless
-Torchless is an LLM inference engine built from scratch in pure C++.
+Torchless is an LLM inference engine built from scratch in pure C++
 
 It runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1) and produces outputs that match the Hugging Face reference implementation.
 
@@ -37,6 +37,7 @@ The core architecture is complete and correct, and the current work is centered 
   Comprehensive validation of all inference components (tokenizer, modules, ops) by checking that their outputs match those produced by the Hugging Face Mistral implementation
 
 - [ ] **Quantization**
+  - [ ] Symmetric int8
 
 - [ ] **SIMD**
 
@@ -51,17 +52,21 @@ The core architecture is complete and correct, and the current work is centered 
 # Resources
 
 #### Concepts
-- [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
 - [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
 - [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
+- [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
 - [Positional Encoding Intuition](https://www.youtube.com/watch?v=T3OT8kqoqjc)
-- [Rotary Embeddings](https://www.youtube.com/watch?v=V8r__fXx7tU)
+- [Rotary Embeddings](https://www.youtube.com/watch?v=V8r__fXx7tU)  
+
+<br>
+
+- [Arseny Kapoulkine - LLM inference speed of light](https://zeux.io/2024/03/15/llm-inference-sol/)
 
 #### Implementations
 - [Hugging Face - Mistral model](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
 - [Andrew Chan - yalm](https://andrewkchan.dev/posts/yalm.html)
 - [Georgi Gerganov - GGML (tensor/operations)](https://github.com/ggml-org/llama.cpp/tree/master/ggml)
 
-My C++ Mistral architecture implementation matches the HF Python implementation
+<br>
 
-Andrew Chan's yaml project was the inspiration for starting this project, strongly recommend his blog posts
+- [GPTQModel - LLM quantization](https://github.com/ModelCloud/GPTQModel)
