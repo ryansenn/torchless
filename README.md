@@ -1,15 +1,14 @@
 # Torchless
-Torchless is an LLM inference engine built from scratch in pure C++
+Torchless is an LLM inference engine built from scratch in C++
 
-It runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1) and produces outputs that match the Hugging Face reference implementation.
+It currently runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1). The core architecture is complete and correct, and the current work is centered on improving execution speed.
 
-The core architecture is complete and correct, and the current work is centered on improving execution speed. GPU support is the next major milestone!
 
 # Roadmap
 
 - [x] **Model Loader**
   - [x] **Binary converter** *(scripts/export_mistral.py)*  
-    Converts a Hugging Face Mistral model (config, vocab/merges, and weights) into a single standardized binary file that can be fed into the engine. It uses a JSON header to store model metadata, vocabulary, merges, and tensor index information, followed by all model weights packed sequentially as contiguous floating point data.
+    Converts a Hugging Face Mistral model (config, vocab/merges, and weights) into a single standardized binary file, optionally applying quantization. It uses a JSON header to store model metadata, vocabulary, merges, and tensor index information, followed by all model weights packed sequentially as contiguous floating point data.
   - [x] **In-memory loader** *(src/loader/parameters.cpp)*  
     Memory-maps the binary, loads the config and provides direct tensor views.
 
@@ -36,8 +35,9 @@ The core architecture is complete and correct, and the current work is centered 
 - [x] **Parity Tests** *(test/mistral)*  
   Comprehensive validation of all inference components (tokenizer, modules, ops) by checking that their outputs match those produced by the Hugging Face Mistral implementation
 
-- [ ] **Quantization**
-  - [ ] Symmetric int8
+- [x] **Quantization** *(scripts/quantize.py)*
+  - [x] **Per-group symmetric quantization** - splits tensor into groups, for each group, finds max abs value, computes scale and produces quantized weights
+  - [ ] **Mixed quantization** - Implement q5_k_m (Use Q6_K for half of the attention.wv and feed_forward.w2 tensors, else Q5_K)
 
 - [ ] **SIMD**
 
@@ -56,17 +56,19 @@ The core architecture is complete and correct, and the current work is centered 
 - [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
 - [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
 - [Positional Encoding Intuition](https://www.youtube.com/watch?v=T3OT8kqoqjc)
-- [Rotary Embeddings](https://www.youtube.com/watch?v=V8r__fXx7tU)  
+- [Rotary Embeddings](https://www.youtube.com/watch?v=V8r__fXx7tU)
 
 <br>
 
 - [Arseny Kapoulkine - LLM inference speed of light](https://zeux.io/2024/03/15/llm-inference-sol/)
+- [Maxime Labonne - Quantize llama models](https://medium.com/data-science/quantize-llama-models-with-ggml-and-llama-cpp-3612dfbcc172)
 
 #### Implementations
 - [Hugging Face - Mistral model](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
 - [Andrew Chan - yalm](https://andrewkchan.dev/posts/yalm.html)
 - [Georgi Gerganov - GGML (tensor/operations)](https://github.com/ggml-org/llama.cpp/tree/master/ggml)
+- [llama2.c - Quantization](https://github.com/karpathy/llama2.c/blob/master/export.py)
 
-<br>
+My C++ Mistral architecture implementation matches the HF Python implementation
 
-- [GPTQModel - LLM quantization](https://github.com/ModelCloud/GPTQModel)
+Andrew Chan's yaml project was the inspiration for starting this project, recommend his blog posts
