@@ -4,6 +4,7 @@ Torchless is an LLM inference engine built from scratch in C++
 It currently runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1). The core architecture is complete and correct, and the current work is centered on improving execution speed.
 
 
+
 # Roadmap
 
 - [x] **Model Loader**
@@ -38,6 +39,8 @@ It currently runs a full CPU forward pass of the [Mistral 7B model](https://hugg
 - [x] **Quantization** *(scripts/quantize.py)*
   - [x] **Per-group symmetric quantization** - splits tensor into groups, for each group, finds max abs value, computes scale and produces quantized weights
   - [ ] **Mixed quantization** - Implement q5_k_m (Use Q6_K for half of the attention.wv and feed_forward.w2 tensors, else Q5_K)
+
+- [ ] **CPU Multithreading**
 
 - [ ] **SIMD**
 

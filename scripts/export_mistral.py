@@ -5,10 +5,37 @@ import struct
 import safetensors
 import torch
 
-"""
-Usage: 
-python export_mistral.py path/to/Mistral-7B-v0.1
+import argparse
 
+from quantize import quantize
+
+"""
+Usage:
+  python export_mistral.py --model_dir /path/to/Mistral-7B-v0.1 [--out model.bin] [--quant int8]
+
+Arguments:
+  --model_dir   Required. Path to the Hugging Face model directory.
+  --out         Optional. Output file path. Defaults to ./model.bin
+  --quant       Optional. Quantization mode. Defaults to f32. Accepts f32 or int8
+"""
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--model_dir", required=True)
+parser.add_argument("--out", default="./model.bin")
+parser.add_argument("--quant", default="f32", choices=["f32", "int8"])
+args = parser.parse_args()
+
+IN_PATH = args.model_dir
+OUT_PATH = args.out
+DATA_SIZE = 4
+DATA_TYPE = torch.float32
+GROUP_SIZE = 64
+
+if args.quant == "int8":
+    DATA_SIZE = 1
+    DATA_TYPE = torch.int8
+
+"""
 This script converts a Hugging Face Mistral model into one standardized binary file that can be fed into the inference engine.
 
 Inputs (from the downloaded model directory):
@@ -19,20 +46,18 @@ Inputs (from the downloaded model directory):
 Output:
   model.bin with layout:
     [8-byte uint64: size of JSON header]
-    [JSON header: config, vocab/merges, tensor index]
-    [payload: All tensors as float32]
-    
-How it works:
-- Read config.json (metadata), tokenizer.json (vocab), and safetensors index (tensors).
-- Build a JSON header with metadata, vocab/merges, and tensor offsets.
-- Write to model.bin:
-    1) 8-byte header size (uint64, little-endian)
-    2) JSON header (UTF-8)
-    3) All tensors as contiguous float32
+    [JSON header]: 
+        - config
+        - vocab/merges
+        - tensor info:
+            - data type
+            - shape
+            - tensor start index
+            - scales size
+            - scales start index
+            
+    [payload: All tensors as continuous data with quantization scales]
 """
-
-IN_PATH = "../Mistral-7B-v0.1"
-OUT_PATH = "../model.bin"
 
 header = {}
 
@@ -52,8 +77,7 @@ with open(config_path, 'r') as f:
         "sliding_window": str(cfg["sliding_window"]),
         "rope_theta": str(cfg["rope_theta"]),
         "norm_eps": str(cfg["rms_norm_eps"]),
-        "act_type": cfg["hidden_act"],
-        "dtype": "fp32",
+        "act_type": cfg["hidden_act"]
     }
 
 # Insert the vocab in header["vocab"]
@@ -83,8 +107,16 @@ for tensor_name in weight_map:
 
     with safetensors.safe_open(tensor_file_path, framework="pt") as f:
         tensor = f.get_tensor(tensor_name)
-        header["tensors"][tensor_name] = {"dtype": "F32", "shape": list(tensor.shape)[:4], "offset": start}
-        start += tensor.numel() * 4 # Here we change when we quantize
+        header["tensors"][tensor_name] = {"dtype": args.quant, "shape": list(tensor.shape)[:4], "offset": start}
+
+        start += tensor.numel() * DATA_SIZE
+
+        if args.quant != "f32":
+            # We store scales
+            scale_size = tensor.numel() // GROUP_SIZE * 4
+            header["tensors"][tensor_name]["scale_start"] = start
+            header["tensors"][tensor_name]["scale_size"] = scale_size
+            start += tensor.numel() // GROUP_SIZE * 4
 
 
 # Serialize header as UTF-8 bytes
@@ -105,11 +137,19 @@ with open(OUT_PATH, "wb") as out:
 
         with safetensors.safe_open(tensor_file_path, framework="pt") as f:
             tensor = f.get_tensor(tensor_name)
+            scales = None
 
-            # Convert to F32 tensor (change here when we quantize)
-            tensor = tensor.to(torch.float32).contiguous()
+            if args.quant != "f32":
+                tensor, scales = quantize(tensor, DATA_SIZE * 8, GROUP_SIZE)
+                scales = scales.to(torch.float32).contiguous()
 
-            # Turn tensor into bytes
+            tensor = tensor.to(DATA_TYPE).contiguous()
+
+            # Turn tensor into bytes and write
             tensor_bytes = tensor.numpy().tobytes()
-
             out.write(tensor_bytes)
+
+            # Write scales
+            if scales is not None:
+                scales_bytes = scales.numpy().tobytes()
+                out.write(scales_bytes)
