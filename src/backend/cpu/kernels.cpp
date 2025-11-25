@@ -7,7 +7,7 @@ void matmul(Tensor& xout, Tensor& w, Tensor& x){
     size_t n = w.shape[0];
     size_t d = w.shape[1];
 
-    assert(x.size == d && xout.size >= n && "matmul shape mismatch");
+    assert(x.numel == d && xout.numel >= n && "matmul shape mismatch");
 
     for (int i=0; i<n; i++){
         xout.data[i] = 0;
@@ -24,7 +24,7 @@ void row_matmul(Tensor& xout, Tensor& x, Tensor& w){
     size_t n = w.shape[0];
     size_t d = w.shape[1];
 
-    assert(x.shape[0] == n && xout.size >= d && "matmul shape mismatch");
+    assert(x.shape[0] == n && xout.numel >= d && "matmul shape mismatch");
 
     for (int i=0; i<d; i++){
         xout.data[i] = 0;
@@ -41,7 +41,7 @@ void row_matmul(Tensor& xout, Tensor& x, Tensor& w){
 void softmax(Tensor& xout, Tensor& x){
     float maxv = x.max();
     float total = 0;
-    for (int i=0; i<x.size; i++){
+    for (int i=0; i<x.numel; i++){
         xout.data[i] = std::expf(x.data[i] - maxv);
         total += xout.data[i];
     }
@@ -82,7 +82,7 @@ void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
 
 // x / (1 + exp(-x))
 void silu(Tensor& xout, Tensor& x){
-    for (int i=0;i<x.size;i++){
+    for (int i=0;i<x.numel;i++){
         xout.data[i] = x.data[i] / (1 + exp(-x.data[i]));
     }
 }
@@ -93,45 +93,45 @@ void silu(Tensor& xout, Tensor& x){
 // Not sure if I will be using all of those
 float sum(Tensor& x){
     float r = 0.0f;
-    for (int i=0; i<x.size; i++){
+    for (int i=0; i<x.numel; i++){
         r += x.data[i];
     }
     return r;
 }
 
 void add(Tensor& xout, Tensor& x, Tensor& y){
-    for (int i = 0; i < x.size; i++) {
+    for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] + y.data[i];
     }
 }
 
 
 void add(Tensor& xout, Tensor& x, float c){
-    for (int i = 0; i < x.size; i++) {
+    for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] + c;
     }
 }
 
 void mul(Tensor& xout, Tensor& x, Tensor& y){
-    for (int i = 0; i < x.size; i++) {
+    for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] * y.data[i];
     }
 }
 
 void mul(Tensor& xout, Tensor& x, float c) {
-    for (int i = 0; i < x.size; i++) {
+    for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] * c;
     }
 }
 
 void pow(Tensor& xout, Tensor& x, int e){
-    for (int i=0; i<x.size; i++){
+    for (int i=0; i<x.numel; i++){
         xout.data[i] = pow(x.data[i], e);
     }
 }
 
 void sqrt(Tensor& xout, Tensor& x){
-    for (int i=0; i<x.size; i++){
+    for (int i=0; i<x.numel; i++){
         xout.data[i] = sqrt(x.data[i]);
     }
 }

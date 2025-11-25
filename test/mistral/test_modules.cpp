@@ -94,7 +94,7 @@ int test_kv_cache() {
     infer.pos = 5;
 
     Tensor dummy(arena, infer.k_state.shape);
-    for(int i=0;i<dummy.size;i++){
+    for(int i=0;i<dummy.numel;i++){
         dummy.data[i] = float(i);
     }
 

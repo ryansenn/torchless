@@ -147,7 +147,7 @@ int test_load_weights() {
         }
 
         const float* p = t->data;
-        size_t n = t->get_size();
+        size_t n = t->get_numel();
         if (!equals(p[0], e.first)) {
             std::cerr << e.key << " first val mismatch " << p[0] << " vs " << e.first << "\n";
             return 1;

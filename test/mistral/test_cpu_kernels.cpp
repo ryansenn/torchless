@@ -8,7 +8,7 @@ int test_rope(){
     for (size_t i = 0; i<4; i++){
         Tensor q(arena, {1,1,128});
 
-        for (int i=0;i<q.size;i++){
+        for (int i=0;i<q.numel;i++){
             q.data[i] = (i%128) / 256.0f;
         }
 

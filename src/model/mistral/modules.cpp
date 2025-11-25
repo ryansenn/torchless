@@ -10,8 +10,8 @@ void Embedding::forward(InferenceState& infer, size_t token_id){
 // Computes RoPE inverse frequencies
 // inv_freq[i] = (1 / rope_theta^(i / (head_dim))) / factor
 void RotaryEmbedding::init_freq(InferenceState& infer, Config& config) {
-    for (int i=0;i<infer.inv_freq.size;i++){
-        float freq = 1.0f / std::pow(config.rope_theta, float(i)/infer.inv_freq.size);
+    for (int i=0;i<infer.inv_freq.numel;i++){
+        float freq = 1.0f / std::pow(config.rope_theta, float(i)/infer.inv_freq.numel);
         infer.inv_freq.data[i] = freq;
     }
 }
@@ -20,9 +20,9 @@ void RotaryEmbedding::init_freq(InferenceState& infer, Config& config) {
 // The forward pass generates cos/sin position encodings for RoPE.
 // Take the inv_freq at each position, multiply them by position and apply cos/sin
 void RotaryEmbedding::forward(InferenceState& infer){
-    for (size_t i=0; i<infer.cos.size; i++){
-        infer.cos.data[i] = std::cos(infer.inv_freq.data[i % infer.inv_freq.size] * infer.pos);
-        infer.sin.data[i] = std::sin(infer.inv_freq.data[i % infer.inv_freq.size] * infer.pos);
+    for (size_t i=0; i<infer.cos.numel; i++){
+        infer.cos.data[i] = std::cos(infer.inv_freq.data[i % infer.inv_freq.numel] * infer.pos);
+        infer.sin.data[i] = std::sin(infer.inv_freq.data[i % infer.inv_freq.numel] * infer.pos);
     }
 }
 
@@ -31,7 +31,7 @@ void RotaryEmbedding::forward(InferenceState& infer){
 void RMSNorm::forward(InferenceState& infer) {
     float squares = 0;
 
-    for(int i =0; i<infer.hidden_state.size; i++){
+    for(int i =0; i<infer.hidden_state.numel; i++){
         squares += infer.hidden_state.data[i] * infer.hidden_state.data[i];
     }
 
@@ -40,7 +40,7 @@ void RMSNorm::forward(InferenceState& infer) {
     mul(infer.hidden_state, infer.hidden_state,1/rms);
 
     // Element wise mul with g
-    for (int i=0; i<infer.hidden_state.size; i++){
+    for (int i=0; i<infer.hidden_state.numel; i++){
         infer.hidden_state.data[i] = infer.hidden_state.data[i] * g.data[i];
     }
 }

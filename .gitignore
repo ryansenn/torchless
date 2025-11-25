@@ -7,3 +7,5 @@ src/common/json.hpp
 __pycache__/
 venv
 scripts/test/output.txt
+mistral.bin
+mistral-int8.bin

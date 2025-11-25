@@ -13,7 +13,7 @@ std::shared_ptr<Parameters> get_params(){
         return params;
     }
 
-    params->load_parameters("../model.bin");
+    params->load_parameters("../mistral.bin");
     init = true;
 
     return params;
@@ -45,11 +45,11 @@ bool equals(float x, float y){
 }
 
 bool equals(const Tensor& x, const Tensor& y){
-    if (x.size != y.size){
+    if (x.numel != y.numel){
         return false;
     }
 
-    for (int i=0; i<x.size; i++){
+    for (int i=0; i<x.numel; i++){
         if (!equals(x.data[i], y.data[i])){
             std::cout << "Mismatch at pos " << i
                       << ": expected " << y.data[i]

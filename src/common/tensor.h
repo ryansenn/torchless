@@ -6,14 +6,14 @@
 
 struct Arena {
     size_t BUFFER_SIZE;
-    float* buffer;
+    char* buffer;
     size_t offset = 0;
 
-    Arena(size_t BUFFER_SIZE) : BUFFER_SIZE(BUFFER_SIZE), buffer(new float[BUFFER_SIZE]) {}
+    Arena(size_t BUFFER_SIZE) : BUFFER_SIZE(BUFFER_SIZE), buffer(new char[BUFFER_SIZE]) {}
 
-    float* allocate(size_t size){
+    void* allocate(size_t size){
         assert(offset + size < BUFFER_SIZE && "Tensor allocator out of memory");
-        float* result = buffer + offset;
+        char* result = buffer + offset;
         offset += size;
 
         return result;
@@ -24,13 +24,20 @@ struct Arena {
     }
 };
 
+enum class Dtype {f32, i8};
+
 struct Tensor {
     std::vector<size_t> shape;
-    std::vector<size_t> strides;
-    size_t size;
-    float* data;
 
-    size_t get_size() const;
+    Dtype t;
+    size_t numel;
+    size_t type_size = 4;
+
+    float* data;
+    std::vector<size_t> strides;
+
+
+    size_t get_numel() const;
     void init_strides();
 
     Tensor(float* data, const std::vector<size_t>& shape);

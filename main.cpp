@@ -20,9 +20,21 @@ size_t generate(Model& model, InferenceState& infer, size_t token){
     return sample_max(infer);
 }
 
-int main(){
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <model_path>\n";
+        return 1;
+    }
+
+    Arena arena(1024*1024);
+    Tensor w(arena, {1, 2, 3, 4, 5, 6}, {2, 3});
+
+
+    /*
+    std::string model_path = argv[1];
+
     std::shared_ptr<Parameters> params = std::make_shared<Parameters>();
-    params->load_parameters("../model.bin");
+    params->load_parameters(model_path);
 
     InferenceState infer(params->config);
     Model model(params);
@@ -41,6 +53,7 @@ int main(){
     }
 
     std::cout << std::endl;
+     */
 
     return 0;
 }

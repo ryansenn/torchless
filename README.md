@@ -1,11 +1,36 @@
 # Torchless
 Torchless is an LLM inference engine built from scratch in C++
 
-It currently runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1). The core architecture is complete and correct, and the current work is centered on improving execution speed.
 
 
+## Running
 
-# Roadmap
+##### Export model - 8 bit quantization
+
+```
+python export_mistral.py 
+  --model_dir /path/to/Mistral-7B-v0.1 
+  --out ./mistral.bin
+  --quant int8
+```
+```
+--model_dir   (Required) Path to the Hugging Face directory
+--out         (Optional) Output file path, defaults to ./model.bin
+--quant       (Optional) Quantization moded, defaults to f32
+````
+
+#### Run
+```
+torchless mistral.bin
+```
+
+## Roadmap
+
+The engine currently runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1). The architecture is complete and correct, with a compatible tokenizer, a loader, a KV cache for autoregressive attention, and implementations of normalization, rotary embeddings, attention, and feedforward layers.
+
+The current work is centered on improving execution speed with SIMD and custom CUDA kernels. Future plans also include supporting Mixtral MoE.
+
+<br>
 
 - [x] **Model Loader**
   - [x] **Binary converter** *(scripts/export_mistral.py)*  
@@ -14,8 +39,8 @@ It currently runs a full CPU forward pass of the [Mistral 7B model](https://hugg
     Memory-maps the binary, loads the config and provides direct tensor views.
 
 - [x] **Tensor & Ops**
-  - [x] Tensor implemented as a view over memory with shape/strides *(src/common/tensor.cpp)*
-  - [x] Math operations (e.g. matmul, softmax, RoPE) to be optimized later *(src/backend/cpu/kernels.cpp)*
+  - [x] Tensor *(src/common/tensor.cpp)* Implements a strided view over memory supporting f32 and int8, with on-the-fly dequantization during compute
+  - [x] Math operations *(src/backend/cpu/kernels.cpp)* e.g. matmul, softmax, RoPE to be optimized later
 
 - [x] **Tokenizer**  *(src/tokenizer/tokenizer.cpp)*     
   The tokenizer implements full byte-pair encoding (BPE) compatible with Mistral’s vocabulary. It loads tokenizer.json, builds vocab and merge maps, applies Metaspace pre-tokenization, encodes UTF-8 text by merging token pairs by rank, and supports byte fallback
@@ -52,26 +77,27 @@ It currently runs a full CPU forward pass of the [Mistral 7B model](https://hugg
 
 - [ ] **Custom CUDA Kernels**
 
-# Resources
+## Resources
 
-#### Concepts
+Material that I found valuable while learning, or that influenced how I approached building this engine
+
+##### ML Theory
 - [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
 - [Andrej Karpathy - Let’s build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE)
-- [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
 - [Positional Encoding Intuition](https://www.youtube.com/watch?v=T3OT8kqoqjc)
 - [Rotary Embeddings](https://www.youtube.com/watch?v=V8r__fXx7tU)
-
-<br>
-
-- [Arseny Kapoulkine - LLM inference speed of light](https://zeux.io/2024/03/15/llm-inference-sol/)
 - [Maxime Labonne - Quantize llama models](https://medium.com/data-science/quantize-llama-models-with-ggml-and-llama-cpp-3612dfbcc172)
 
-#### Implementations
-- [Hugging Face - Mistral model](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
+
+##### Systems Internals
+- [Edward Z. Yang - PyTorch Internals](https://blog.ezyang.com/2019/05/pytorch-internals/)
+- [C++ Vtables](https://shaharmike.com/cpp/vtable-part1/)
 - [Andrew Chan - yalm](https://andrewkchan.dev/posts/yalm.html)
-- [Georgi Gerganov - GGML (tensor/operations)](https://github.com/ggml-org/llama.cpp/tree/master/ggml)
-- [llama2.c - Quantization](https://github.com/karpathy/llama2.c/blob/master/export.py)
+- [Arseny Kapoulkine - LLM inference speed of light](https://zeux.io/2024/03/15/llm-inference-sol/)
 
-My C++ Mistral architecture implementation matches the HF Python implementation
 
-Andrew Chan's yaml project was the inspiration for starting this project, recommend his blog posts
+##### Reference Implementations
+- [Hugging Face - Mistral model](https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py)
+- [Arseny Kapoulkine - calm](https://github.com/zeux/calm/tree/main)
+- [Georgi Gerganov - llama.cpp + ggml](https://github.com/ggml-org/llama.cpp/)
+- [Andrej Karpathy - llama2.c quantization](https://github.com/karpathy/llama2.c/blob/master/export.py)
