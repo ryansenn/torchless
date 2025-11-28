@@ -34,7 +34,7 @@ void load_expected_values(){
             data.push_back(x);
             i++;
         }
-        expected.emplace(name, Tensor(arena, data, {i}));
+        expected.emplace(name, Tensor<float>(arena, data, {i}));
     }
 }
 
@@ -44,7 +44,7 @@ bool equals(float x, float y){
     return std::fabs(x - y) < atol;
 }
 
-bool equals(const Tensor& x, const Tensor& y){
+bool equals(const Tensor<float>& x, const Tensor<float>& y){
     if (x.numel != y.numel){
         return false;
     }

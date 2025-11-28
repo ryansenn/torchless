@@ -7,23 +7,23 @@
 
 #include "tensor.h"
 
-void matmul(Tensor& xout, Tensor& w, Tensor& x);
-void row_matmul(Tensor& xout, Tensor& x, Tensor& w);
+void matmul(Tensor<float>& xout, Tensor<float>& w, Tensor<float>& x);
+void row_matmul(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& w);
 
-void softmax(Tensor& xout, Tensor& x);
-void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin);
+void softmax(Tensor<float>& xout, Tensor<float>& x);
+void rope(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& cos, Tensor<float>& sin);
 
-void silu(Tensor& xout, Tensor& x);
+void silu(Tensor<float>& xout, Tensor<float>& x);
 
-float sum(Tensor& x);
+float sum(Tensor<float>& x);
 
-void add(Tensor& xout, Tensor& x, Tensor& y);
-void add(Tensor& xout, Tensor& x, float c);
+void add(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& y);
+void add(Tensor<float>& xout, Tensor<float>& x, float c);
 
-void mul(Tensor& xout, Tensor& x, Tensor& y);
-void mul(Tensor& xout, Tensor& x, float c);
+void mul(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& y);
+void mul(Tensor<float>& xout, Tensor<float>& x, float c);
 
-void pow(Tensor& xout, Tensor& x, int e);
-void sqrt(Tensor& xout, Tensor& x);
+void pow(Tensor<float>& xout, Tensor<float>& x, int e);
+void sqrt(Tensor<float>& xout, Tensor<float>& x);
 
 #endif // MATH_OPS_H

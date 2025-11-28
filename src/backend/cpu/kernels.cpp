@@ -3,7 +3,7 @@
 
 // This only works for
 // W (n,d) @ x (d,) = xout (n,)
-void matmul(Tensor& xout, Tensor& w, Tensor& x){
+void matmul(Tensor<float>& xout, Tensor<float>& w, Tensor<float>& x){
     size_t n = w.shape[0];
     size_t d = w.shape[1];
 
@@ -20,7 +20,7 @@ void matmul(Tensor& xout, Tensor& w, Tensor& x){
 
 
 // x (,n) @ W (n,d) = xout (d,)
-void row_matmul(Tensor& xout, Tensor& x, Tensor& w){
+void row_matmul(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& w){
     size_t n = w.shape[0];
     size_t d = w.shape[1];
 
@@ -38,7 +38,7 @@ void row_matmul(Tensor& xout, Tensor& x, Tensor& w){
 // e^x / sum(e^x)
 // Here we compute the max and subtract it from each logit to avoid overflow,
 // keeping the relative ratios unchanged (softmax is shift-invariant)
-void softmax(Tensor& xout, Tensor& x){
+void softmax(Tensor<float>& xout, Tensor<float>& x){
     float maxv = x.max();
     float total = 0;
     for (int i=0; i<x.numel; i++){
@@ -61,7 +61,7 @@ void softmax(Tensor& xout, Tensor& x){
 // Each dim i is rotated with i + head_dim/2
 
 // TODO: This only works 1 token at time (assumed seq_len = 1), cos/sin is only given for 1 pos
-void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
+void rope(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& cos, Tensor<float>& sin){
     size_t n_heads = x.shape[0];
     //size_t seq_len = x.shape[1];
     size_t head_size = x.shape[2];
@@ -81,7 +81,7 @@ void rope(Tensor& xout, Tensor& x, Tensor& cos, Tensor& sin){
 }
 
 // x / (1 + exp(-x))
-void silu(Tensor& xout, Tensor& x){
+void silu(Tensor<float>& xout, Tensor<float>& x){
     for (int i=0;i<x.numel;i++){
         xout.data[i] = x.data[i] / (1 + exp(-x.data[i]));
     }
@@ -91,7 +91,7 @@ void silu(Tensor& xout, Tensor& x){
 
 
 // Not sure if I will be using all of those
-float sum(Tensor& x){
+float sum(Tensor<float>& x){
     float r = 0.0f;
     for (int i=0; i<x.numel; i++){
         r += x.data[i];
@@ -99,38 +99,38 @@ float sum(Tensor& x){
     return r;
 }
 
-void add(Tensor& xout, Tensor& x, Tensor& y){
+void add(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& y){
     for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] + y.data[i];
     }
 }
 
 
-void add(Tensor& xout, Tensor& x, float c){
+void add(Tensor<float>& xout, Tensor<float>& x, float c){
     for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] + c;
     }
 }
 
-void mul(Tensor& xout, Tensor& x, Tensor& y){
+void mul(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& y){
     for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] * y.data[i];
     }
 }
 
-void mul(Tensor& xout, Tensor& x, float c) {
+void mul(Tensor<float>& xout, Tensor<float>& x, float c) {
     for (int i = 0; i < x.numel; i++) {
         xout.data[i] = x.data[i] * c;
     }
 }
 
-void pow(Tensor& xout, Tensor& x, int e){
+void pow(Tensor<float>& xout, Tensor<float>& x, int e){
     for (int i=0; i<x.numel; i++){
         xout.data[i] = pow(x.data[i], e);
     }
 }
 
-void sqrt(Tensor& xout, Tensor& x){
+void sqrt(Tensor<float>& xout, Tensor<float>& x){
     for (int i=0; i<x.numel; i++){
         xout.data[i] = sqrt(x.data[i]);
     }

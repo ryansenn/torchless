@@ -93,7 +93,7 @@ RegisterTest mlp_feedforward_reg("test attention feedforward mlp", &test_mlp);
 int test_kv_cache() {
     infer.pos = 5;
 
-    Tensor dummy(arena, infer.k_state.shape);
+    Tensor<float> dummy(arena, infer.k_state.shape);
     for(int i=0;i<dummy.numel;i++){
         dummy.data[i] = float(i);
     }

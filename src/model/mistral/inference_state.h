@@ -4,34 +4,34 @@
 
 inline size_t MAX_SEQ_LEN = 500;
 
-// Holds tensor memory used during inference
+// Holds Tensor<float> memory used during inference
 struct InferenceState {
     Config config;
     Arena arena;
 
-    Tensor hidden_state; // [hidden_size]
-    Tensor residual; // [hidden_size]
+    Tensor<float> hidden_state; // [hidden_size]
+    Tensor<float> residual; // [hidden_size]
     size_t pos = 0;
     size_t seq_len = 0;
 
-    Tensor inv_freq; // [head_dim / 2]
-    Tensor cos; // [head_dim]
-    Tensor sin; // [head_dim]
+    Tensor<float> inv_freq; // [head_dim / 2]
+    Tensor<float> cos; // [head_dim]
+    Tensor<float> sin; // [head_dim]
 
-    Tensor q_state; // [n_heads, head_dim]
-    Tensor k_state; // [n_kv_heads, head_dim]
-    Tensor v_state; // [n_kv_heads, head_dim]
+    Tensor<float> q_state; // [n_heads, head_dim]
+    Tensor<float> k_state; // [n_kv_heads, head_dim]
+    Tensor<float> v_state; // [n_kv_heads, head_dim]
 
-    Tensor k_cache; // [n_kv_heads, seq_len, head_dim]
-    Tensor v_cache; // [n_kv_heads, seq_len, head_dim]
+    Tensor<float> k_cache; // [n_kv_heads, seq_len, head_dim]
+    Tensor<float> v_cache; // [n_kv_heads, seq_len, head_dim]
 
-    Tensor scores; // [n_heads, seq_len]
-    Tensor context; // [n_heads, head_dim]
+    Tensor<float> scores; // [n_heads, seq_len]
+    Tensor<float> context; // [n_heads, head_dim]
 
-    Tensor mlp_gate; // [intermediate_size]
-    Tensor mlp_up; // [intermediate_size]
+    Tensor<float> mlp_gate; // [intermediate_size]
+    Tensor<float> mlp_up; // [intermediate_size]
 
-    Tensor logits; // [vocab_size]
+    Tensor<float> logits; // [vocab_size]
 
     void push_kv(){
         for (size_t h=0;h<config.n_kv_heads;h++){

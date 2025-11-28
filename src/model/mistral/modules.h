@@ -5,10 +5,10 @@
 
 // https://docs.pytorch.org/docs/stable/generated/torch.nn.Embedding.html
 struct Embedding {
-    Tensor table;
+    Tensor<float> table;
     size_t num_embeddings;
     size_t embedding_dim;
-    Embedding(Tensor& table) : table(table), num_embeddings(table.shape[0]), embedding_dim(table.shape[1]) {}
+    Embedding(Tensor<float>& table) : table(table), num_embeddings(table.shape[0]), embedding_dim(table.shape[1]) {}
     void forward(InferenceState& infer, size_t token_id);
 };
 
@@ -20,24 +20,24 @@ struct RotaryEmbedding {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L58
 struct RMSNorm {
-    Tensor g;
+    Tensor<float> g;
     float e = 1e-6f;
 
-    RMSNorm(const Tensor& g) : g(g) {}
+    RMSNorm(const Tensor<float>& g) : g(g) {}
     void forward(InferenceState& infer);
 };
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L123
 struct Attention {
-    Tensor q_proj;
-    Tensor k_proj;
-    Tensor v_proj;
-    Tensor o_proj;
+    Tensor<float> q_proj;
+    Tensor<float> k_proj;
+    Tensor<float> v_proj;
+    Tensor<float> o_proj;
 
-    Attention(const Tensor& q_proj,
-              const Tensor& k_proj,
-              const Tensor& v_proj,
-              const Tensor& o_proj)
+    Attention(const Tensor<float>& q_proj,
+              const Tensor<float>& k_proj,
+              const Tensor<float>& v_proj,
+              const Tensor<float>& o_proj)
             : q_proj(q_proj),
               k_proj(k_proj),
               v_proj(v_proj),
@@ -49,11 +49,11 @@ struct Attention {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L35
 struct MLP {
-    Tensor down_proj;
-    Tensor gate_proj;
-    Tensor up_proj;
+    Tensor<float> down_proj;
+    Tensor<float> gate_proj;
+    Tensor<float> up_proj;
 
-    MLP(const Tensor& down_proj, const Tensor& gate_proj, const Tensor& up_proj) : down_proj(down_proj), gate_proj(gate_proj), up_proj(up_proj){}
+    MLP(const Tensor<float>& down_proj, const Tensor<float>& gate_proj, const Tensor<float>& up_proj) : down_proj(down_proj), gate_proj(gate_proj), up_proj(up_proj){}
 
     void forward(InferenceState& infer);
 };
@@ -66,7 +66,7 @@ struct Layer {
     Attention attn;
     MLP mlp;
 
-    Layer(const std::unordered_map<std::string, Tensor>& w) :
+    Layer(const std::unordered_map<std::string, Tensor<float>>& w) :
 
                                 input_norm(w.at("input_layernorm.weight")),
                                 output_norm(w.at("post_attention_layernorm.weight")),
@@ -88,7 +88,7 @@ struct Layer {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L414
 struct LMHead {
-    Tensor lm_head; // [4096, vocab_size]
+    Tensor<float> lm_head; // [4096, vocab_size]
 
     LMHead(std::shared_ptr<Parameters> params) : lm_head(params->global_weights.at("lm_head.weight")) {}
 

@@ -123,7 +123,7 @@ int test_load_weights() {
     // Check some of the tensors have right shape, first value and last value
 
     for (const auto& e : expected_tensors) {
-        Tensor* t;
+        Tensor<float>* t;
 
         if (e.layer == -1) {
             auto it = params->global_weights.find(e.key);

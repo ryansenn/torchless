@@ -6,7 +6,7 @@ int test_rope(){
     RotaryEmbedding::init_freq(infer, params->config);
 
     for (size_t i = 0; i<4; i++){
-        Tensor q(arena, {1,1,128});
+        Tensor<float> q(arena, {1,1,128});
 
         for (int i=0;i<q.numel;i++){
             q.data[i] = (i%128) / 256.0f;
@@ -30,10 +30,10 @@ RegisterTest rope_reg("test rope", &test_rope);
 
 
 int test_matmul(){
-    Tensor w(arena, {1, 2, 3, 4, 5, 6}, {2, 3});
-    Tensor x(arena, {10, 20, 30}, {3});
-    Tensor xout(arena, {0, 0}, {2});
-    Tensor expected(arena, {140, 320}, {2});
+    Tensor<float> w(arena, {1, 2, 3, 4, 5, 6}, {2, 3});
+    Tensor<float> x(arena, {10, 20, 30}, {3});
+    Tensor<float> xout(arena, {0, 0}, {2});
+    Tensor<float> expected(arena, {140, 320}, {2});
 
     matmul(xout, w, x);
 
@@ -48,12 +48,12 @@ int test_matmul(){
 RegisterTest matmul_reg("test matmul", &test_matmul);
 
 int test_row_matmul(){
-    Tensor w(arena, {1, 2,
+    Tensor<float> w(arena, {1, 2,
                      3, 4,
                      5, 6}, {3, 2});
-    Tensor x(arena, {10, 20, 30}, {3});
-    Tensor xout(arena, {0, 0}, {2});
-    Tensor expected(arena, {220, 280}, {2});
+    Tensor<float> x(arena, {10, 20, 30}, {3});
+    Tensor<float> xout(arena, {0, 0}, {2});
+    Tensor<float> expected(arena, {220, 280}, {2});
 
     row_matmul(xout, x, w);
 
@@ -69,9 +69,9 @@ RegisterTest row_matmul_reg("test row matmul", &test_row_matmul);
 
 
 int test_softmax(){
-    Tensor x(arena, {1.0f, 2.0f, 3.0f}, {3});
-    Tensor xout(arena, {0.0f, 0.0f, 0.0f}, {3});
-    Tensor expected(arena, {0.09003057f, 0.24472848f, 0.66524094f}, {3});
+    Tensor<float> x(arena, {1.0f, 2.0f, 3.0f}, {3});
+    Tensor<float> xout(arena, {0.0f, 0.0f, 0.0f}, {3});
+    Tensor<float> expected(arena, {0.09003057f, 0.24472848f, 0.66524094f}, {3});
 
     softmax(xout, x);
 
@@ -86,16 +86,16 @@ RegisterTest softmaxl_reg("test softmax", &test_softmax);
 
 
 int test_silu(){
-    Tensor x(arena, {-2.0f, -1.0f, 0.0f, 1.0f, 2.0f}, {5});
+    Tensor<float> x(arena, {-2.0f, -1.0f, 0.0f, 1.0f, 2.0f}, {5});
 
-    Tensor expected(arena, {-0.2384, -0.2689,  0.0000,  0.7311,  1.7616}, {5});
+    Tensor<float> expected(arena, {-0.2384, -0.2689,  0.0000,  0.7311,  1.7616}, {5});
 
-    Tensor xout(arena, {5});
+    Tensor<float> xout(arena, {5});
 
     silu(xout, x);
 
     if (!equals(xout, expected)){
-        std::cout << "tensor silu mismatch" << std::endl;
+        std::cout << "Tensor<float> silu mismatch" << std::endl;
         return 1;
     }
 
@@ -106,7 +106,7 @@ RegisterTest silu_reg("test silu", &test_silu);
 
 
 int test_sum(){
-    Tensor x(arena, {1.1f,2.2f,3.3f,4.4f,5.5f,6.6f}, {6});
+    Tensor<float> x(arena, {1.1f,2.2f,3.3f,4.4f,5.5f,6.6f}, {6});
     float expected = 23.1f;
 
     if (!equals(sum(x), expected)){
@@ -119,10 +119,10 @@ int test_sum(){
 }
 
 int test_add(){
-    Tensor x(arena, {1.0f, 2.0f, 3.0f}, {3});
+    Tensor<float> x(arena, {1.0f, 2.0f, 3.0f}, {3});
     float c = 2.5f;
-    Tensor expected(arena, {3.5f, 4.5f, 5.5f}, {3});
-    Tensor xout(arena, {0.0f, 0.0f, 0.0f}, {3});
+    Tensor<float> expected(arena, {3.5f, 4.5f, 5.5f}, {3});
+    Tensor<float> xout(arena, {0.0f, 0.0f, 0.0f}, {3});
 
     add(xout, x, c);
 
@@ -135,9 +135,9 @@ int test_add(){
 }
 
 int test_mul(){
-    Tensor x(arena, {-1.5f, 0.0f, 2.5f, 4.2f}, {4});
+    Tensor<float> x(arena, {-1.5f, 0.0f, 2.5f, 4.2f}, {4});
     float scalar = -3.0f;
-    Tensor expected(arena, {4.5f, 0.0f, -7.5f, -12.6f}, {4});
+    Tensor<float> expected(arena, {4.5f, 0.0f, -7.5f, -12.6f}, {4});
 
     mul(x, x, scalar);
 
@@ -150,9 +150,9 @@ int test_mul(){
 }
 
 int test_pow(){
-    Tensor x(arena, {2.0f, 3.0f, 4.0f}, {3});
+    Tensor<float> x(arena, {2.0f, 3.0f, 4.0f}, {3});
     float power = 2.0f;
-    Tensor expected(arena, {4.0f, 9.0f, 16.0f}, {3});
+    Tensor<float> expected(arena, {4.0f, 9.0f, 16.0f}, {3});
 
     pow(x, x, power);
 
@@ -166,8 +166,8 @@ int test_pow(){
 
 
 int test_sqrt(){
-    Tensor x(arena, {1.0f, 4.0f, 9.0f, 16.0f}, {4});
-    Tensor expected(arena, {1.0f, 2.0f, 3.0f, 4.0f}, {4});
+    Tensor<float> x(arena, {1.0f, 4.0f, 9.0f, 16.0f}, {4});
+    Tensor<float> expected(arena, {1.0f, 2.0f, 3.0f, 4.0f}, {4});
 
     sqrt(x, x);
 

@@ -45,7 +45,7 @@ void Parameters::load_config(nlohmann::json& header){
     config.head_dim          = config.hidden_size / config.n_heads;
 }
 
-void Parameters::load_tensor(std::unordered_map<std::string, Tensor>& m, char* p, const std::string& key, nlohmann::json& value){
+void Parameters::load_tensor(std::unordered_map<std::string, Tensor<float>>& m, char* p, const std::string& key, nlohmann::json& value){
     uint64_t offset = value["offset"];
     std::vector<size_t> shape = value["shape"];
 

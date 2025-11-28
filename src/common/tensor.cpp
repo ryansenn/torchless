@@ -3,7 +3,8 @@
 #include <cstring>
 #include <iostream>
 
-size_t Tensor::get_numel() const {
+template <typename T>
+size_t Tensor<T>::get_numel() const {
     size_t s = 1;
     for (size_t d : shape) {
         assert(d > 0 && "dim=0 not supported");
@@ -12,7 +13,8 @@ size_t Tensor::get_numel() const {
     return s;
 }
 
-void Tensor::init_strides() {
+template <typename T>
+void Tensor<T>::init_strides() {
     strides.assign(shape.size(), 1);
     if (shape.size() < 2) return;
     size_t stride = 1;
@@ -22,24 +24,29 @@ void Tensor::init_strides() {
     }
 }
 
-Tensor::Tensor(float* data, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(data){
+template <typename T>
+Tensor<T>::Tensor(T* data, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(data){
     init_strides();
 }
 
-Tensor::Tensor(Arena& arena, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<float*>(arena.allocate(numel*type_size))){
+template <typename T>
+Tensor<T>::Tensor(Arena& arena, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<float*>(arena.allocate(numel*type_size))){
     init_strides();
 }
 
-Tensor::Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<float*>(arena.allocate(numel*type_size))){
+template <typename T>
+Tensor<T>::Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<float*>(arena.allocate(numel*type_size))){
     init_strides();
     std::copy(arr.begin(), arr.end(), data);
 }
 
-void Tensor::copy_from(const Tensor& tensor) {
+template <typename T>
+void Tensor<T>::copy_from(const Tensor& tensor) {
     std::memcpy(data, tensor.data, tensor.numel*type_size);
 }
 
-Tensor Tensor::at(std::initializer_list<size_t> idx) {
+template <typename T>
+Tensor<T> Tensor<T>::at(std::initializer_list<size_t> idx) {
     assert(idx.size() <= shape.size() && "Too many indices for tensor");
     float* new_data = data;
 
@@ -54,7 +61,8 @@ Tensor Tensor::at(std::initializer_list<size_t> idx) {
     return Tensor(new_data, new_shape);
 }
 
-float Tensor::max(){
+template <typename T>
+float Tensor<T>::max(){
     float result = data[0];
     for (int i=0; i<numel; i++){
         result = std::max(result, data[i]);
@@ -62,16 +70,20 @@ float Tensor::max(){
     return result;
 }
 
-Tensor Tensor::reshape(std::vector<size_t> new_shape) {
+template <typename T>
+Tensor<T> Tensor<T>::reshape(std::vector<size_t> new_shape) {
     size_t new_numel = 1;
     for (auto d : new_shape) new_numel *= d;
     assert(new_numel <= numel && "Reshape size mismatch");
     return Tensor(data, new_shape);
 }
 
-void Tensor::print(){
+template <typename T>
+void Tensor<T>::print(){
     for (int i=0;i<numel;i++){
         std::cout << data[i] << " ";
     }
     std::cout << std::endl;
 }
+
+template class Tensor<float>;
