@@ -1,32 +1,19 @@
 # Torchless
+
 Torchless is an LLM inference engine built from scratch in C++
-
-
 
 ## Running
 
-##### Export model - 8 bit quantization
+### Export with 8-bit quantization
 
 ```
-python export_mistral.py 
-  --model_dir /path/to/Mistral-7B-v0.1 
-  --out ./mistral.bin
-  --quant int8
+python export_mistral.py --model_dir /path/to/Mistral-7B-v0.1 --out ./mistral.bin --quant int8
 ```
-```
---model_dir   (Required) Path to the Hugging Face directory
---out         (Optional) Output file path, defaults to ./model.bin
---quant       (Optional) Quantization moded, defaults to f32
-````
 
-#### Run
-```
-torchless mistral.bin
-```
+The int8-quantized model is the smallest supported variant at approximately 8 GB. Make sure your system has more than 8 GB of RAM. Systems with 16 GB of RAM run it without problems.
+
 
 ## Roadmap
-
-The engine currently runs a full CPU forward pass of the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1). The architecture is complete and correct, with a compatible tokenizer, a loader, a KV cache for autoregressive attention, and implementations of normalization, rotary embeddings, attention, and feedforward layers.
 
 The current work is centered on improving execution speed with SIMD and custom CUDA kernels. Future plans also include supporting Mixtral MoE.
 
@@ -77,9 +64,11 @@ The current work is centered on improving execution speed with SIMD and custom C
 
 - [ ] **Custom CUDA Kernels**
 
-## Resources
+- [ ] **MoE**
 
-Material that I found valuable while learning, or that influenced how I approached building this engine
+# Resources
+
+#### List of material that helped me learn or build the engine
 
 ##### ML Theory
 - [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)

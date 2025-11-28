@@ -59,9 +59,8 @@ Output:
     [payload: All tensors as continuous data with quantization scales]
 """
 
-header = {}
-
 # Load config inside of header["config"]
+header = {}
 config_path = os.path.join(IN_PATH, "config.json")
 
 with open(config_path, 'r') as f:
@@ -99,7 +98,6 @@ with open(tensor_index_path, 'r') as f:
 
 # Loop through each tensor and add info to header["tensors"]
 header["tensors"] = {}
-raw_tensors = {}
 start = 0
 
 for tensor_name in weight_map:
@@ -107,16 +105,23 @@ for tensor_name in weight_map:
 
     with safetensors.safe_open(tensor_file_path, framework="pt") as f:
         tensor = f.get_tensor(tensor_name)
-        header["tensors"][tensor_name] = {"dtype": args.quant, "shape": list(tensor.shape)[:4], "offset": start}
 
-        start += tensor.numel() * DATA_SIZE
+        # Quantize
+        if "_proj" in tensor_name and args.quant != "f32":
+            header["tensors"][tensor_name] = {"dtype": args.quant, "shape": list(tensor.shape)[:4], "offset": start}
+            start += tensor.numel() * DATA_SIZE
 
-        if args.quant != "f32":
             # We store scales
             scale_size = tensor.numel() // GROUP_SIZE * 4
             header["tensors"][tensor_name]["scale_start"] = start
             header["tensors"][tensor_name]["scale_size"] = scale_size
             start += tensor.numel() // GROUP_SIZE * 4
+
+        # Full float
+        else:
+            header["tensors"][tensor_name] = {"dtype": "f32", "shape": list(tensor.shape)[:4], "offset": start}
+            start += tensor.numel() * DATA_SIZE
+
 
 
 # Serialize header as UTF-8 bytes
@@ -125,21 +130,32 @@ header_bytes = json.dumps(header).encode("utf-8")
 # Get header size as an 8-byte little-endian unsigned integer
 header_size = struct.pack("<Q", len(header_bytes))
 
+print("\033[1m\033[4mModel Export\033[0m\n"
+      f"\033[1mModel Directory:\033[0m {IN_PATH}\n"
+      f"\033[1mOutput File:\033[0m     {OUT_PATH}\n"
+      f"\033[1mQuantization:\033[0m    {args.quant}\n")
 
 ### Write out everyting to binary output file
 with open(OUT_PATH, "wb") as out:
     out.write(header_size)
     out.write(header_bytes)
 
+    total = len(weight_map)
+    i = 0
+    bar_width = 40
+
     # Dump all the tensors in the same order as header
     for tensor_name in weight_map:
+        i += 1
+        print("[" + "#" * int(bar_width * i/total) + "-" * (bar_width - int(bar_width * i/total)) + f"] {int(i/total*100)}%", end="\r")
+
         tensor_file_path = os.path.join(IN_PATH, weight_map[tensor_name])
 
         with safetensors.safe_open(tensor_file_path, framework="pt") as f:
             tensor = f.get_tensor(tensor_name)
             scales = None
 
-            if args.quant != "f32":
+            if header["tensors"][tensor_name]["dtype"] != "f32":
                 tensor, scales = quantize(tensor, DATA_SIZE * 8, GROUP_SIZE)
                 scales = scales.to(torch.float32).contiguous()
 
@@ -153,3 +169,5 @@ with open(OUT_PATH, "wb") as out:
             if scales is not None:
                 scales_bytes = scales.numpy().tobytes()
                 out.write(scales_bytes)
+
+print("\nCompleted")
