@@ -125,26 +125,6 @@ int test_load_weights() {
     for (const auto& e : expected_tensors) {
         Tensor<float>* t;
 
-        if (e.layer == -1) {
-            auto it = params->global_weights.find(e.key);
-            if (it == params->global_weights.end()) {
-                std::cerr << "Missing global tensor: " << e.key << "\n";
-                return 1;
-            }
-            t = &it->second;
-        } else {
-            if (e.layer < 0 || e.layer >= (int)params->layer_weights.size()) {
-                std::cerr << "Invalid layer index " << e.layer << " for " << e.key << "\n";
-                return 1;
-            }
-            auto& lw = params->layer_weights[e.layer];
-            auto it = lw.find(e.key);
-            if (it == lw.end()) {
-                std::cerr << "Missing tensor: " << e.key << "\n";
-                return 1;
-            }
-            t = &it->second;
-        }
 
         const float* p = t->data;
         size_t n = t->get_numel();

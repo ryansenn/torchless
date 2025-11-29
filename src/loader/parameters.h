@@ -25,15 +25,18 @@ struct Parameters {
     Tokenizer tokenizer;
 
     // Global weights (For Mistral, this is embeddings, final layernorm, lm_head)
-    std::unordered_map<std::string, Tensor<float>> global_weights;
+    std::unordered_map<std::string, std::variant<Tensor<float>, Tensor<int8_t>>> global_weights;
 
     // Layer specific weights
-    std::vector<std::unordered_map<std::string, Tensor<float>>> layer_weights;
+    std::vector<std::unordered_map<std::string, std::variant<Tensor<float>, Tensor<int8_t>>>> layer_weights;
 
     static void* map_file(int fd);
-    void load_tensor(std::unordered_map<std::string, Tensor<float>>& m, char* p, const std::string& key, nlohmann::json& value);
+    void load_tensor(std::unordered_map<std::string, std::variant<Tensor<float>, Tensor<int8_t>>>& m, char* p, const std::string& key, nlohmann::json& value);
 
     void load_config(nlohmann::json& header);
     void load_weights(char* p, nlohmann::json& header);
     void load_parameters(const std::string& path);
+
+    Tensor<float> get_tensor_f32(int layer, const std::string& name);
+    Tensor<int8_t> get_tensor_int8(int layer, const std::string& name);
 };

@@ -34,6 +34,7 @@ struct Tensor {
 
     T* data;
     std::vector<size_t> strides;
+    std::vector<float> scales;
 
 
     size_t get_numel() const;
@@ -42,6 +43,9 @@ struct Tensor {
     Tensor(T* data, const std::vector<size_t>& shape);
     Tensor(Arena& arena, const std::vector<size_t>& shape);
     Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape);
+
+    // Quantized
+    Tensor(T* data, const std::vector<float>& scales, const std::vector<size_t>& shape);
 
     void copy_from(const Tensor& tensor);
 

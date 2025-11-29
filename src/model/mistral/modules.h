@@ -8,7 +8,7 @@ struct Embedding {
     Tensor<float> table;
     size_t num_embeddings;
     size_t embedding_dim;
-    Embedding(Tensor<float>& table) : table(table), num_embeddings(table.shape[0]), embedding_dim(table.shape[1]) {}
+    Embedding(const Tensor<float>& table) : table(table), num_embeddings(table.shape[0]), embedding_dim(table.shape[1]) {}
     void forward(InferenceState& infer, size_t token_id);
 };
 
@@ -61,24 +61,26 @@ struct MLP {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L206
 struct Layer {
+    int i;
     RMSNorm input_norm;
     RMSNorm output_norm;
     Attention attn;
     MLP mlp;
 
-    Layer(const std::unordered_map<std::string, Tensor<float>>& w) :
+    Layer(int i, std::shared_ptr<Parameters> p) :
+                                i(i),
 
-                                input_norm(w.at("input_layernorm.weight")),
-                                output_norm(w.at("post_attention_layernorm.weight")),
+                                input_norm(p->get_tensor_f32(i, "input_layernorm.weight")),
+                                output_norm(p->get_tensor_f32(i, "post_attention_layernorm.weight")),
 
-                                attn(w.at("self_attn.q_proj.weight"),
-                                     w.at("self_attn.k_proj.weight"),
-                                     w.at("self_attn.v_proj.weight"),
-                                     w.at("self_attn.o_proj.weight")),
+                                attn(p->get_tensor_f32(i, "self_attn.q_proj.weight"),
+                                     p->get_tensor_f32(i, "self_attn.k_proj.weight"),
+                                     p->get_tensor_f32(i, "self_attn.v_proj.weight"),
+                                     p->get_tensor_f32(i, "self_attn.o_proj.weight")),
 
-                                mlp(w.at("mlp.down_proj.weight"),
-                                     w.at("mlp.gate_proj.weight"),
-                                     w.at("mlp.up_proj.weight"))
+                                mlp(p->get_tensor_f32(i, "mlp.down_proj.weight"),
+                                    p->get_tensor_f32(i, "mlp.gate_proj.weight"),
+                                    p->get_tensor_f32(i, "mlp.up_proj.weight"))
                                 {}
 
 
@@ -90,7 +92,7 @@ struct Layer {
 struct LMHead {
     Tensor<float> lm_head; // [4096, vocab_size]
 
-    LMHead(std::shared_ptr<Parameters> params) : lm_head(params->global_weights.at("lm_head.weight")) {}
+    LMHead(std::shared_ptr<Parameters> params) : lm_head(params->get_tensor_f32(-1, "lm_head.weight")) {}
 
     void forward(InferenceState& infer);
 };
@@ -103,9 +105,9 @@ struct Model {
     LMHead lmHead;
     std::vector<Layer> layers;
 
-    Model(std::shared_ptr<Parameters> params) : embedding(params->global_weights.at("model.embed_tokens.weight")), norm(params->global_weights.at("model.norm.weight")), lmHead(params){
+    Model(std::shared_ptr<Parameters> params) : embedding(params->get_tensor_f32(-1, "model.embed_tokens.weight")), norm(params->get_tensor_f32(-1, "model.norm.weight")), lmHead(params){
         for (int i=0;i<params->config.n_layers; i++){
-            layers.emplace_back(params->layer_weights[i]);
+            layers.emplace_back(i, params);
         }
     }
 

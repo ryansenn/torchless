@@ -4,7 +4,7 @@ int test_layer() {
     std::shared_ptr<Parameters> params = get_params();
     infer.pos = 0;
 
-    Layer layer(params->layer_weights[0]);
+    Layer layer(0, params);
 
     // Test over sequence of 3 tokens
     for (int i=1;i<4;i++) {
@@ -27,7 +27,7 @@ int test_attention() {
     infer.pos = 0;
 
     auto& w = params->layer_weights[0];
-    Attention attn(w.at("self_attn.q_proj.weight"), w.at("self_attn.k_proj.weight"), w.at("self_attn.v_proj.weight"), w.at("self_attn.o_proj.weight"));
+    Attention attn(params->get_tensor_f32(0, "self_attn.q_proj.weight"), params->get_tensor_f32(0, "self_attn.k_proj.weight"), params->get_tensor_f32(0, "self_attn.v_proj.weight"), params->get_tensor_f32(0, "self_attn.o_proj.weight"));
 
     // Test over sequence of 3 tokens
     for (int i=1;i<4;i++){
@@ -72,9 +72,9 @@ int test_mlp(){
     std::shared_ptr<Parameters> params = get_params();
     auto w = params->layer_weights[0];
 
-    MLP mlp(w.at("mlp.down_proj.weight"),
-            w.at("mlp.gate_proj.weight"),
-            w.at("mlp.up_proj.weight"));
+    MLP mlp(params->get_tensor_f32(0, "mlp.down_proj.weight"),
+            params->get_tensor_f32(0, "mlp.gate_proj.weight"),
+            params->get_tensor_f32(0, "mlp.up_proj.weight"));
 
     infer.hidden_state.copy_from(expected.at("mlp_h"));
 
@@ -123,7 +123,7 @@ RegisterTest kv_cache_reg("test kv cache", &test_kv_cache);
 int test_embedding() {
     std::shared_ptr<Parameters> params = get_params();
 
-    Embedding emb(params->global_weights.at("model.embed_tokens.weight"));
+    Embedding emb(params->get_tensor_f32(-1, "model.embed_tokens.weight"));
 
     size_t token_id = 0;
     emb.forward(infer, token_id);

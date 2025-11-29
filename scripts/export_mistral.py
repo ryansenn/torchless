@@ -113,7 +113,7 @@ for tensor_name in weight_map:
 
             # We store scales
             scale_size = tensor.numel() // GROUP_SIZE * 4
-            header["tensors"][tensor_name]["scale_start"] = start
+            header["tensors"][tensor_name]["scale_offset"] = start
             header["tensors"][tensor_name]["scale_size"] = scale_size
             start += tensor.numel() // GROUP_SIZE * 4
 

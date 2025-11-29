@@ -30,15 +30,22 @@ Tensor<T>::Tensor(T* data, const std::vector<size_t>& shape) : shape(shape), num
 }
 
 template <typename T>
-Tensor<T>::Tensor(Arena& arena, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<float*>(arena.allocate(numel*type_size))){
+Tensor<T>::Tensor(Arena& arena, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<T*>(arena.allocate(numel*type_size))){
     init_strides();
 }
 
 template <typename T>
-Tensor<T>::Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<float*>(arena.allocate(numel*type_size))){
+Tensor<T>::Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape) : shape(shape), numel(get_numel()), data(static_cast<T*>(arena.allocate(numel*type_size))){
     init_strides();
     std::copy(arr.begin(), arr.end(), data);
 }
+
+
+template <typename T>
+Tensor<T>::Tensor(T* data, const std::vector<float>& scales, const std::vector<size_t>& shape) : Tensor(data, shape) {
+    this->scales = scales;
+}
+
 
 template <typename T>
 void Tensor<T>::copy_from(const Tensor& tensor) {
@@ -48,7 +55,7 @@ void Tensor<T>::copy_from(const Tensor& tensor) {
 template <typename T>
 Tensor<T> Tensor<T>::at(std::initializer_list<size_t> idx) {
     assert(idx.size() <= shape.size() && "Too many indices for tensor");
-    float* new_data = data;
+    T* new_data = data;
 
     int i = 0;
     for (auto v : idx) {
@@ -61,8 +68,8 @@ Tensor<T> Tensor<T>::at(std::initializer_list<size_t> idx) {
     return Tensor(new_data, new_shape);
 }
 
-template <typename T>
-float Tensor<T>::max(){
+template<>
+float Tensor<float>::max(){
     float result = data[0];
     for (int i=0; i<numel; i++){
         result = std::max(result, data[i]);
@@ -87,3 +94,4 @@ void Tensor<T>::print(){
 }
 
 template class Tensor<float>;
+template class Tensor<signed char>;

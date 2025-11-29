@@ -45,12 +45,25 @@ void Parameters::load_config(nlohmann::json& header){
     config.head_dim          = config.hidden_size / config.n_heads;
 }
 
-void Parameters::load_tensor(std::unordered_map<std::string, Tensor<float>>& m, char* p, const std::string& key, nlohmann::json& value){
+void Parameters::load_tensor(std::unordered_map<std::string, std::variant<Tensor<float>, Tensor<int8_t>>>& m, char* p, const std::string& key, nlohmann::json& value){
+    std::string type = value["dtype"];
     uint64_t offset = value["offset"];
     std::vector<size_t> shape = value["shape"];
 
-    Tensor t = Tensor(reinterpret_cast<float*>(p + offset), shape);
-    m.insert({key, t});
+    if (type == "f32"){
+        Tensor<float> t = Tensor(reinterpret_cast<float*>(p + offset), shape);
+        m.insert({key, t});
+        return;
+    }
+    else if (type == "int8"){
+        uint64_t scale_offset = value["scale_offset"];
+        uint64_t scale_size = value["scale_size"];
+
+        float* scale_start = reinterpret_cast<float*>(p + scale_offset);
+
+        Tensor<int8_t> t = Tensor(reinterpret_cast<int8_t*>(p + offset), std::vector<float>(scale_start, scale_start+scale_size), shape);
+        m.insert({key, t});
+    }
 }
 
 // Load Tensor views for all weights using offsets from the JSON header.
@@ -112,4 +125,10 @@ void Parameters::load_parameters(const std::string& path){
     close(fd);
 }
 
+Tensor<float> Parameters::get_tensor_f32(int layer, const std::string& name){
+
+}
+Tensor<int8_t> Parameters::get_tensor_int8(int layer, const std::string& name){
+
+}
 
