@@ -93,5 +93,16 @@ void Tensor<T>::print(){
     std::cout << std::endl;
 }
 
+template<>
+float Tensor<float>::get(size_t i){
+    return data[i];
+}
+
+template<>
+float Tensor<int8_t>::get(size_t i){
+    return data[i] / scales[scales.size() * i / numel];
+}
+
+
 template class Tensor<float>;
 template class Tensor<signed char>;

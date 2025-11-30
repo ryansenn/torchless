@@ -20,7 +20,7 @@ int test_layer() {
     return 0;
 }
 
-RegisterTest layer_reg("test layer", &test_layer);
+RegisterTest layer_reg("test layer", "f32", &test_layer);
 
 int test_attention() {
     std::shared_ptr<Parameters> params = get_params();
@@ -66,7 +66,7 @@ int test_attention() {
     return 0;
 }
 
-RegisterTest attention_reg("test attention", &test_attention);
+RegisterTest attention_reg("test attention", "f32", &test_attention);
 
 int test_mlp(){
     std::shared_ptr<Parameters> params = get_params();
@@ -88,7 +88,7 @@ int test_mlp(){
     return 0;
 }
 
-RegisterTest mlp_feedforward_reg("test attention feedforward mlp", &test_mlp);
+RegisterTest mlp_feedforward_reg("test attention feedforward mlp", "f32", &test_mlp);
 
 int test_kv_cache() {
     infer.pos = 5;
@@ -118,7 +118,7 @@ int test_kv_cache() {
     return 0;
 }
 
-RegisterTest kv_cache_reg("test kv cache", &test_kv_cache);
+RegisterTest kv_cache_reg("test kv cache", "f32", &test_kv_cache);
 
 int test_embedding() {
     std::shared_ptr<Parameters> params = get_params();
@@ -155,7 +155,7 @@ int test_embedding() {
     return 0;
 }
 
-RegisterTest embedding_reg("test embedding", &test_embedding);
+RegisterTest embedding_reg("test embedding", "f32", &test_embedding);
 
 int test_rotary_embedding_inv_freq(){
     std::shared_ptr<Parameters> params = get_params();
@@ -170,7 +170,7 @@ int test_rotary_embedding_inv_freq(){
     return 0;
 }
 
-RegisterTest rotary_embedding_inv_freq_reg("test rotary embedding inv freq", &test_rotary_embedding_inv_freq);
+RegisterTest rotary_embedding_inv_freq_reg("test rotary embedding inv freq", "f32", &test_rotary_embedding_inv_freq);
 
 int test_rotary_embedding(){
     std::shared_ptr<Parameters> params = get_params();
@@ -206,7 +206,7 @@ int test_rotary_embedding(){
     return 0;
 }
 
-RegisterTest rotary_embeddingg("test rotary embedding", &test_rotary_embedding);
+RegisterTest rotary_embeddingg("test rotary embedding", "f32", &test_rotary_embedding);
 
 
 
@@ -226,7 +226,7 @@ int test_rmsnorm() {
     return 0;
 }
 
-RegisterTest rmsnorm_reg("test rmsnorm", &test_rmsnorm);
+RegisterTest rmsnorm_reg("test rmsnorm", "f32", &test_rmsnorm);
 
 
 int test_lm_head() {
@@ -253,6 +253,6 @@ int test_lm_head() {
 }
 
 
-RegisterTest lm_head_reg("test lm head", &test_lm_head);
+RegisterTest lm_head_reg("test lm head", "f32", &test_lm_head);
 
 

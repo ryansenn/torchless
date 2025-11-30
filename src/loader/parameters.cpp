@@ -150,4 +150,6 @@ Tensor<T> Parameters::get_tensor(int layer, const std::string& name){
 }
 
 template Tensor<float> Parameters::get_tensor<float>(int, const std::string&);
+template Tensor<int8_t> Parameters::get_tensor<int8_t>(int, const std::string&);
+
 

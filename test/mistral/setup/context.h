@@ -6,14 +6,15 @@
 
 struct TestCase {
     std::string name;
+    std::string quant;
     int (*func)();
 };
 
 extern std::vector<TestCase> tests;
 
 struct RegisterTest {
-    RegisterTest(std::string name, int (*func)()){
-        tests.push_back({name, func});
+    RegisterTest(std::string name, std::string quant, int (*func)()){
+        tests.push_back({name, quant, func});
     }
 };
 

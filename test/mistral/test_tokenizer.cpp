@@ -31,7 +31,8 @@ int test_tokenizer_encode(){
     return 0;
 }
 
-static RegisterTest tokenizer_encode("tokenizer encode",&test_tokenizer_encode);
+static RegisterTest tokenizer_encode("tokenizer encode", "f32", &test_tokenizer_encode);
+static RegisterTest tokenizer_encode_q("tokenizer encode", "int8", &test_tokenizer_encode);
 
 
 int test_tokenizer_encode_byte_fallback(){
@@ -68,5 +69,6 @@ int test_tokenizer_encode_byte_fallback(){
     return 0;
 }
 
-static RegisterTest tokenizer_encode_fallback("tokenizer encode fallback",&test_tokenizer_encode_byte_fallback);
+static RegisterTest tokenizer_encode_fallback("tokenizer encode fallback", "f32", &test_tokenizer_encode_byte_fallback);
+static RegisterTest tokenizer_encode_fallback_q("tokenizer encode fallback", "int8", &test_tokenizer_encode_byte_fallback);
 

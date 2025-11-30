@@ -52,7 +52,8 @@ int test_load_config(){
     return 0;
 }
 
-static RegisterTest load_config("load config",&test_load_config);
+static RegisterTest load_config("load config", "f32", &test_load_config);
+static RegisterTest load_config_q("load config", "int8", &test_load_config);
 
 
 /*
@@ -95,6 +96,7 @@ static const std::vector<Expected> expected_tensors = {
         {"mlp.down_proj.weight",            31, {4096, 14336},  0.00180816650390625f,     0.0024566650390625f},
 };
 
+
 int test_load_weights() {
     std::shared_ptr<Parameters> params = get_params();
 
@@ -120,18 +122,33 @@ int test_load_weights() {
         }
     }
 
-    // Check some of the tensors have right shape, first value and last value
     for (const auto& e : expected_tensors) {
-        Tensor<float> t = params->get_tensor<float>(e.layer, e.key);
+        const auto& v = (e.layer == -1)
+                        ? params->global_weights.at(e.key)
+                        : params->layer_weights[e.layer].at(e.key);
 
-        const float* p = t.data;
-        size_t n = t.get_numel();
-        if (!equals(p[0], e.first)) {
-            std::cerr << e.key << " first val mismatch " << p[0] << " vs " << e.first << "\n";
+        float first_val;
+        float last_val;
+        size_t n;
+
+        if (std::holds_alternative<Tensor<float>>(v)) {
+            auto t = std::get<Tensor<float>>(v);
+            n = t.get_numel();
+            first_val = t.get(0);
+            last_val = t.get(n - 1);
+        } else {
+            auto t = std::get<Tensor<int8_t>>(v);
+            n = t.get_numel();
+            first_val = t.get(0);
+            last_val = t.get(n - 1);
+        }
+
+        if (!equals(first_val, e.first)) {
+            std::cerr << e.key << " first val mismatch " << first_val << " vs " << e.first << "\n";
             return 1;
         }
-        if (!equals(p[n - 1], e.last)) {
-            std::cerr << e.key << " last val mismatch " << p[n - 1] << " vs " << e.last << "\n";
+        if (!equals(last_val, e.last)) {
+            std::cerr << e.key << " last val mismatch " << last_val << " vs " << e.last << "\n";
             return 1;
         }
     }
@@ -139,4 +156,5 @@ int test_load_weights() {
     return 0;
 }
 
-static RegisterTest load_weights("load weights",&test_load_weights);
+static RegisterTest load_weights("load weights", "f32", &test_load_weights);
+static RegisterTest load_weights_q("load weights", "int8", &test_load_weights);

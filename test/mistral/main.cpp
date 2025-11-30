@@ -7,17 +7,21 @@ int main() {
     int total   = 0;
     int failed  = 0;
 
+    std::cout << "Running tests for model type: " << get_params()->config.quant << std::endl;
+
     for (const TestCase& t : tests) {
-        total++;
-        int result = t.func();
-        if (result != 0) {
-            failed++;
-            std::cout << t.name << " has failed" << std::endl;
+        if (t.quant == get_params()->config.quant){
+            total++;
+            int result = t.func();
+            if (result != 0) {
+                failed++;
+                std::cout << t.name << " has failed" << std::endl;
+            }
         }
     }
 
     int passed = total - failed;
-    std::cout << std::endl << "Summary: " << passed << " / " << total << " tests passed" << std::endl;
+    std::cout << std::endl << "Summary " << ": " << passed << " / " << total << " tests passed" << std::endl;
 
     return 0;
 }
