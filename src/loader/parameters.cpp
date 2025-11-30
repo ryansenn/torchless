@@ -125,10 +125,28 @@ void Parameters::load_parameters(const std::string& path){
     close(fd);
 }
 
-Tensor<float> Parameters::get_tensor_f32(int layer, const std::string& name){
+template<typename T>
+Tensor<T> Parameters::get_tensor(int layer, const std::string& name){
+    if (layer == -1){
+        for (auto& e : global_weights){
+            if (name == e.first){
+                return std::get<Tensor<T>>(e.second);
+            }
+        }
 
-}
-Tensor<int8_t> Parameters::get_tensor_int8(int layer, const std::string& name){
+        assert(false && "tensor not found");
+        return {};
+    }
 
+    for (auto& e : layer_weights[layer]){
+        if (name == e.first){
+            return std::get<Tensor<T>>(e.second);
+        }
+    }
+
+    assert(false && "tensor not found");
+    return {};
 }
+
+template Tensor<float> Parameters::get_tensor<float>(int, const std::string&);
 

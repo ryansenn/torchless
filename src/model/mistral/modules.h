@@ -70,17 +70,17 @@ struct Layer {
     Layer(int i, std::shared_ptr<Parameters> p) :
                                 i(i),
 
-                                input_norm(p->get_tensor_f32(i, "input_layernorm.weight")),
-                                output_norm(p->get_tensor_f32(i, "post_attention_layernorm.weight")),
+                                input_norm(p->get_tensor<float>(i, "input_layernorm.weight")),
+                                output_norm(p->get_tensor<float>(i, "post_attention_layernorm.weight")),
 
-                                attn(p->get_tensor_f32(i, "self_attn.q_proj.weight"),
-                                     p->get_tensor_f32(i, "self_attn.k_proj.weight"),
-                                     p->get_tensor_f32(i, "self_attn.v_proj.weight"),
-                                     p->get_tensor_f32(i, "self_attn.o_proj.weight")),
+                                attn(p->get_tensor<float>(i, "self_attn.q_proj.weight"),
+                                     p->get_tensor<float>(i, "self_attn.k_proj.weight"),
+                                     p->get_tensor<float>(i, "self_attn.v_proj.weight"),
+                                     p->get_tensor<float>(i, "self_attn.o_proj.weight")),
 
-                                mlp(p->get_tensor_f32(i, "mlp.down_proj.weight"),
-                                    p->get_tensor_f32(i, "mlp.gate_proj.weight"),
-                                    p->get_tensor_f32(i, "mlp.up_proj.weight"))
+                                mlp(p->get_tensor<float>(i, "mlp.down_proj.weight"),
+                                    p->get_tensor<float>(i, "mlp.gate_proj.weight"),
+                                    p->get_tensor<float>(i, "mlp.up_proj.weight"))
                                 {}
 
 
@@ -92,7 +92,7 @@ struct Layer {
 struct LMHead {
     Tensor<float> lm_head; // [4096, vocab_size]
 
-    LMHead(std::shared_ptr<Parameters> params) : lm_head(params->get_tensor_f32(-1, "lm_head.weight")) {}
+    LMHead(std::shared_ptr<Parameters> params) : lm_head(params->get_tensor<float>(-1, "lm_head.weight")) {}
 
     void forward(InferenceState& infer);
 };
@@ -105,7 +105,7 @@ struct Model {
     LMHead lmHead;
     std::vector<Layer> layers;
 
-    Model(std::shared_ptr<Parameters> params) : embedding(params->get_tensor_f32(-1, "model.embed_tokens.weight")), norm(params->get_tensor_f32(-1, "model.norm.weight")), lmHead(params){
+    Model(std::shared_ptr<Parameters> params) : embedding(params->get_tensor<float>(-1, "model.embed_tokens.weight")), norm(params->get_tensor<float>(-1, "model.norm.weight")), lmHead(params){
         for (int i=0;i<params->config.n_layers; i++){
             layers.emplace_back(i, params);
         }

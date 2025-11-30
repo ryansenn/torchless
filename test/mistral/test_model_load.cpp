@@ -121,13 +121,11 @@ int test_load_weights() {
     }
 
     // Check some of the tensors have right shape, first value and last value
-
     for (const auto& e : expected_tensors) {
-        Tensor<float>* t;
+        Tensor<float> t = params->get_tensor<float>(e.layer, e.key);
 
-
-        const float* p = t->data;
-        size_t n = t->get_numel();
+        const float* p = t.data;
+        size_t n = t.get_numel();
         if (!equals(p[0], e.first)) {
             std::cerr << e.key << " first val mismatch " << p[0] << " vs " << e.first << "\n";
             return 1;

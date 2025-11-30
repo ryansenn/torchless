@@ -40,6 +40,7 @@ struct Tensor {
     size_t get_numel() const;
     void init_strides();
 
+    Tensor() {}
     Tensor(T* data, const std::vector<size_t>& shape);
     Tensor(Arena& arena, const std::vector<size_t>& shape);
     Tensor(Arena& arena, const std::vector<float>& arr, const std::vector<size_t>& shape);

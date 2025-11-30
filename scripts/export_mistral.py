@@ -17,6 +17,8 @@ Arguments:
   --model_dir   Required. Path to the Hugging Face model directory.
   --out         Optional. Output file path. Defaults to ./model.bin
   --quant       Optional. Quantization mode. Defaults to f32. Accepts f32 or int8
+  
+python export_mistral.py --model_dir ../Mistral-7B-v0.1 --out ../mistral.bin --quant int8
 """
 
 parser = argparse.ArgumentParser()

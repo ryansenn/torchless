@@ -37,6 +37,6 @@ struct Parameters {
     void load_weights(char* p, nlohmann::json& header);
     void load_parameters(const std::string& path);
 
-    Tensor<float> get_tensor_f32(int layer, const std::string& name);
-    Tensor<int8_t> get_tensor_int8(int layer, const std::string& name);
+    template<typename T>
+    Tensor<T> get_tensor(int layer, const std::string& name);
 };
