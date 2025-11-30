@@ -18,7 +18,7 @@ Arguments:
   --out         Optional. Output file path. Defaults to ./model.bin
   --quant       Optional. Quantization mode. Defaults to f32. Accepts f32 or int8
   
-python export_mistral.py --model_dir ../Mistral-7B-v0.1 --out ../mistral.bin --quant int8
+python export_mistral.py --model_dir ../Mistral-7B-v0.1 --out ../mistral-int8.bin --quant int8
 """
 
 parser = argparse.ArgumentParser()
@@ -78,7 +78,8 @@ with open(config_path, 'r') as f:
         "sliding_window": str(cfg["sliding_window"]),
         "rope_theta": str(cfg["rope_theta"]),
         "norm_eps": str(cfg["rms_norm_eps"]),
-        "act_type": cfg["hidden_act"]
+        "act_type": cfg["hidden_act"],
+        "quant": str(args.quant)
     }
 
 # Insert the vocab in header["vocab"]

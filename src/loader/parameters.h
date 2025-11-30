@@ -18,6 +18,7 @@ struct Config {
     size_t max_position_embeddings;
     float rope_theta;
     float norm_eps;
+    std::string quant;
 };
 
 struct Parameters {

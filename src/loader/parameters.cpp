@@ -43,6 +43,7 @@ void Parameters::load_config(nlohmann::json& header){
     config.norm_eps          = std::stof(m["norm_eps"].get<std::string>());
     config.max_position_embeddings = std::stoi(m["max_position_embeddings"].get<std::string>());
     config.head_dim          = config.hidden_size / config.n_heads;
+    config.quant             = m["quant"].get<std::string>();
 }
 
 void Parameters::load_tensor(std::unordered_map<std::string, std::variant<Tensor<float>, Tensor<int8_t>>>& m, char* p, const std::string& key, nlohmann::json& value){

@@ -26,9 +26,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    Arena arena(1024*1024);
-    Tensor w(arena, {1, 2, 3, 4, 5, 6}, {2, 3});
+    std::string model_path = argv[1];
 
+    std::shared_ptr<Parameters> params = std::make_shared<Parameters>();
+    params->load_parameters(model_path);
 
     /*
     std::string model_path = argv[1];
