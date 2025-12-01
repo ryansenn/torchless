@@ -15,7 +15,8 @@ size_t sample_max(InferenceState& infer){
     return res;
 }
 
-size_t generate(Model& model, InferenceState& infer, size_t token){
+template <typename T>
+size_t generate(Model<T>& model, InferenceState& infer, size_t token){
     model.forward(infer, token);
     return sample_max(infer);
 }
@@ -26,19 +27,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    std::string model_path = argv[1];
 
-    std::shared_ptr<Parameters> params = std::make_shared<Parameters>();
-    params->load_parameters(model_path);
-
-    /*
     std::string model_path = argv[1];
 
     std::shared_ptr<Parameters> params = std::make_shared<Parameters>();
     params->load_parameters(model_path);
 
     InferenceState infer(params->config);
-    Model model(params);
+    Model<int8_t> model(params);
 
     const std::string text = "Hello are you alive?";
     std::vector<uint32_t> got = params->tokenizer.encode(text);
@@ -54,7 +50,6 @@ int main(int argc, char** argv) {
     }
 
     std::cout << std::endl;
-     */
 
     return 0;
 }

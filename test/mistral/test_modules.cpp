@@ -23,13 +23,13 @@ int test_layer() {
 
 RegisterTest layer_reg("test layer", "f32", &test_layer<float>);
 
-
+template <typename T>
 int test_attention() {
     std::shared_ptr<Parameters> params = get_params();
     infer.pos = 0;
 
     auto& w = params->layer_weights[0];
-    Attention attn(params->get_tensor<float>(0, "self_attn.q_proj.weight"), params->get_tensor<float>(0, "self_attn.k_proj.weight"), params->get_tensor<float>(0, "self_attn.v_proj.weight"), params->get_tensor<float>(0, "self_attn.o_proj.weight"));
+    Attention attn(params->get_tensor<T>(0, "self_attn.q_proj.weight"), params->get_tensor<T>(0, "self_attn.k_proj.weight"), params->get_tensor<T>(0, "self_attn.v_proj.weight"), params->get_tensor<T>(0, "self_attn.o_proj.weight"));
 
     // Test over sequence of 3 tokens
     for (int i=1;i<4;i++){
@@ -68,15 +68,18 @@ int test_attention() {
     return 0;
 }
 
-RegisterTest attention_reg("test attention", "f32", &test_attention);
+RegisterTest attention_reg("test attention", "f32", &test_attention<float>);
+RegisterTest attention_reg_q("test attention", "int8", &test_attention<int8_t>);
 
+
+template <typename T>
 int test_mlp(){
     std::shared_ptr<Parameters> params = get_params();
     auto w = params->layer_weights[0];
 
-    MLP mlp(params->get_tensor<float>(0, "mlp.down_proj.weight"),
-            params->get_tensor<float>(0, "mlp.gate_proj.weight"),
-            params->get_tensor<float>(0, "mlp.up_proj.weight"));
+    MLP mlp(params->get_tensor<T>(0, "mlp.down_proj.weight"),
+            params->get_tensor<T>(0, "mlp.gate_proj.weight"),
+            params->get_tensor<T>(0, "mlp.up_proj.weight"));
 
     infer.hidden_state.copy_from(expected.at("mlp_h"));
 
@@ -90,7 +93,8 @@ int test_mlp(){
     return 0;
 }
 
-RegisterTest mlp_feedforward_reg("test attention feedforward mlp", "f32", &test_mlp);
+RegisterTest mlp_feedforward_reg("test attention feedforward mlp", "f32", &test_mlp<float>);
+RegisterTest mlp_feedforward_reg_q("test attention feedforward mlp", "int8", &test_mlp<int8_t>);
 
 int test_kv_cache() {
     infer.pos = 5;

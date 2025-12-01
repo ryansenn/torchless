@@ -1,8 +1,8 @@
 # Torchless
 
-Torchless is an LLM inference engine built from scratch. It currently runs the full [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1) on CPU for local text generation. The core development goal is achieving maximum inference speed and supporting advanced architectures like Mistral [Mixture of Experts](https://mistral.ai/news/mixtral-of-experts).
+Torchless is an LLM inference engine built from scratch. It currently runs the full [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1) on CPU for local text generation.
 
-It features custom implementations of tensors, tokenizer and Mistral transformer architecture, all rigorously tested against Hugging Face references. I aim to keep the project's code clear and lightweight as to serve as an educational reference to how a modern LLM runs, layer by layer.
+The goal of this project is achieving maximum inference speed and supporting advanced architectures like [Mixture of Experts](https://mistral.ai/news/mixtral-of-experts). Torchless has custom implementations of tensors, tokenizer and Mistral transformer architecture, all  tested against Hugging Face references. I aim to keep the project's code clear and lightweight as to serve as an educational reference to how a modern LLM runs.
 
 ## Running
 
@@ -23,7 +23,7 @@ If you run into issues that appear specific to your environment, feel free to op
 
 ## Roadmap
 
-The current work is centered on improving execution speed. I am rewriting some of the transformer modules in C for integrating SIMD and custom CUDA kernels.
+The current work is centered on improving execution speed
 
 <br>
 
