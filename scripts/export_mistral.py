@@ -18,6 +18,9 @@ Arguments:
   --out         Optional. Output file path. Defaults to ./model.bin
   --quant       Optional. Quantization mode. Defaults to f32. Accepts f32 or int8
   
+
+python export_mistral.py --model_dir ../Mistral-7B-v0.1 --out ../mistral.bin --quant f32
+
 python export_mistral.py --model_dir ../Mistral-7B-v0.1 --out ../mistral-int8.bin --quant int8
 """
 
@@ -151,7 +154,7 @@ def write_binary(header):
         # Dump all the tensors in the same order as header
         for tensor_name in header["tensors"]:
             i += 1
-            #print("[" + "#" * int(bar_width * i/total) + "-" * (bar_width - int(bar_width * i/total)) + f"] {int(i/total*100)}%", end="\r")
+            print("[" + "#" * int(bar_width * i/total) + "-" * (bar_width - int(bar_width * i/total)) + f"] {int(i/total*100)}%", end="\r")
 
             if "_proj" in tensor_name and header["tensors"][tensor_name]["dtype"] != "f32":
                 write_tensor_q(out, tensor_name)

@@ -46,7 +46,8 @@ void RMSNorm::forward(InferenceState& infer) {
 }
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L140
-void Attention::forward(InferenceState &infer) {
+template <typename T>
+void Attention<T>::forward(InferenceState &infer) {
     // Get q, k, v
     // [proj, hidden_size] @ [hidden_size, 1] = [proj]
     matmul(infer.q_state, q_proj, infer.hidden_state);
@@ -65,8 +66,6 @@ void Attention::forward(InferenceState &infer) {
 
     // Perform attention with tokens in window
     // softmax ( QK^t / sqrt(head_dim) ) * V
-    // TODO: Try repeating K and do 1 matmul instead of 32 individual ones
-
     // Reuse each KV head 4 times
     for (size_t h=0; h<infer.config.n_heads; h++){
         // [seq_len, 128] @ [128]
@@ -97,7 +96,8 @@ void Attention::forward(InferenceState &infer) {
 // It runs the input through two linear projections.
 // The first gives the main signal, the second goes through a silu activation
 // Then multiplies these two paths together and apply the final projection
-void MLP::forward(InferenceState &infer) {
+template <typename T>
+void MLP<T>::forward(InferenceState &infer) {
     // gate_proj [14336, 4096] @ hidden_state [4096]
     matmul(infer.mlp_gate, gate_proj, infer.hidden_state);
 
@@ -115,7 +115,8 @@ void MLP::forward(InferenceState &infer) {
 }
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L215
-void Layer::forward(InferenceState &infer){
+template <typename T>
+void Layer<T>::forward(InferenceState &infer){
     // Copy input into residual
     infer.residual.copy_from(infer.hidden_state);
 
@@ -150,7 +151,8 @@ void LMHead::forward(InferenceState &infer) {
 
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L334
 // Processes 1 token at a time and do a rewrite to support multiple tokens
-void Model::forward(InferenceState &infer, size_t token_id) {
+template <typename T>
+void Model<T>::forward(InferenceState &infer, size_t token_id) {
     // Get token embedding
     embedding.forward(infer, token_id);
 
@@ -167,3 +169,14 @@ void Model::forward(InferenceState &infer, size_t token_id) {
 
     infer.pos++;
 }
+
+
+template void Attention<float>::forward(InferenceState &);
+template void MLP<float>::forward(InferenceState &);
+template void Layer<float>::forward(InferenceState &);
+template void Model<float>::forward(InferenceState &, size_t);
+
+template void Attention<int8_t>::forward(InferenceState &);
+template void MLP<int8_t>::forward(InferenceState &);
+template void Layer<int8_t>::forward(InferenceState &);
+template void Model<int8_t>::forward(InferenceState &, size_t);

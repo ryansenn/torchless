@@ -1,10 +1,11 @@
 #include "setup/context.h"
 
+template <typename T>
 int test_layer() {
     std::shared_ptr<Parameters> params = get_params();
     infer.pos = 0;
 
-    Layer layer(0, params);
+    Layer<T> layer(0, params);
 
     // Test over sequence of 3 tokens
     for (int i=1;i<4;i++) {
@@ -20,7 +21,8 @@ int test_layer() {
     return 0;
 }
 
-RegisterTest layer_reg("test layer", "f32", &test_layer);
+RegisterTest layer_reg("test layer", "f32", &test_layer<float>);
+
 
 int test_attention() {
     std::shared_ptr<Parameters> params = get_params();

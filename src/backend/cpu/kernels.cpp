@@ -1,7 +1,7 @@
 #include <math.h>
 #include "../../common/kernels.h"
 
-// This only works for
+
 // W (n,d) @ x (d,) = xout (n,)
 void matmul(Tensor<float>& xout, Tensor<float>& w, Tensor<float>& x){
     size_t n = w.shape[0];
@@ -17,6 +17,19 @@ void matmul(Tensor<float>& xout, Tensor<float>& w, Tensor<float>& x){
     }
 }
 
+void matmul(Tensor<float>& xout, Tensor<int8_t>& w, Tensor<float>& x){
+    size_t n = w.shape[0];
+    size_t d = w.shape[1];
+
+    assert(x.numel == d && xout.numel >= n && "matmul shape mismatch");
+
+    for (int i=0; i<n; i++){
+        xout.data[i] = 0;
+        for (int j=0; j<d; j++){
+            xout.data[i] += w.get(i*d+j) * x.data[j];
+        }
+    }
+}
 
 
 // x (,n) @ W (n,d) = xout (d,)
@@ -86,8 +99,6 @@ void silu(Tensor<float>& xout, Tensor<float>& x){
         xout.data[i] = x.data[i] / (1 + exp(-x.data[i]));
     }
 }
-
-
 
 
 // Not sure if I will be using all of those

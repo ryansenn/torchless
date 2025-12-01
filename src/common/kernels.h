@@ -8,6 +8,7 @@
 #include "tensor.h"
 
 void matmul(Tensor<float>& xout, Tensor<float>& w, Tensor<float>& x);
+void matmul(Tensor<float>& xout, Tensor<int8_t>& w, Tensor<float>& x);
 void row_matmul(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& w);
 
 void softmax(Tensor<float>& xout, Tensor<float>& x);
