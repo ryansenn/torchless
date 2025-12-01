@@ -109,18 +109,12 @@ def load_tensor_map(header):
 def write_tensor_q(out, tensor_name):
     tensor_file_path = os.path.join(IN_PATH, weight_map[tensor_name])
 
-    print(tensor_name)
-
     with safetensors.safe_open(tensor_file_path, framework="pt") as f:
         tensor = f.get_tensor(tensor_name)
 
         tensor, scales = quantize(tensor, DATA_SIZE * 8, GROUP_SIZE)
         tensor = tensor.to(DATA_TYPE).contiguous()
         scales = scales.to(torch.float32).contiguous()
-
-        if tensor_name == "model.layers.0.mlp.down_proj.weight":
-            print(tensor[:5])
-            print(scales[:5])
 
         tensor_bytes = tensor.numpy().tobytes()
         out.write(tensor_bytes)
