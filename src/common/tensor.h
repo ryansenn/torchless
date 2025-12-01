@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include <initializer_list>
+#include <cassert>
 
 struct Arena {
     size_t BUFFER_SIZE;

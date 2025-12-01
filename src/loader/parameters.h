@@ -3,6 +3,7 @@
 #include "../common/tensor.h"
 #include "../tokenizer/tokenizer.h"
 #include "../common/json.hpp"
+#include <variant>
 
 #pragma once
 

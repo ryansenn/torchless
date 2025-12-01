@@ -6,6 +6,7 @@
 #define MATH_OPS_H
 
 #include "tensor.h"
+#include <cmath>
 
 void matmul(Tensor<float>& xout, Tensor<float>& w, Tensor<float>& x);
 void matmul(Tensor<float>& xout, Tensor<int8_t>& w, Tensor<float>& x);

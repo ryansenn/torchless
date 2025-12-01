@@ -55,7 +55,7 @@ void softmax(Tensor<float>& xout, Tensor<float>& x){
     float maxv = x.max();
     float total = 0;
     for (int i=0; i<x.numel; i++){
-        xout.data[i] = std::expf(x.data[i] - maxv);
+        xout.data[i] = std::exp(x.data[i] - maxv);
         total += xout.data[i];
     }
     mul(xout, xout, 1/total);

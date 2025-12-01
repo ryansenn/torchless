@@ -13,7 +13,7 @@ std::shared_ptr<Parameters> get_params(){
         return params;
     }
 
-    params->load_parameters("../mistral-int8.bin");
+    params->load_parameters("../mistral.bin");
     init = true;
 
     return params;

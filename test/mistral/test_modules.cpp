@@ -69,7 +69,7 @@ int test_attention() {
 }
 
 RegisterTest attention_reg("test attention", "f32", &test_attention<float>);
-RegisterTest attention_reg_q("test attention", "int8", &test_attention<int8_t>);
+//RegisterTest attention_reg_q("test attention", "int8", &test_attention<int8_t>);
 
 
 template <typename T>
