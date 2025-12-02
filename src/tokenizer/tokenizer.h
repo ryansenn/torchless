@@ -24,7 +24,7 @@ struct Tokenizer {
 
     void load(nlohmann::json tokenizer);
 
-    std::string pre_tokenize_mistral(std::string& text) const;
-    std::vector<uint32_t> encode(std::string text) const;
-    std::string decode(std::vector<int>& tokens) const;
+    std::string pre_tokenize_mistral(const std::string& text) const;
+    std::vector<uint32_t> encode(const std::string& text) const;
+    std::string decode(const std::vector<uint32_t>& token) const;
 };

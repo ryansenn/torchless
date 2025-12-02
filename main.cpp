@@ -2,7 +2,7 @@
 #include "src/loader/parameters.h"
 #include "src/model/mistral/modules.h"
 
-size_t sample_max(InferenceState& infer){
+uint32_t sample_max(InferenceState& infer){
     float max_val = infer.logits.data[0];
     size_t res = 0;
     for (size_t i = 0;i < infer.config.vocab_size; i++){
@@ -16,7 +16,7 @@ size_t sample_max(InferenceState& infer){
 }
 
 template <typename T>
-size_t generate(Model<T>& model, InferenceState& infer, size_t token){
+uint32_t generate(Model<T>& model, InferenceState& infer, size_t token){
     model.forward(infer, token);
     return sample_max(infer);
 }
@@ -43,10 +43,10 @@ int main(int argc, char** argv) {
         generate(model, infer, got[i]);
     }
 
-    size_t t = got[got.size()-1];
+    uint32_t t = got[got.size()-1];
     for (int i = 0; i<50;i++){
         t = generate(model, infer, t);
-        std::cout << t;
+        std::cout << params->tokenizer.decode({t}) << std::flush;
     }
 
     std::cout << std::endl;

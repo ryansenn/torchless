@@ -106,7 +106,7 @@ std::vector<uint32_t> Tokenizer::merge(std::vector<uint32_t>& tokens, uint32_t l
 }
 
 // For mistral, use Metaspace pre-tokenization, replace spaces with '▁' and prepend
-std::string Tokenizer::pre_tokenize_mistral(std::string& text) const{
+std::string Tokenizer::pre_tokenize_mistral(const std::string& text) const{
     std::string out = "▁";
 
     for (auto c : text){
@@ -120,13 +120,13 @@ std::string Tokenizer::pre_tokenize_mistral(std::string& text) const{
 }
 
 // Runs the BPE merge based tokenization
-std::vector<uint32_t> Tokenizer::encode(std::string text) const {
+std::vector<uint32_t> Tokenizer::encode(const std::string& text) const {
     // If want to support other tokenizers config we would support other stages that are not needed in Mistral
 
     // Normalization (not implemented for Mistral)
 
     // Pre-tokenization
-    text = pre_tokenize_mistral(text);
+    std::string text2 = pre_tokenize_mistral(text);
 
     // Now run the BPE Algorithm
 
@@ -134,12 +134,12 @@ std::vector<uint32_t> Tokenizer::encode(std::string text) const {
     std::vector<uint32_t> tokens;
 
     size_t i = 0;
-    while (i < text.size()) {
+    while (i < text2.size()) {
         // If we have a valid multiple byte UTF-8 encoding, we want to merge them into one string
         // I should probably use a library to handle raw UTF-8 bytes but couldnt find
         // The first byte leading 1s indicate the number of byte to read
 
-        unsigned char b0 = static_cast<unsigned char>(text[i]);
+        unsigned char b0 = static_cast<unsigned char>(text2[i]);
         size_t len = 1;
 
         if      ((b0 & 0x80) == 0x00) len = 1;          // 0xxxxxxx
@@ -147,7 +147,7 @@ std::vector<uint32_t> Tokenizer::encode(std::string text) const {
         else if ((b0 & 0xF0) == 0xE0) len = 3;          // 1110xxxx
         else if ((b0 & 0xF8) == 0xF0) len = 4;          // 11110xxx
 
-        std::string s = text.substr(i, len);
+        std::string s = text2.substr(i, len);
 
         std::vector<uint32_t> ids = get_id(s);
         tokens.insert(tokens.end(), ids.begin(), ids.end());
@@ -172,6 +172,11 @@ std::vector<uint32_t> Tokenizer::encode(std::string text) const {
     return tokens;
 }
 
-std::string Tokenizer::decode(std::vector<int>& tokens) const {
-    return "hello!";
+std::string Tokenizer::decode(const std::vector<uint32_t>& tokens) const {
+    std::string result;
+
+    for (auto& t : tokens){
+        result += id_to_token[t];
+    }
+    return result;
 }
