@@ -75,19 +75,19 @@ static RegisterTest tokenizer_encode_fallback_q("tokenizer encode fallback", "in
 int test_tokenizer_decode(){
     std::shared_ptr<Parameters> params = get_params();
 
-    const std::string expected = "The quick brown fox jumps over the lazy dog. Mistral models tokenize text using byte pair encoding, handling punctuation, emojis 😊, and multilingual words like déjà vu or 中文 with care.";
+    const std::string expected = "The quick brown fox jumps over the lazy dog.";
 
     const std::vector<uint32_t> ids = {
-            1, 415, 2936, 9060, 285, 1142, 461, 10575, 754, 272,
-            17898, 3914, 28723, 25200, 1650, 4994, 6029, 653, 2245, 1413,
-            7500, 5964, 16087, 28725, 12852, 22195, 10223, 28725, 877, 6054,
-            278, 28705, 30464, 28725, 304, 2531, 5708, 840, 3085, 737,
-            28320, 20620, 442, 28705, 28991, 29019, 395, 1656, 28723
+            415, 2936, 9060, 285, 1142, 461, 10575, 754, 272,
+            17898, 3914, 28723
     };
 
     std::string got = params->tokenizer.decode(ids);
 
-    std::cout << got << std::endl;
+    if (expected != got){
+        std::cout << "Tokenizer decode mismatch" << std::endl;
+        return 1;
+    }
 
     return 0;
 }

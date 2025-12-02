@@ -9,6 +9,7 @@ void matmul(Tensor<float>& xout, Tensor<float>& w, Tensor<float>& x){
 
     assert(x.numel == d && xout.numel >= n && "matmul shape mismatch");
 
+    #pragma omp parallel for private(i)
     for (int i=0; i<n; i++){
         xout.data[i] = 0;
         for (int j=0; j<d; j++){

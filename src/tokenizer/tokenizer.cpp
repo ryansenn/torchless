@@ -172,11 +172,34 @@ std::vector<uint32_t> Tokenizer::encode(const std::string& text) const {
     return tokens;
 }
 
+std::string Tokenizer::decode_mistral(std::string s) const{
+    std::string t = "▁";
+    std::string result;
+    int i = 0;
+
+    while (i<s.size() - t.size()){
+        if (s.substr(i, t.size()) == t) {
+            if (i > 0){
+                result += " ";
+            }
+            i += t.size();
+            continue;
+        }
+        result += s[i];
+        i++;
+    }
+
+    result += s.substr(s.size() - t.size(), s.size());
+
+    return result;
+}
+
 std::string Tokenizer::decode(const std::vector<uint32_t>& tokens) const {
     std::string result;
 
-    for (auto& t : tokens){
+    for (auto& t : tokens) {
         result += id_to_token[t];
     }
-    return result;
+
+    return decode_mistral(result);
 }

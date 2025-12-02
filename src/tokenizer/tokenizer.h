@@ -26,5 +26,7 @@ struct Tokenizer {
 
     std::string pre_tokenize_mistral(const std::string& text) const;
     std::vector<uint32_t> encode(const std::string& text) const;
+
+    std::string decode_mistral(std::string s) const;
     std::string decode(const std::vector<uint32_t>& token) const;
 };

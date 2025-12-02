@@ -22,11 +22,10 @@ uint32_t generate(Model<T>& model, InferenceState& infer, size_t token){
 }
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <model_path>\n";
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <model_path> <prompt>" << std::endl;
         return 1;
     }
-
 
     std::string model_path = argv[1];
 
@@ -38,16 +37,15 @@ int main(int argc, char** argv) {
 
     std::cout << "Model loaded" << std::endl;
 
-    const std::string text = "Paris is the capital of";
+    const std::string text = argv[2];
     std::vector<uint32_t> got = params->tokenizer.encode(text);
 
+    std::cout << "Understanding the prompt..." << std::endl;
     for (int i=0;i<got.size()-1;i++){
         generate(model, infer, got[i]);
-        std::cout << i << " " << std::flush;
     }
 
-    std::cout << std::endl;
-
+    std::cout << "Response: " << std::endl;
     uint32_t t = got[got.size()-1];
     for (int i = 0; i<50;i++){
         t = generate(model, infer, t);
