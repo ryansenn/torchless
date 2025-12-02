@@ -106,7 +106,7 @@ void Parameters::load_parameters(const std::string& path){
     read(fd, &header_size, sizeof(header_size));
 
     // Read and parse the JSON Header
-    char* header = new char[header_size+1]; // TODO: Apparently using a runtime size is unsafe, should replace this?
+    char* header = new char[header_size+1]; // TODO: Apparently using a runtime size is unsafe
     read(fd, header, header_size);
     header[header_size] = '\0';
     nlohmann::json header_json = nlohmann::json::parse(std::string(header));

@@ -79,6 +79,13 @@ def load_tokenizer(header):
         header["tokenizer"]["vocab"] = t["model"]["vocab"]
         header["tokenizer"]["merges"] = t["model"]["merges"]
 
+def pad_to_64(offset):
+    r = offset % 64
+    if r == 0:
+        return 0
+
+    return 64 - r
+
 def load_tensor_map(header):
     # Loop through each tensor and add info to header["tensors"]
     header["tensors"] = {}
@@ -94,52 +101,39 @@ def load_tensor_map(header):
             if "_proj" in tensor_name and args.quant != "f32":
                 header["tensors"][tensor_name] = {"dtype": args.quant, "shape": list(tensor.shape)[:4], "offset": start}
                 start += tensor.numel() * DATA_SIZE
+                start += pad_to_64(start)
 
                 # We store scales
                 scale_size = tensor.numel() // GROUP_SIZE
                 header["tensors"][tensor_name]["scale_offset"] = start
                 header["tensors"][tensor_name]["scale_size"] = scale_size
                 start += tensor.numel() // GROUP_SIZE * 4
+                start += pad_to_64(start)
 
             # Full float
             else:
                 header["tensors"][tensor_name] = {"dtype": "f32", "shape": list(tensor.shape)[:4], "offset": start}
                 start += tensor.numel() * 4
+                start += pad_to_64(start)
 
-def write_tensor_q(out, tensor_name):
-    tensor_file_path = os.path.join(IN_PATH, weight_map[tensor_name])
-
-    with safetensors.safe_open(tensor_file_path, framework="pt") as f:
-        tensor = f.get_tensor(tensor_name)
-
-        tensor, scales = quantize(tensor, DATA_SIZE * 8, GROUP_SIZE)
-        tensor = tensor.to(DATA_TYPE).contiguous()
-        scales = scales.to(torch.float32).contiguous()
-
+def write_tensor(out, tensor, base_offset, tensor_offset):
         tensor_bytes = tensor.numpy().tobytes()
-        out.write(tensor_bytes)
-
-        scales_bytes = scales.numpy().tobytes()
-        out.write(scales_bytes)
-
-def write_tensor(out, tensor_name):
-    tensor_file_path = os.path.join(IN_PATH, weight_map[tensor_name])
-
-    with safetensors.safe_open(tensor_file_path, framework="pt") as f:
-        tensor = f.get_tensor(tensor_name)
-        tensor = tensor.to(torch.float32).contiguous()
-        tensor_bytes = tensor.numpy().tobytes()
+        out.seek(base_offset + tensor_offset, 0)
         out.write(tensor_bytes)
 
 
 def write_binary(header):
     with open(OUT_PATH, "wb") as out:
         header_bytes = json.dumps(header).encode("utf-8")
+        padding_size = pad_to_64(8 + len(header_bytes))
 
-        header_size = struct.pack("<Q", len(header_bytes))
+        header_size = struct.pack("<Q", len(header_bytes) + padding_size)
 
         out.write(header_size)
         out.write(header_bytes)
+
+        out.seek(padding_size, 1)
+        base_offset = out.tell()
 
         total = len(header["tensors"])
         i = 0
@@ -150,10 +144,23 @@ def write_binary(header):
             i += 1
             print("[" + "#" * int(bar_width * i/total) + "-" * (bar_width - int(bar_width * i/total)) + f"] {int(i/total*100)}%", end="\r")
 
-            if "_proj" in tensor_name and header["tensors"][tensor_name]["dtype"] != "f32":
-                write_tensor_q(out, tensor_name)
-            else:
-                write_tensor(out, tensor_name)
+            tensor_file_path = os.path.join(IN_PATH, weight_map[tensor_name])
+            with safetensors.safe_open(tensor_file_path, framework="pt") as f:
+                tensor = f.get_tensor(tensor_name)
+                scales = None
+
+                if "_proj" in tensor_name and header["tensors"][tensor_name]["dtype"] != "f32":
+                    tensor, scales = quantize(tensor, DATA_SIZE * 8, GROUP_SIZE)
+                    tensor = tensor.to(DATA_TYPE)
+                    scales = scales.to(torch.float32)
+                else:
+                    tensor = tensor.to(torch.float32)
+
+                write_tensor(out, tensor, base_offset, header["tensors"][tensor_name]["offset"])
+
+                if scales is not None:
+                    write_tensor(out, scales, base_offset, header["tensors"][tensor_name]["scale_offset"])
+
 
 
 parser = argparse.ArgumentParser()
