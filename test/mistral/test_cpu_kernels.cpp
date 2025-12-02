@@ -6,7 +6,7 @@ int test_rope(){
     RotaryEmbedding::init_freq(infer, params->config);
 
     for (size_t i = 0; i<4; i++){
-        Tensor<float> q(arena, {1,1,128});
+        Tensor<float> q(arena, {1,128});
 
         for (int i=0;i<q.numel;i++){
             q.data[i] = (i%128) / 256.0f;
@@ -17,7 +17,7 @@ int test_rope(){
 
         rope(q, q, infer.cos, infer.sin);
 
-        if (!equals(q.at({0,0}), expected.at("rope" + std::to_string(i)))){
+        if (!equals(q, expected.at("rope" + std::to_string(i)))){
             std::cout << "Mismatch RoPE at pos " + std::to_string(i) << std::endl;
             return 1;
         }

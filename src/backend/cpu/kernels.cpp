@@ -77,7 +77,7 @@ void softmax(Tensor<float>& xout, Tensor<float>& x){
 void rope(Tensor<float>& xout, Tensor<float>& x, Tensor<float>& cos, Tensor<float>& sin){
     size_t n_heads = x.shape[0];
     //size_t seq_len = x.shape[1];
-    size_t head_size = x.shape[2];
+    size_t head_size = x.shape[1];
     size_t half = head_size/2;
 
     for (size_t h = 0; h<n_heads; h++){
