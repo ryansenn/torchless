@@ -106,8 +106,8 @@ void Parameters::load_parameters(const std::string& path){
     read(fd, &header_size, sizeof(header_size));
 
     // Read and parse the JSON Header
-    char header[header_size+1]; // TODO: Apparently using a runtime size is unsafe, should replace this?
-    read(fd, &header, header_size);
+    char* header = new char[header_size+1]; // TODO: Apparently using a runtime size is unsafe, should replace this?
+    read(fd, header, header_size);
     header[header_size] = '\0';
     nlohmann::json header_json = nlohmann::json::parse(std::string(header));
 
@@ -122,6 +122,8 @@ void Parameters::load_parameters(const std::string& path){
 
     // Load tensor weights to pointers in mmap
     load_weights(start, header_json);
+
+    delete[] header;
 
     close(fd);
 }
