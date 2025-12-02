@@ -29,7 +29,7 @@ int test_attention() {
     infer.pos = 0;
 
     auto& w = params->layer_weights[0];
-    Attention attn(params->get_tensor<T>(0, "self_attn.q_proj.weight"), params->get_tensor<T>(0, "self_attn.k_proj.weight"), params->get_tensor<T>(0, "self_attn.v_proj.weight"), params->get_tensor<T>(0, "self_attn.o_proj.weight"));
+    Attention attn(params->get_tensor<T>(0, "self_attn.q_proj.weight"), params->get_tensor<T>(0, "self_attn.k_proj.weight"), params->get_tensor<T>(0, "self_attn.v_proj.weight"), params->get_tensor<T>(0, "self_attn.o_proj.weight"), 0);
 
     // Test over sequence of 3 tokens
     for (int i=1;i<4;i++){
@@ -107,15 +107,15 @@ int test_kv_cache() {
     infer.k_state.copy_from(dummy);
     infer.v_state.copy_from(dummy);
 
-    infer.push_kv();
+    infer.push_kv(0);
 
     for (size_t h=0; h<infer.config.n_kv_heads; h++){
-        if (!equals(infer.k_cache.at({h, infer.pos}), dummy.at({h}))){
+        if (!equals(infer.k_cache.at({0, h, infer.pos}), dummy.at({h}))){
             std::cout << "KV Cache push k mismatch" << std::endl;
             return 1;
         }
 
-        if (!equals(infer.v_cache.at({h, infer.pos}), dummy.at({h}))){
+        if (!equals(infer.v_cache.at({0, h, infer.pos}), dummy.at({h}))){
             std::cout << "KV Cache push v mismatch" << std::endl;
             return 1;
         }

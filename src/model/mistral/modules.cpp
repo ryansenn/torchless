@@ -62,7 +62,7 @@ void Attention<T>::forward(InferenceState &infer) {
     rope(infer.k_state, infer.k_state, infer.cos, infer.sin);
 
     // Push KV to cache
-    infer.push_kv();
+    infer.push_kv(layer);
 
     // Perform attention with tokens in window
     // softmax ( QK^t / sqrt(head_dim) ) * V
@@ -70,7 +70,7 @@ void Attention<T>::forward(InferenceState &infer) {
     for (size_t h=0; h<infer.config.n_heads; h++){
         // [seq_len, 128] @ [128]
         Tensor q_head = infer.q_state.at({h}); // [128]
-        Tensor k_head = infer.k_cache.at({h/4}).reshape({infer.pos+1, infer.config.head_dim}); // [seq_len, 128]
+        Tensor k_head = infer.k_cache.at({layer, h/4}).reshape({infer.pos+1, infer.config.head_dim}); // [seq_len, 128]
         Tensor score_head = infer.scores.at({h}).reshape({infer.pos+1});
 
         // KQ
@@ -80,7 +80,7 @@ void Attention<T>::forward(InferenceState &infer) {
         // Softmax
         softmax(score_head, score_head); // [seq_len]
 
-        Tensor v_head = infer.v_cache.at({h/4}).reshape({infer.pos+1, infer.config.head_dim});  // [seq_len, 128]
+        Tensor v_head = infer.v_cache.at({layer, h/4}).reshape({infer.pos+1, infer.config.head_dim});  // [seq_len, 128]
         Tensor context_head = infer.context.at({h});
 
         // score_head [seq_len] @ v_head [seq_len, head_dim]

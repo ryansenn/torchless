@@ -34,14 +34,19 @@ int main(int argc, char** argv) {
     params->load_parameters(model_path);
 
     InferenceState infer(params->config);
-    Model<int8_t> model(params);
+    Model<float> model(params);
 
-    const std::string text = "Hello are you alive?";
+    std::cout << "Model loaded" << std::endl;
+
+    const std::string text = "Paris is the capital of";
     std::vector<uint32_t> got = params->tokenizer.encode(text);
 
     for (int i=0;i<got.size()-1;i++){
         generate(model, infer, got[i]);
+        std::cout << i << " " << std::flush;
     }
+
+    std::cout << std::endl;
 
     uint32_t t = got[got.size()-1];
     for (int i = 0; i<50;i++){

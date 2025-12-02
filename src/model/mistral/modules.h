@@ -21,7 +21,7 @@ struct RotaryEmbedding {
 // https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_mistral.py#L58
 struct RMSNorm {
     Tensor<float> g;
-    float e = 1e-6f;
+    float e = 1e-5f;
 
     RMSNorm(const Tensor<float>& g) : g(g) {}
     void forward(InferenceState& infer);
@@ -35,14 +35,18 @@ struct Attention {
     Tensor<T> v_proj;
     Tensor<T> o_proj;
 
+    size_t layer;
+
     Attention(const Tensor<T>& q_proj,
               const Tensor<T>& k_proj,
               const Tensor<T>& v_proj,
-              const Tensor<T>& o_proj)
+              const Tensor<T>& o_proj,
+              size_t layer)
             : q_proj(q_proj),
               k_proj(k_proj),
               v_proj(v_proj),
-              o_proj(o_proj) {}
+              o_proj(o_proj),
+              layer(layer){}
 
     void forward(InferenceState& infer);
 };
@@ -79,7 +83,7 @@ struct Layer {
                                 attn(p->get_tensor<T>(i, "self_attn.q_proj.weight"),
                                      p->get_tensor<T>(i, "self_attn.k_proj.weight"),
                                      p->get_tensor<T>(i, "self_attn.v_proj.weight"),
-                                     p->get_tensor<T>(i, "self_attn.o_proj.weight")),
+                                     p->get_tensor<T>(i, "self_attn.o_proj.weight"), i),
 
                                 mlp(p->get_tensor<T>(i, "mlp.down_proj.weight"),
                                     p->get_tensor<T>(i, "mlp.gate_proj.weight"),
