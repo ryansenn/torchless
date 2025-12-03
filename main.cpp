@@ -20,13 +20,20 @@ uint32_t sample_max(InferenceState& infer){
     return res;
 }
 
-uint32_t sample_multinomial(InferenceState& infer){
-    softmax(infer.probs, infer.logits);
-    float r = distr(gen);
+uint32_t sample_multinomial(InferenceState& infer, float temp){
+    if (temp > 0) {
+        for (int i=0; i<infer.logits.numel; i++) {
+            infer.logits.data[i] /= temp;
+        }
+        softmax(infer.probs, infer.logits);
+    } else {
+        return sample_max(infer);
+    }
 
+    float r = distr(gen);
     float total = 0;
 
-    for (int i=0;i<infer.probs.numel;i++){
+    for (int i=0; i<infer.probs.numel; i++){
         total += infer.probs.data[i];
         if (total >= r){
             return i;
@@ -35,10 +42,11 @@ uint32_t sample_multinomial(InferenceState& infer){
     return infer.probs.numel - 1;
 }
 
+// Update generate to use sampling
 template <typename T>
 uint32_t generate(Model<T>& model, InferenceState& infer, size_t token){
     model.forward(infer, token);
-    return sample_max(infer);
+    return sample_multinomial(infer, 0.0f);
 }
 
 int main(int argc, char** argv) {
