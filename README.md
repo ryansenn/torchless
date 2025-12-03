@@ -1,6 +1,6 @@
 # Torchless
 
-Torchless is a custom-built LLM inference engine written entirely from scratch. It currently runs [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.1) on CPU for local text completion.
+Torchless is a custom-built LLM inference engine written entirely from scratch (yes, coded and tested entirely by hand). It currently runs [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.1) on CPU for local text completion.
 
 The goal of this project is to reach maximum inference speed and support the newest [Mistral 3](https://mistral.ai/news/mistral-3) architectures.
 
@@ -8,7 +8,29 @@ The goal of this project is to reach maximum inference speed and support the new
 
 ![demo](https://github.com/user-attachments/assets/5a18f975-5e4e-407d-9a9b-10b6d2b42c1f)
 
-*Emphasis on *basic* text completion for now :)*
+
+## How it works
+
+If you are new to LLM internals, an inference engine is essentially a loop that predicts the next word in a sequence, adds it to the history, and repeats. Here is the exact lifecycle of a prompt inside Torchless.
+
+### Loading
+Before we can run any math, we need the weights. The `export_mistral.py` script takes the complex Hugging Face folder structure and packs the weights into a single standardized binary file. The C++ engine loads this entire file into RAM at startup so the data is mapped and ready for computation.
+
+### Tokenization
+The model performs math on numbers, not strings. When you type a prompt like "Paris is", the **Tokenizer** breaks it down using Byte-Pair Encoding (BPE). It looks up these chunks in the Mistral vocabulary and converts them into a list of integer IDs (e.g. `[1, 782, 312]`).
+
+### Transformer Loop
+We feed these IDs into the model one by one. The goal is to update a single vector, the `hidden_state`, as it passes through the network.
+
+* **Embedding:** We take the input token ID and look up its specific floating-point vector in the embedding table. This turns a simple integer into a dense vector representing the token's initial semantic meaning.
+* **Layers:** This state travels through 32 identical layers. In every layer, we first apply **RMSNorm** to stabilize the numbers. Then the state enters the **Attention** module. It projects the state into Query, Key, and Value vectors. The Query "looks back" at the Keys of previous tokens to find relevant information (Values). We apply **RoPE** (Rotary Positional Embeddings) so the model understands relative distance between words, then store the Key and Value in the **KV Cache**. This cache acts as the model's short-term memory, saving us from recalculating the history for every new word.
+* **MLP:** Finally, the state goes through the **Feedforward** module (a SwiGLU block). If Attention gathers context from the past, the MLP processes that information. It projects the vector to a higher dimension (14,336) to untangle complex relationships, applies a non-linear activation (SiLU), and projects it back down.
+
+### Prediction
+After 32 layers of processing, the final `hidden_state` holds the "meaning" of the next predicted token. We project this vector against the entire vocabulary to get **logits** raw confidence scores for all 32,000 possible next tokens. We run a **softmax** operation to turn these scores into probabilities and **sample** the result (either choosing the most likely token or picking randomly based on the probability distribution). We decode that ID back into text, print it, and feed it back into the transformer.
+
+
+
 
 # Running
 
@@ -54,16 +76,14 @@ cmake --build .
 
 If you run into issues that appear specific to your environment, feel free to open a GitHub issue.
 
-# Project Roadmap
+# Current Focus
 
-The initial phase of the project focused on correctness and building the necessary backend infrastructure for completing an inference pass. This involved implementing a model loader, tensor/math utilities, tokenizer, transformer architecture and verifying everything against Hugging Face.
+The initial phase of the project focused on correctness and building the necessary backend infrastructure for completing an inference pass. This involved a lot of pain as well as implementing a model loader, tensor/math utilities, tokenizer, transformer architecture and verifying everything against Hugging Face.
 
 Current development focuses on performance optimization and model expansion:
 - Ongoing rewrite of slow code sections
 - Implementing CPU SIMD instructions and custom CUDA kernels (primary focus)
 - Supporting [Ministral 3 3B](https://huggingface.co/mistralai/Ministral-3-3B-Reasoning-2512)
-
-More detailed roadmap can be found [here](roadmap.md).
 
 # Resources
 
@@ -86,3 +106,67 @@ More detailed roadmap can be found [here](roadmap.md).
 - [Arseny Kapoulkine - calm](https://github.com/zeux/calm/tree/main)
 - [Georgi Gerganov - llama.cpp + ggml](https://github.com/ggml-org/llama.cpp/)
 - [Andrej Karpathy - llama2.c quantization](https://github.com/karpathy/llama2.c/blob/master/export.py)
+
+# Roadmap
+
+## Loading
+
+### Model Loader
+- [x] **Model binary converter** *(export_mistral.py)*  
+  Converts a Hugging Face Mistral model (config, vocab/merges, and weights) into a single standardized binary file, optionally applying quantization. It uses a JSON header to store model metadata, vocabulary, merges, and tensor index information, followed by all model weights packed sequentially as contiguous floating point data.
+- [x] **In-memory loader** *(src/loader/parameters.cpp)*  
+  Memory-maps the binary, loads the config and provides direct tensor views.
+
+### Tensor & Ops
+- [x] **Tensor** *(src/common/tensor.cpp)*  
+  Implements a strided view over memory supporting f32 and int8, with on-the-fly dequantization during compute
+- [x] **Math operations** *(src/backend/cpu/kernels.cpp)*  
+  Implementation of matmul, softmax and RoPE to be optimized later
+
+## Text In, Tokens Out
+
+### Tokenizer
+- [x] **Tokenizer** *(src/tokenizer/tokenizer.cpp)*  
+  Implements full byte-pair encoding (BPE) compatible with Mistral’s vocabulary. It loads tokenizer.json, builds vocab and merge maps, applies Metaspace pre-tokenization, encodes UTF-8 text by merging token pairs by rank, and supports byte fallback
+
+### Token Generation & Sampler
+- [x] Basic text completion with greedy decoding
+- [x] Multinomial sampling
+- [ ] Temperature scaling
+
+### CLI I/O
+- [ ] Build a terminal chat inferface
+
+## Core Transformer
+The architecture *(src/model/mistral/modules.cpp)* is broken into independent C++ structs using a shared inference state to manage memory and cache. The implementation encodes relative positions using rotary embeddings (RoPE), applies gated SwiGLU in the feed-forward layers, and utilizes grouped-query attention (GQA) which assigns multiple query heads to share a single key-value head pair.
+
+### Inference State
+- [x] Temporary memory and cache *(src/common/inference_state.h)* used to hold all intermediate tensors for a single token's computation during the forward pass
+
+### Modules
+- [x] **Embedding** - Looks up initial embedding from token and copies it to `infer.hidden_state`
+- [x] **RMSNorm** - Initializes inverse frequencies based on rope theta and generates cosine/sine tables dynamically based on the current `infer.pos`
+- [x] **Rotary Embedding** - precomputes inverse frequencies from rope_theta and fills cos/sin tensors for RoPE for each position
+- [x] **Attention** - Projects to Q/K/V, applies rotary embeddings to Q/K, pushes to the KV cache, runs the grouped-query attention mechanism (reusing KV heads 4x), and projects the result.
+- [x] **Feedforward MLP** - Implements the SwiGLU feedforward: linear projections + SiLU
+- [x] **Layer** - Runs norm, attention, and MLP with residuals around each subblock
+- [x] **Model** - Embeds input token and runs it through all decoder layers
+- [x] **LM Head** - Projects the final `infer.hidden_state` onto the vocabulary dimension to populate `infer.logits`
+
+### Parity Tests
+- [x] Comprehensive validation in *(test/mistral)* of all inference components (tokenizer, modules, ops) by checking that their outputs match those produced by the Hugging Face Mistral implementation
+
+## Gotta go fast
+
+### Quantization
+- [ ] Support fp8 with a cast `tensor.to(torch.float8_e5m2)` during model export
+- [x] **Per-group symmetric quantization** - splits tensor into groups, for each group, finds max abs value, computes scale and produces quantized weights
+
+### CPU Multithreading
+- [ ] Todo
+
+### SIMD
+- [ ] Todo
+
+### Custom CUDA Kernels
+- [ ] Todo
