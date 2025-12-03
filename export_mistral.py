@@ -7,8 +7,6 @@ import torch
 
 import argparse
 
-from quantize import quantize
-
 """
 Usage:
   python export_mistral.py --model_dir /path/to/Mistral-7B-v0.1 [--out model.bin] [--quant int8]
@@ -22,10 +20,9 @@ Arguments:
 python export_mistral.py --model_dir ../Mistral-7B-v0.1 --out ../mistral.bin --quant f32
 
 python export_mistral.py --model_dir ../Mistral-7B-v0.1 --out ../mistral-int8.bin --quant int8
-"""
 
+---------
 
-"""
 This script converts a Hugging Face Mistral model into one standardized binary file that can be fed into the inference engine.
 
 Inputs (from the downloaded model directory):
@@ -48,6 +45,27 @@ Output:
             
     [payload: All tensors as continuous data with quantization scales]
 """
+
+# Per-group symmetric quantization
+# Splits tensor in groups, finds the max abs value and computes the scale that maps values -> int range
+# With int8 (n_bits=8) the usable range is [-127, 127].
+# Returns the quantized tensor and the scales
+def quantize(x: torch.Tensor, n_bits: int, group_size: int):
+    assert (x.numel() % group_size == 0)
+
+    # Split tensor in groups
+    x = x.reshape(-1, group_size)
+
+    # Max int range
+    int_max = 2 ** (n_bits - 1) - 1
+
+    # Compute scale for each group
+    scales = int_max / x.abs().max(dim=-1).values.unsqueeze(-1)
+
+    # Quantize
+    quant = (x * scales).round()
+
+    return quant, scales
 
 def load_config(header):
     config_path = os.path.join(IN_PATH, "config.json")
