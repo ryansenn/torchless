@@ -10,4 +10,5 @@ scripts/test/output.txt
 mistral.bin
 mistral-int8.bin
 .DS_Store
-scripts/test.py
+cmake-build-release-system/
+cmake-build-release/

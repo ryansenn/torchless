@@ -1,6 +1,11 @@
 #include <iostream>
 #include "src/loader/parameters.h"
 #include "src/model/mistral/modules.h"
+#include <random>
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<double> distr(0.0, 1.0);
 
 uint32_t sample_max(InferenceState& infer){
     float max_val = infer.logits.data[0];
@@ -13,6 +18,21 @@ uint32_t sample_max(InferenceState& infer){
     }
 
     return res;
+}
+
+uint32_t sample_multinomial(InferenceState& infer){
+    softmax(infer.probs, infer.logits);
+    float r = distr(gen);
+
+    float total = 0;
+
+    for (int i=0;i<infer.probs.numel;i++){
+        total += infer.probs.data[i];
+        if (total >= r){
+            return i;
+        }
+    }
+    return infer.probs.numel - 1;
 }
 
 template <typename T>
@@ -35,17 +55,9 @@ int main(int argc, char** argv) {
     InferenceState infer(params->config);
     Model<float> model(params);
 
-    std::cout << "Model loaded" << std::endl;
-
     const std::string text = argv[2];
     std::vector<uint32_t> got = params->tokenizer.encode(text);
 
-    std::cout << "Understanding the prompt..." << std::endl;
-    for (int i=0;i<got.size()-1;i++){
-        generate(model, infer, got[i]);
-    }
-
-    std::cout << "Response: " << std::endl;
     uint32_t t = got[got.size()-1];
     for (int i = 0; i<50;i++){
         t = generate(model, infer, t);

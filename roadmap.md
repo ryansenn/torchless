@@ -20,7 +20,8 @@
 
 ### Token Generation & Sampler
 - [x] Basic text completion with greedy decoding
-- [ ] Multinomial Sampling & temperature scaling
+- [x] Multinomial sampling
+- [ ] Temperature scaling
 
 ### CLI I/O
 - [ ] Build a terminal chat inferface

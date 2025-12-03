@@ -1,10 +1,8 @@
 # Torchless
 
-Torchless is an LLM inference engine built entirely from scratch. It currently runs the [Mistral 7B model](https://huggingface.co/mistralai/Mistral-7B-v0.1) on CPU for local text completion.
+Torchless is a custom-built LLM inference engine written entirely from scratch. It currently runs [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.1) on CPU for local text completion.
 
-
-
-The goal of this project is to reach maximum inference speed and support new state-of-the-art [Mistral 3](https://mistral.ai/news/mistral-3) architectures.
+The current goal of this project is to reach maximum inference speed and support new state-of-the-art [Mistral 3](https://mistral.ai/news/mistral-3) architectures.
 
 # Running
 
@@ -39,15 +37,14 @@ python3 export_mistral.py \
 ```
 mkdir build
 cd build
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 ```
 
 #### Run
 ```
-torchless mistral.bin "Paris is the capital of"
+torchless ../mistral.bin "Paris is the capital of"
 ```
-
 
 If you run into issues that appear specific to your environment, feel free to open a GitHub issue.
 
@@ -55,11 +52,10 @@ If you run into issues that appear specific to your environment, feel free to op
 
 The initial phase of the project focused on correctness and building the necessary backend infrastructure for completing an inference pass. This involved implementing a model loader, tensor/math utilities, tokenizer, transformer architecture and verifying everything against Hugging Face.
 
-Work is now focused on:
-- Rewriting slow sections of the code
-- Adding SIMD paths on CPU and custom CUDA kernels
-- Supporting Mistral 3 newest architectures starting with [Ministral 3](https://huggingface.co/mistralai/Ministral-3-3B-Reasoning-2512)
-- Building a small terminal chat interface
+Current development focuses on performance optimization and model expansion:
+- Ongoing rewrite of slow code sections
+- Implementing CPU SIMD instructions and custom CUDA kernels (primary focus)
+- Supporting [Ministral 3 3B](https://huggingface.co/mistralai/Ministral-3-3B-Reasoning-2512)
 
 More detailed roadmap can be found [here](roadmap.md).
 

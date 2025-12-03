@@ -33,6 +33,8 @@ struct InferenceState {
 
     Tensor<float> logits; // [vocab_size]
 
+    Tensor<float> probs; // [vocab_size]
+
     void push_kv(size_t i){
         for (size_t h=0;h<config.n_kv_heads;h++){
             k_cache.at({i, h, pos}).copy_from(k_state.at({h}));
@@ -62,7 +64,9 @@ struct InferenceState {
                                      mlp_gate(arena, {config.intermediate_size}),
                                      mlp_up(arena, {config.intermediate_size}),
 
-                                     logits(arena, {config.vocab_size})
+                                     logits(arena, {config.vocab_size}),
+
+                                     probs(arena, {config.vocab_size})
 
                                      {}
 };
