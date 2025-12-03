@@ -58,6 +58,10 @@ int main(int argc, char** argv) {
     const std::string text = argv[2];
     std::vector<uint32_t> got = params->tokenizer.encode(text);
 
+    for (int i=0;i<got.size()-1;i++){
+        model.forward(infer, got[i]);
+    }
+
     uint32_t t = got[got.size()-1];
     for (int i = 0; i<50;i++){
         t = generate(model, infer, t);

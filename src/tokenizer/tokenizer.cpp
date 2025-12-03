@@ -184,9 +184,7 @@ std::string Tokenizer::decode_mistral(std::string s) const{
 
     while (i <= s.size() - t.size()){
         if (s.substr(i, t.size()) == t) {
-            if (i > 0){
-                result += " ";
-            }
+            result += " ";
             i += t.size();
             continue;
         }
