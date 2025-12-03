@@ -1,14 +1,25 @@
-cmake_minimum_required(VERSION 3.16)
-project(MyProject C CXX)
+cmake_minimum_required(VERSION 3.20)
+project(torchless CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
-file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "src/*.cpp")
-file(GLOB_RECURSE TEST_MISTRAL CONFIGURE_DEPENDS "test/mistral/*.cpp")
+if(APPLE)
+    set(LIBOMP_ROOT "/opt/homebrew/opt/libomp")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xpreprocessor -fopenmp -I${LIBOMP_ROOT}/include")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${LIBOMP_ROOT}/lib -lomp")
+else()
+    find_package(OpenMP REQUIRED)
+endif()
 
-add_executable(torchless main.cpp ${SRC})
-add_executable(test_exec ${SRC} ${TEST_MISTRAL})
-configure_file(test/mistral/expected.txt expected.txt COPYONLY)
+add_executable(torchless
+        main.cpp
+        src/backend/cpu/kernels.cpp
+        src/common/tensor.cpp
+        src/loader/parameters.cpp
+        src/model/mistral/modules.cpp
+        src/tokenizer/tokenizer.cpp
+)
+
+if(NOT APPLE)
+    target_link_libraries(torchless PRIVATE OpenMP::OpenMP_CXX)
+endif()

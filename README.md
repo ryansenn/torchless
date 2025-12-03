@@ -43,7 +43,7 @@ cmake --build .
 
 #### Run
 ```
-torchless ../mistral.bin "Paris is the capital of"
+./torchless ../mistral.bin "Paris is the capital of"
 ```
 
 If you run into issues that appear specific to your environment, feel free to open a GitHub issue.
