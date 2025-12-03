@@ -2,7 +2,13 @@
 
 Torchless is a custom-built LLM inference engine written entirely from scratch. It currently runs [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.1) on CPU for local text completion.
 
-The current goal of this project is to reach maximum inference speed and support new state-of-the-art [Mistral 3](https://mistral.ai/news/mistral-3) architectures.
+The goal of this project is to reach maximum inference speed and support the newest [Mistral 3](https://mistral.ai/news/mistral-3) architectures.
+
+<br>
+
+![demo](https://github.com/user-attachments/assets/5a18f975-5e4e-407d-9a9b-10b6d2b42c1f)
+
+*Emphasis on *basic* text completion for now :)*
 
 # Running
 
